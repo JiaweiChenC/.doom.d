@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: multifigs
+# uuid: multifigs
+# key: multifigs
+# condition: t
+# --
+\begin{figure}[ht] \label{multifig}
+  \begin{minipage}[b]{0.5\linewidth}
+  \centering
+    \includegraphics[width=.6\linewidth]{${1:figure1}}
+    \caption{${2: Subfigure 1}}
+  \end{minipage}
+  \begin{minipage}[b]{0.5\linewidth}
+  \centering
+    \includegraphics[width=.6\linewidth]{${3:fiture2}}
+    \caption{${4: Subfigure 2}}
+  \end{minipage}
+\end{figure}
