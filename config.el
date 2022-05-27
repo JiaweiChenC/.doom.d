@@ -50,7 +50,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 ;; (setq doom-theme 'doom-one)
-;;(setq doom-theme nil)
+(setq doom-theme nil)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -77,7 +77,6 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-(setq doom-theme 'modus-operandi)
 
 (with-eval-after-load 'ox-latex
 (add-to-list 'org-latex-classes
@@ -130,3 +129,4 @@
 (setq fancy-splash-image (concat doom-private-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
+(setq doc-view-resolution 300)
