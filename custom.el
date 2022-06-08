@@ -31,7 +31,7 @@
       (file+head "%<%Y%m%d%H%M%S>-${slug}.org" " #+title: ${title}\12")
       :unnarrowed t)))
  '(package-selected-packages
-   '(lsp-latex pdf-tools color-theme-sanityinc-tomorrow treemacs-all-the-icons olivetti leuven-theme zotxt org-fragtog evil-matchit auctex latex-math-preview imenu-list cdlatex lsp-python-ms org-roam-ui visual-fill-column ts request org-roam org-bullets ht flycheck-pycheckers dracula-theme deferred))
+   '(lsp-latex treemacs-all-the-icons olivetti leuven-theme zotxt org-fragtog evil-matchit auctex latex-math-preview imenu-list cdlatex lsp-python-ms org-roam-ui visual-fill-column ts request org-bullets ht flycheck-pycheckers dracula-theme deferred))
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(vc-annotate-background "#282a36")
