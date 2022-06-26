@@ -1,32 +1,6 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-(use-package! cdlatex
-  :when (featurep! +cdlatex)
-  :hook (LaTeX-mode . cdlatex-mode)
-  :hook (org-mode . org-cdlatex-mode)
-  :config
-  ;; Use \( ... \) instead of $ ... $.
-  (setq cdlatex-use-dollar-to-ensure-math t)
-  ;; Disabling keys that have overlapping functionality with other parts of Doom.
-  (map! :map cdlatex-mode-map
-        ;; Smartparens takes care of inserting closing delimiters, and if you
-        ;; don't use smartparens you probably don't want these either.
-        "$" nil
-        "(" nil
-        "[" nil
-        "|" nil
-        "<" nil
-        ;; TAB is used for CDLaTeX's snippets and navigation. But we have
-        ;; Yasnippet for that.
-        (:when (featurep! :editor snippets)
-          "TAB" nil)
-        ;; AUCTeX takes care of auto-inserting {} on _^ if you want, with
-        ;; `TeX-electric-sub-and-superscript'.
-        "^" nil
-        "_" nil
-        ;; AUCTeX already provides this with `LaTeX-insert-item'.
-        [(control return)] nil))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
@@ -109,8 +83,47 @@
 
 (setq org-log-done 't)
 
+
+(setq org-preview-latex-default-process 'dvisvgm)
+
+(setq fancy-splash-image (concat doom-private-dir "splash.png"))
+;; Hide the menu for as minimalistic a startup screen as possible.
+(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
+(setq doc-view-resolution 300)
+
+(setq org-startup-folded 'show2levels)
+
+
+(use-package! cdlatex
+  :when (featurep! +cdlatex)
+  :hook (LaTeX-mode . cdlatex-mode)
+  :hook (org-mode . org-cdlatex-mode)
+  :config
+  ;; Use \( ... \) instead of $ ... $.
+  (setq cdlatex-use-dollar-to-ensure-math t)
+  ;; Disabling keys that have overlapping functionality with other parts of Doom.
+  (map! :map cdlatex-mode-map
+        ;; Smartparens takes care of inserting closing delimiters, and if you
+        ;; don't use smartparens you probably don't want these either.
+        "$" nil
+        "(" nil
+        "[" nil
+        "|" nil
+        "<" nil
+        ;; TAB is used for CDLaTeX's snippets and navigation. But we have
+        ;; Yasnippet for that.
+        (:when (featurep! :editor snippets)
+          "TAB" nil)
+        ;; AUCTeX takes care of auto-inserting {} on _^ if you want, with
+        ;; `TeX-electric-sub-and-superscript'.
+        "^" nil
+        "_" nil
+        ;; AUCTeX already provides this with `LaTeX-insert-item'.
+        [(control return)] nil))
+
 (use-package! websocket
     :after org-roam)
+
 (use-package! org-roam-ui
     :after org-roam ;; or :after org
 ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
@@ -122,10 +135,3 @@
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
-
-(setq org-preview-latex-default-process 'dvisvgm)
-
-(setq fancy-splash-image (concat doom-private-dir "splash.png"))
-;; Hide the menu for as minimalistic a startup screen as possible.
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(setq doc-view-resolution 300)
