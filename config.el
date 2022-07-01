@@ -74,8 +74,6 @@
 
 (setq org-agenda-files '("~/Documents/roam/daily/"))
 
-(setq org-agenda-span 'month)
-
 (setq org-fontify-done-headline t)
 
 (setq evil-split-window-below t
@@ -83,13 +81,11 @@
 
 (setq org-log-done 't)
 
-
 (setq org-preview-latex-default-process 'dvisvgm)
 
 (setq fancy-splash-image (concat doom-private-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(setq doc-view-resolution 300)
 
 (setq org-startup-folded 'show2levels)
 
@@ -135,3 +131,108 @@
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
+
+(use-package! company-box
+  :hook (company-mode . company-box-mode))
+
+;; paste image
+(defun zz/org-download-paste-clipboard (&optional use-default-filename)
+  (interactive "P")
+  (require 'org-download)
+  (let ((file
+         (if (not use-default-filename)
+             (read-string (format "Filename [%s]: "
+                                  org-download-screenshot-basename)
+                          nil nil org-download-screenshot-basename)
+           nil)))
+    (org-download-clipboard file)))
+
+(after! org
+  (setq org-download-method 'directory)
+  (setq org-download-image-dir "images")
+  (setq org-download-heading-lvl nil)
+  (setq org-download-timestamp "%Y%m%d-%H%M%S_")
+  (setq org-image-actual-width 300)
+  (map! :map org-mode-map
+        "C-c l a y" #'zz/org-download-paste-clipboard
+        "C-M-y" #'zz/org-download-paste-clipboard))
+
+
+(after! lsp-mode
+  (setq lsp-ui-doc-use-webkit t
+        lsp-file-watch-threshold 100000
+        lsp-ui-doc-show-with-cursor nil
+        lsp-ui-doc-show-with-mouse t)
+
+  (defun lsp-tramp-connection@override (local-command &optional generate-error-file-fn)
+    "Create LSP stdio connection named name.
+LOCAL-COMMAND is either list of strings, string or function which
+returns the command to execute."
+    (defvar tramp-connection-properties)
+    (list :connect (lambda (filter sentinel name environment-fn)
+                     (let* ((final-command (lsp-resolve-final-function
+                                            local-command))
+                            (process-name (generate-new-buffer-name name))
+                            (stderr-buf (format "*%s::stderr*" process-name))
+                            (err-buf (generate-new-buffer stderr-buf))
+                            (process-environment
+                             (lsp--compute-process-environment environment-fn))
+                            (proc (make-process
+                                   :name process-name
+                                   :buffer (format "*%s*" process-name)
+                                   :command final-command
+                                   :connection-type 'pipe
+                                   :coding 'no-conversion
+                                   :noquery t
+                                   :filter filter
+                                   :sentinel sentinel
+                                   :stderr err-buf
+                                   :file-handler t)))
+                       (cons proc proc)))
+          :test? (lambda () (-> local-command lsp-resolve-final-function
+                                lsp-server-present?))))
+  (advice-add 'lsp-tramp-connection :override #'lsp-tramp-connection@override)
+
+  )
+
+(after! lsp-clangd
+  (set-lsp-priority! 'clangd 2)
+  lsp-clients-clangd-args '("-j=7"
+                            "--background-index"
+                            "--clang-tidy"
+                            "--completion-style=detailed"
+                            "--suggest-missing-includes"
+                            "--header-insertion=never")
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-tramp-connection (cons "clangd" lsp-clients-clangd-args))
+                    :major-modes '(c-mode c++-mode)
+                    :remote? t
+                    :server-id 'clangd-remote)))
+
+(after! lsp-pyright
+  (setq lsp-log-io t)
+  (setq lsp-pyright-use-library-code-for-types t)
+  (setq lsp-pyright-diagnostic-mode "workspace")
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-tramp-connection (lambda ()
+                                            (cons "pyright-langserver"
+                                                  lsp-pyright-langserver-command-args)))
+    :major-modes '(python-mode)
+    :remote? t
+    :server-id 'pyright-remote
+    :multi-root t
+    :priority 3
+    :initialization-options (lambda () (ht-merge (lsp-configuration-section "pyright")
+                                                 (lsp-configuration-section "python")))
+    :initialized-fn (lambda (workspace)
+                      (with-lsp-workspace workspace
+                        (lsp--set-configuration
+                         (ht-merge (lsp-configuration-section "pyright")
+                                   (lsp-configuration-section "python")))))
+    :download-server-fn (lambda (_client callback error-callback _update?)
+                          (lsp-package-ensure 'pyright callback error-callback))
+    :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
+                                   ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
+                                   ("pyright/endProgress" 'lsp-pyright--end-progress-callback))))
+  )
