@@ -89,36 +89,42 @@
 
 (setq org-startup-folded 'show2levels)
 
+(setq doom-modeline-major-mode-icon t)
 
-(use-package! cdlatex
-  :when (featurep! +cdlatex)
-  :hook (LaTeX-mode . cdlatex-mode)
-  :hook (org-mode . org-cdlatex-mode)
-  :config
-  ;; Use \( ... \) instead of $ ... $.
-  (setq cdlatex-use-dollar-to-ensure-math t)
-  ;; Disabling keys that have overlapping functionality with other parts of Doom.
-  (map! :map cdlatex-mode-map
-        ;; Smartparens takes care of inserting closing delimiters, and if you
-        ;; don't use smartparens you probably don't want these either.
-        "$" nil
-        "(" nil
-        "[" nil
-        "|" nil
-        "<" nil
-        ;; TAB is used for CDLaTeX's snippets and navigation. But we have
-        ;; Yasnippet for that.
-        (:when (featurep! :editor snippets)
-          "TAB" nil)
-        ;; AUCTeX takes care of auto-inserting {} on _^ if you want, with
-        ;; `TeX-electric-sub-and-superscript'.
-        "^" nil
-        "_" nil
-        ;; AUCTeX already provides this with `LaTeX-insert-item'.
-        [(control return)] nil))
+
+(map! (:after evil-org
+       :map evil-org-mode-map
+       :n "gk" (cmd! (if (org-on-heading-p)
+                         (org-backward-element)
+                       (evil-previous-visual-line)))
+       :n "gj" (cmd! (if (org-on-heading-p)
+                         (org-forward-element)
+                       (evil-next-visual-line))))
+
+      :o "o" #'evil-inner-symbol
+
+      :leader
+      "h L" #'global-keycast-mode
+      (:prefix "f"
+       "t" #'find-in-dotfiles
+       "T" #'browse-dotfiles)
+      (:prefix "n"
+       "b" #'org-roam-buffer-toggle
+       "d" #'org-roam-dailies-goto-today
+       "D" #'org-roam-dailies-goto-date
+       "e" (cmd! (find-file (doom-dir org-directory "ledger.gpg")))
+       "i" #'org-roam-node-insert
+       "r" #'org-roam-node-find
+       "R" #'org-roam-capture))
 
 (use-package! websocket
     :after org-roam)
+
+(use-package vertico
+  :init
+  (vertico-mode)
+  (setq vertico-resize 'grow-only)
+  )
 
 (use-package! org-roam-ui
     :after org-roam ;; or :after org
@@ -152,48 +158,13 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  (setq org-image-actual-width 300)
+  ;; (setq org-image-actual-width 00)
   (map! :map org-mode-map
         "C-c l a y" #'zz/org-download-paste-clipboard
         "C-M-y" #'zz/org-download-paste-clipboard))
 
-
-(after! lsp-mode
-  (setq lsp-ui-doc-use-webkit t
-        lsp-file-watch-threshold 100000
-        lsp-ui-doc-show-with-cursor nil
-        lsp-ui-doc-show-with-mouse t)
-
-  (defun lsp-tramp-connection@override (local-command &optional generate-error-file-fn)
-    "Create LSP stdio connection named name.
-LOCAL-COMMAND is either list of strings, string or function which
-returns the command to execute."
-    (defvar tramp-connection-properties)
-    (list :connect (lambda (filter sentinel name environment-fn)
-                     (let* ((final-command (lsp-resolve-final-function
-                                            local-command))
-                            (process-name (generate-new-buffer-name name))
-                            (stderr-buf (format "*%s::stderr*" process-name))
-                            (err-buf (generate-new-buffer stderr-buf))
-                            (process-environment
-                             (lsp--compute-process-environment environment-fn))
-                            (proc (make-process
-                                   :name process-name
-                                   :buffer (format "*%s*" process-name)
-                                   :command final-command
-                                   :connection-type 'pipe
-                                   :coding 'no-conversion
-                                   :noquery t
-                                   :filter filter
-                                   :sentinel sentinel
-                                   :stderr err-buf
-                                   :file-handler t)))
-                       (cons proc proc)))
-          :test? (lambda () (-> local-command lsp-resolve-final-function
-                                lsp-server-present?))))
-  (advice-add 'lsp-tramp-connection :override #'lsp-tramp-connection@override)
-
-  )
+(after! tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 (after! lsp-clangd
   (set-lsp-priority! 'clangd 2)
@@ -236,3 +207,32 @@ returns the command to execute."
                                    ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
                                    ("pyright/endProgress" 'lsp-pyright--end-progress-callback))))
   )
+
+
+(after! org-roam
+  (setq org-roam-capture-templates
+        `(("n" "note" plain
+           ,(format "#+title: ${title}\n%%[%s/template/note.org]" org-roam-directory)
+           :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t)
+          ("b" "booknotes" plain
+           ,(format "#+title: ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
+           :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t)
+          ("p" "project" plain
+           ,(format "#+title: ${title}\n%%[%s/template/project.org]" org-roam-directory)
+           :target (file "project/%<%Y%m%d>-${slug}.org")
+           :unnarrowed t)
+          ("w" "works" plain
+           ,(format "#+title: ${title}\n%%[%s/template/works.org]" org-roam-directory)
+           :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t)
+          ("s" "secret" plain "#+title: ${title}\n\n"
+           :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t))
+        ;; Use human readable dates for dailies titles
+        org-roam-dailies-capture-templates
+        '(("d" "default" entry "* %?"
+           :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
+
+(setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))

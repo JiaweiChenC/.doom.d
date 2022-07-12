@@ -61,3 +61,6 @@
 (package! impatient-mode)
 (package! company-box)
 (package! org-download)
+(package! cdlatex)
+(package! easy-hugo)
+(package! xenops)
