@@ -49,6 +49,7 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 (unpin! org-roam company-org-roam)
+(unpin! doom-modeline)
 (package! org-roam-ui)
 (package! pdf-tools)
 (package! evil-matchit)

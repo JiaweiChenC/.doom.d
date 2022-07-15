@@ -65,8 +65,10 @@
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 (setq org-latex-listings 't)
+
 (setq org-roam-directory "~/Documents/roam")
 
+(setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq deft-directory "~/Desktop/notes"
       deft-extensions '("org" "txt" "md")
@@ -234,5 +236,3 @@
         org-roam-dailies-capture-templates
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
-
-(setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
