@@ -29,6 +29,7 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
+(setq org-log-into-drawer t)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
@@ -143,6 +144,26 @@
 (use-package! company-box
   :hook (company-mode . company-box-mode))
 
+(use-package laas
+  :hook (LaTeX-mode . laas-mode)
+  :config ; do whatever here
+  (aas-set-snippets 'laas-mode
+                    ;; set condition!
+                    :cond #'texmathp ; expand only while in math
+                    "supp" "\\supp"
+                    "On" "O(n)"
+                    "O1" "O(1)"
+                    "Olog" "O(\\log n)"
+                    "Olon" "O(n \\log n)"
+                    ;; bind to functions!
+                    "Sum" (lambda () (interactive)
+                            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+                    "Span" (lambda () (interactive)
+                             (yas-expand-snippet "\\Span($1)$0"))
+                    ;; add accent snippets
+                    :cond #'laas-object-on-left-condition
+                    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
+
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
   (interactive "P")
@@ -229,6 +250,10 @@
            ,(format "#+title: ${title}\n%%[%s/template/works.org]" org-roam-directory)
            :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
+          ("m" "math" plain
+           ,(format "#+title: ${title}\n%%[%s/template/math.org]" org-roam-directory)
+           :target (file "math/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t)
           ("s" "secret" plain "#+title: ${title}\n\n"
            :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t))
@@ -236,3 +261,5 @@
         org-roam-dailies-capture-templates
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
+
+
