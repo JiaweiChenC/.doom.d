@@ -246,9 +246,9 @@
            ,(format "#+title: ${title}\n%%[%s/template/project.org]" org-roam-directory)
            :target (file "project/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
-          ("r" "research" plain
-           ,(format "#+title: ${title}\n%%[%s/template/research.org]" org-roam-directory)
-           :target (file "research/%<%Y%m%d>-${slug}.org")
+          ("a" "paper" plain
+           ,(format "#+title: ${title}\n%%[%s/template/paper.org]" org-roam-directory)
+           :target (file "paper/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
           ("w" "works" plain
            ,(format "#+title: ${title}\n%%[%s/template/works.org]" org-roam-directory)
@@ -265,4 +265,6 @@
         org-roam-dailies-capture-templates
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
+
+
 
