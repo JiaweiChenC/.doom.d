@@ -123,6 +123,15 @@
 (use-package! websocket
     :after org-roam)
 
+(use-package super-save
+  :config
+  (super-save-mode +1))
+(setq auto-save-default nil)
+(setq super-save-remote-files nil)
+;; add integration with ace-window
+(add-to-list 'super-save-triggers 'ace-window)
+(add-to-list 'super-save-triggers '+vterm/toggle)
+
 (use-package vertico
   :init
   (vertico-mode)
@@ -144,26 +153,6 @@
 (use-package! company-box
   :hook (company-mode . company-box-mode))
 
-(use-package laas
-  :hook (LaTeX-mode . laas-mode)
-  :config ; do whatever here
-  (aas-set-snippets 'laas-mode
-                    ;; set condition!
-                    :cond #'texmathp ; expand only while in math
-                    "supp" "\\supp"
-                    "On" "O(n)"
-                    "O1" "O(1)"
-                    "Olog" "O(\\log n)"
-                    "Olon" "O(n \\log n)"
-                    ;; bind to functions!
-                    "Sum" (lambda () (interactive)
-                            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-                    "Span" (lambda () (interactive)
-                             (yas-expand-snippet "\\Span($1)$0"))
-                    ;; add accent snippets
-                    :cond #'laas-object-on-left-condition
-                    "qq" (lambda () (interactive) (laas-wrap-previous-object "sqrt"))))
-
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
   (interactive "P")
@@ -181,7 +170,7 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  ;; (setq org-image-actual-width 00)
+  (setq org-image-actual-width 400)
   (map! :map org-mode-map
         "C-c l a y" #'zz/org-download-paste-clipboard
         "C-M-y" #'zz/org-download-paste-clipboard))
@@ -246,6 +235,10 @@
            ,(format "#+title: ${title}\n%%[%s/template/project.org]" org-roam-directory)
            :target (file "project/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
+          ("r" "research" plain
+           ,(format "#+title: ${title}\n%%[%s/template/research.org]" org-roam-directory)
+           :target (file "research/%<%Y%m%d>-${slug}.org")
+           :unnarrowed t)
           ("a" "paper" plain
            ,(format "#+title: ${title}\n%%[%s/template/paper.org]" org-roam-directory)
            :target (file "paper/%<%Y%m%d>-${slug}.org")
@@ -266,5 +259,7 @@
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
 
-
+(setq xenops-math-image-scale-factor 1.2)
+(add-hook 'latex-mode-hook #'xenops-mode)
+(add-hook 'LaTeX-mode-hook #'xenops-mode)
 

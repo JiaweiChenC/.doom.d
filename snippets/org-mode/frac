@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name:frac
-# key: frac
+# name:fr
+# key: fr
 # --
 \frac{${1:`(or % "numerator")`}}{${2:denominator}}$0

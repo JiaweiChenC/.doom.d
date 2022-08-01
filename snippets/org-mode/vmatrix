@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: vmatrix
+# key: vmat
+# condition: t
+# --
+\begin{vmatrix}
+$0
+\end{vmatrix}

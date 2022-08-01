@@ -65,3 +65,4 @@
 (package! cdlatex)
 (package! easy-hugo)
 (package! xenops)
+(package! super-save)
