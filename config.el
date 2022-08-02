@@ -170,7 +170,7 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  (setq org-image-actual-width 400)
+  (setq org-image-actual-width 500)
   (map! :map org-mode-map
         "C-c l a y" #'zz/org-download-paste-clipboard
         "C-M-y" #'zz/org-download-paste-clipboard))
@@ -262,4 +262,3 @@
 (setq xenops-math-image-scale-factor 1.2)
 (add-hook 'latex-mode-hook #'xenops-mode)
 (add-hook 'LaTeX-mode-hook #'xenops-mode)
-

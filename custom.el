@@ -14,25 +14,8 @@
    '(((python python-shell-completion-native-turn-on-maybe))
      (initialization)
      (initialization))))
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(diredfl-dir-heading ((t (:inherit modus-themes-pseudo-header :foreground "Blue"))))
-;;  '(diredfl-dir-name ((t (:foreground "DarkRed"))))
-;;  '(diredfl-dir-priv ((t (:foreground "DarkRed"))))
-;;  '(diredfl-exec-priv ((t nil)))
-;;  '(diredfl-no-priv ((t nil)))
-;;  '(diredfl-other-priv ((t nil)))
-;;  '(diredfl-rare-priv ((t (:foreground "Magenta"))))
-;;  '(diredfl-read-priv ((t nil)))
-;;  '(diredfl-write-priv ((t nil))))
 (put 'customize-face 'disabled nil)
 (put 'customize-group 'disabled nil)
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+  '(org-block-begin-line ((t (:background nil))))
+  '(org-block-end-line   ((t (:background nil)))))
