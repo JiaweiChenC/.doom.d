@@ -94,6 +94,10 @@
 
 (setq doom-modeline-major-mode-icon t)
 
+;; Disable title bar
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+  (setq frame-title-format "\n")
 
 (map! (:after evil-org
        :map evil-org-mode-map
@@ -266,4 +270,3 @@
 (setq xenops-math-image-scale-factor 1.2)
 (add-hook 'latex-mode-hook #'xenops-mode)
 (add-hook 'LaTeX-mode-hook #'xenops-mode)
-
