@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi)
+(setq doom-theme 'nil)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -234,6 +234,10 @@
           ("b" "booknotes" plain
            ,(format "#+title: ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
            :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
+           :unnarrowed t)
+          ("c" "coding" plain
+           ,(format "#+title: ${title}\n%%[%s/template/coding.org]" org-roam-directory)
+           :target (file "coding/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("l" "lectures" plain
            ,(format "#+title: ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
