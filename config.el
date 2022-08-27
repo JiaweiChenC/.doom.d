@@ -124,6 +124,13 @@
        "r" #'org-roam-node-find
        "R" #'org-roam-capture))
 
+(use-package! mathpix.el
+  :custom ((mathpix-app-id "chenjw12580_gmail_com_2ad82a_fb84ed")
+           (mathpix-app-key "a52385924df4b5a6c0ada7b0f127e5d721147387d2b7be5494919f957ae11565"))
+  :bind
+  ("C-x m" . mathpix-screenshot))
+(setq mathpix-screenshot-method "screencapture -i %s")
+
 (use-package! websocket
     :after org-roam)
 
@@ -154,8 +161,8 @@
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 
-(use-package! company-box
-  :hook (company-mode . company-box-mode))
+;;(use-package! company-box
+;;  :hook (company-mode . company-box-mode))
 
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
@@ -274,3 +281,4 @@
 (setq xenops-math-image-scale-factor 1.2)
 (add-hook 'latex-mode-hook #'xenops-mode)
 (add-hook 'LaTeX-mode-hook #'xenops-mode)
+

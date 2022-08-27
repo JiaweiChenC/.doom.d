@@ -60,9 +60,12 @@
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
-(package! company-box)
 (package! org-download)
 (package! cdlatex)
 (package! easy-hugo)
 (package! xenops)
 (package! super-save)
+(package! mathpix.el)
+(package! mathpix.el
+  :recipe (:host github :repo "jethrokuan/mathpix.el")
+)
