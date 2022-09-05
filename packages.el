@@ -65,7 +65,7 @@
 (package! easy-hugo)
 (package! xenops)
 (package! super-save)
-(package! mathpix.el)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el")
 )
+(package! company-posframe)

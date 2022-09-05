@@ -24,7 +24,6 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'nil)
-
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -35,6 +34,10 @@
 (setq display-line-numbers-type 'nil)
 
 (setq auto-save-default t)
+
+(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+
+(setq latex-preview-pane-use-frame t)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -71,10 +74,6 @@
 
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
-(setq deft-directory "~/Desktop/notes"
-      deft-extensions '("org" "txt" "md")
-      deft-recursive t)
-
 (setq org-agenda-files '("~/Documents/roam/daily/"))
 
 (setq org-fontify-done-headline t)
@@ -86,7 +85,7 @@
 
 (setq org-preview-latex-default-process 'dvisvgm)
 
-(setq fancy-splash-image (concat doom-private-dir "splash.png"))
+(setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
@@ -94,19 +93,15 @@
 
 (setq doom-modeline-major-mode-icon t)
 
-;; Disable title bar
-(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
-  (setq frame-title-format "\n")
+;;Disable title bar
+;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
+;; (setq frame-title-format "%b")
 
 (map! (:after evil-org
        :map evil-org-mode-map
-       :n "gk" (cmd! (if (org-on-heading-p)
-                         (org-backward-element)
-                       (evil-previous-visual-line)))
-       :n "gj" (cmd! (if (org-on-heading-p)
-                         (org-forward-element)
-                       (evil-next-visual-line))))
+       :n "gk" (cmd! (evil-previous-visual-line))
+       :n "gj" (cmd! (evil-next-visual-line)))
 
       :o "o" #'evil-inner-symbol
 
@@ -282,3 +277,13 @@
 (add-hook 'latex-mode-hook #'xenops-mode)
 (add-hook 'LaTeX-mode-hook #'xenops-mode)
 
+(setq org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
+;; ;; (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
+;; (add-to-list 'TeX-command-list '("pdflateX" "%`pdflatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
+
+;; use posfrmae
+(require 'company-posframe)
+(company-posframe-mode 1)
+;; (setq company-posframe-show-indicator nil
+;;       company-posframe-show-metadata nil)
+(setq company-posframe-show-indicator nil)
