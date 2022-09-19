@@ -287,3 +287,9 @@
 ;; (setq company-posframe-show-indicator nil
 ;;       company-posframe-show-metadata nil)
 (setq company-posframe-show-indicator nil)
+
+;; see document of `move-file-to-trash'
+  (defun system-move-file-to-trash (filename)
+    (process-file-shell-command
+     (format "trash %S" (file-local-name filename))))
+

@@ -49,7 +49,7 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 (unpin! org-roam company-org-roam)
-(unpin! evil)
+(unpin! evil diredfl)
 (package! org-roam-ui)
 (package! evil-matchit)
 (package! zotxt)
@@ -63,7 +63,6 @@
 (package! org-download)
 (package! ox-hugo)
 (package! cdlatex)
-(package! doom-modeline :pin "c26c26131377895984f9fdc49cc4914f9ee6997c")
 (package! xenops)
 (package! super-save)
 (package! mathpix.el
