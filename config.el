@@ -293,3 +293,5 @@
     (process-file-shell-command
      (format "trash %S" (file-local-name filename))))
 
+;; (after! dap-mode
+;;   (setq dap-python-debugger 'debugpy))
