@@ -63,7 +63,6 @@
 (package! org-download)
 (package! ox-hugo)
 (package! cdlatex)
-(package! xenops)
 (package! super-save)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el")
