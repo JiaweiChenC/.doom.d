@@ -93,16 +93,14 @@
 
 (setq doom-modeline-major-mode-icon t)
 
-;;Disable title bar
-;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
-;; (setq frame-title-format "%b")
+(define-key evil-normal-state-map (kbd "gj") 'evil-next-visual-line)
+(define-key evil-normal-state-map (kbd "gk") 'evil-previous-visual-line)
 
 (map! (:after evil-org
        :map evil-org-mode-map
-       :n "gk" (cmd! (evil-previous-visual-line))
-       :n "gj" (cmd! (evil-next-visual-line)))
-
+       ;; :n "gk" (cmd! (evil-previous-visual-line))
+       ;; :n "gj" (cmd! (evil-next-visual-line))
+       )
       :o "o" #'evil-inner-symbol
 
       :leader
@@ -272,10 +270,6 @@
         org-roam-dailies-capture-templates
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
-
-(setq xenops-math-image-scale-factor 1.2)
-(add-hook 'latex-mode-hook #'xenops-mode)
-(add-hook 'LaTeX-mode-hook #'xenops-mode)
 
 (setq org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 ;; ;; (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
