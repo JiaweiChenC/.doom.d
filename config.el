@@ -278,7 +278,7 @@
 ;; use posfrmae
 (require 'company-posframe)
 (company-posframe-mode 1)
-;; (setq company-posframe-show-indicator nil
-;;       company-posframe-show-metadata nil)
+ (setq company-posframe-show-indicator nil
+       company-posframe-show-metadata nil)
 (setq company-posframe-show-indicator nil)
 
