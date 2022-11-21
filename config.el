@@ -84,6 +84,7 @@
 (setq org-log-done 't)
 
 (setq org-preview-latex-default-process 'dvisvgm)
+(plist-put org-format-latex-options :scale 3)
 
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
