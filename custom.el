@@ -9,7 +9,9 @@
  '(package-selected-packages
    '(ox-reveal latex-preview-pane rg cdlatex nov srcery-theme jupyter))
  '(python-shell-interpreter "python")
- '(safe-local-variable-values '((global-flycheck-mode . -1))))
+ '(safe-local-variable-values
+   '((conda-env-autoactivate-mode . t)
+     (global-flycheck-mode . -1))))
 (put 'customize-face 'disabled nil)
 (put 'customize-group 'disabled nil)
 (custom-set-faces

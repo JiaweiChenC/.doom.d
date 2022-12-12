@@ -10,7 +10,6 @@
 #+LATEX_HEADER: \definecolor{bblue}{HTML}{0645AD}
 #+LATEX_HEADER: \usepackage[colorlinks]{hyperref}
 #+LATEX_HEADER: \hypersetup{colorlinks, linkcolor=blue, urlcolor=bblue}
-
 % Moving up the title.
 #+LATEX_HEADER: \usepackage{titling}
 #+LATEX_HEADER: \setlength{\droptitle}{-6em}

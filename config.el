@@ -84,8 +84,7 @@
 (setq org-log-done 't)
 
 (setq org-preview-latex-default-process 'dvisvgm)
-(plist-put org-format-latex-options :scale 3)
-
+(after! org (plist-put org-format-latex-options :scale 3))
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
@@ -276,10 +275,9 @@
 ;; ;; (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
 ;; (add-to-list 'TeX-command-list '("pdflateX" "%`pdflatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
 
-;; use posfrmae
+;; use posframe
 (require 'company-posframe)
 (company-posframe-mode 1)
  (setq company-posframe-show-indicator nil
        company-posframe-show-metadata nil)
 (setq company-posframe-show-indicator nil)
-
