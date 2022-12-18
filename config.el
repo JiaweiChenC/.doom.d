@@ -154,9 +154,6 @@
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 
-;;(use-package! company-box
-;;  :hook (company-mode . company-box-mode))
-
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
   (interactive "P")
