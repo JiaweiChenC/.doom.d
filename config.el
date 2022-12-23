@@ -98,8 +98,6 @@
 
 (map! (:after evil-org
        :map evil-org-mode-map
-       ;; :n "gk" (cmd! (evil-previous-visual-line))
-       ;; :n "gj" (cmd! (evil-next-visual-line))
        )
       :o "o" #'evil-inner-symbol
 
@@ -112,7 +110,7 @@
        "b" #'org-roam-buffer-toggle
        "d" #'org-roam-dailies-goto-today
        "D" #'org-roam-dailies-goto-date
-       "e" (cmd! (find-file (doom-dir org-directory "ledger.gpg")))
+       "e" (cmd! (find-file (doom-path org-directory "ledger.gpg")))
        "i" #'org-roam-node-insert
        "r" #'org-roam-node-find
        "R" #'org-roam-capture))
@@ -130,6 +128,7 @@
 (use-package super-save
   :config
   (super-save-mode +1))
+
 (setq auto-save-default nil)
 (setq super-save-remote-files nil)
 ;; add integration with ace-window
@@ -278,3 +277,7 @@
  (setq company-posframe-show-indicator nil
        company-posframe-show-metadata nil)
 (setq company-posframe-show-indicator nil)
+
+;; alias open file
+(defalias 'e 'find-file)
+(defalias 'eo 'find-file-other-window)
