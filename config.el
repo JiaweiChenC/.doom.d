@@ -68,7 +68,12 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
-(setq org-latex-listings 't)
+
+(after! cdlatex
+(add-to-list 'cdlatex-math-modify-alist '( ?s   "\\boldsymbol"               nil        t   t   nil ))
+)
+
+(setq org-latex-listings t)
 
 (setq org-roam-directory "~/Documents/roam")
 
@@ -81,7 +86,7 @@
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
 
-(setq org-log-done 't)
+(setq org-log-done t)
 
 (setq org-preview-latex-default-process 'dvisvgm)
 (after! org (plist-put org-format-latex-options :scale 3))
@@ -131,6 +136,7 @@
 
 (setq auto-save-default nil)
 (setq super-save-remote-files nil)
+
 ;; add integration with ace-window
 (add-to-list 'super-save-triggers 'ace-window)
 (add-to-list 'super-save-triggers '+vterm/toggle)
@@ -272,7 +278,6 @@
 ;; (add-to-list 'TeX-command-list '("pdflateX" "%`pdflatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
 
 ;; use posframe
-(require 'company-posframe)
 (company-posframe-mode 1)
  (setq company-posframe-show-indicator nil
        company-posframe-show-metadata nil)
@@ -281,3 +286,18 @@
 ;; alias open file
 (defalias 'e 'find-file)
 (defalias 'eo 'find-file-other-window)
+
+;; citar configuration
+;; paths
+(setq org-cite-csl-styles-dir "~/Zotero/styles")
+(setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
+(setq! bibtex-completion-library-path '("~/Documents/roam/biblibrary/")
+       bibtex-completion-notes-path "~/Documents/roam/")
+(setq! citar-library-paths '("~/Documents/roam/biblibrary/")
+       citar-notes-paths '("~/Documents/roam/"))
+;; citar symbols
+(setq citar-symbols
+      `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
+        (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
+        (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
+(setq citar-symbol-separator "  ")
