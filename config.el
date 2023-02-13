@@ -71,6 +71,7 @@
 
 (after! cdlatex
 (add-to-list 'cdlatex-math-modify-alist '( ?s   "\\boldsymbol"               nil        t   t   nil ))
+(add-to-list 'cdlatex-math-modify-alist '( ?n   "\\mathbb"               nil        t   t   nil ))
 )
 
 (setq org-latex-listings t)
@@ -80,6 +81,8 @@
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/Documents/roam/daily/"))
+(add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/training_log.org")
+(add-to-list 'org-agenda-files "/Users/jiawei/Documents/roam/research/meetings.org")
 
 (setq org-fontify-done-headline t)
 
@@ -89,7 +92,7 @@
 (setq org-log-done t)
 
 (setq org-preview-latex-default-process 'dvisvgm)
-(after! org (plist-put org-format-latex-options :scale 3))
+(after! org (plist-put org-format-latex-options :scale 2.5))
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
@@ -301,3 +304,4 @@
         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
         (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
 (setq citar-symbol-separator "  ")
+
