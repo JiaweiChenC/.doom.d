@@ -81,7 +81,8 @@
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/Documents/roam/daily/"))
-(add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/training_log.org")
+(add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
+(add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
 (add-to-list 'org-agenda-files "/Users/jiawei/Documents/roam/research/meetings.org")
 
 (setq org-fontify-done-headline t)
@@ -92,7 +93,7 @@
 (setq org-log-done t)
 
 (setq org-preview-latex-default-process 'dvisvgm)
-(after! org (plist-put org-format-latex-options :scale 2.7))
+;; (after! org (plist-put org-format-latex-options :scale 2.7))
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
@@ -178,7 +179,7 @@
   (setq org-download-method 'directory)
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
-  (setq org-download-timestamp "%Y%m%d-%H%M%S_")
+  ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
   (setq org-image-actual-width 400)
   (map! :map org-mode-map
         "C-c l a y" #'zz/org-download-paste-clipboard
@@ -299,6 +300,7 @@
 (setq! citar-library-paths '("~/Documents/roam/biblibrary/")
        citar-notes-paths '("~/Documents/roam/"))
 ;; citar symbols
+
 (setq citar-symbols
       `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
         (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
@@ -313,3 +315,7 @@
          :map copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
+
+;; set space o s as mac-os-open-with
+(map! :leader
+      :desc "Open with" "o s" #'+macos-open-with)
