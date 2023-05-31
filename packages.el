@@ -50,6 +50,7 @@
 ;(unpin! t)
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl)
+(unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)
 (package! zotxt)
@@ -71,6 +72,6 @@
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 
-;; ;; temporary fix
-(package! transient :pin "c2bdf7e12c530eb85476d3aef317eb2941ab9440")
-(package! with-editor :pin "bbc60f68ac190f02da8a100b6fb67cf1c27c53ab")
+;; (package! org-ai
+;;   :recipe (:host github :repo "rksm/org-ai" :files ("*.el" "snippets" "README.md")))
+;; (package! org-ai)

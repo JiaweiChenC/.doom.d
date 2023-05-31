@@ -283,7 +283,7 @@
 
 ;; use posframe
 (company-posframe-mode 1)
- (setq company-posframe-show-indicator nil
+(setq company-posframe-show-indicator nil
        company-posframe-show-metadata nil)
 (setq company-posframe-show-indicator nil)
 
@@ -316,6 +316,20 @@
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
 
-;; set space o s as mac-os-open-with
-(map! :leader
-      :desc "Open with" "o s" #'+macos-open-with)
+;; set space o m as mac-os-open-with
+(map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
+;; set yank from kill ring to space y
+(map! :leader :desc "yank from kill ring" "y" #'yank-from-kill-ring)
+
+;; openai
+(setq org-ai-openai-api-token "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")
+
+;; projectile ignore a project
+(after! projectile
+  (add-to-list 'projectile-ignored-projects "/Users/jiawei/Documents/roam/"))
+
+
+;; citar open file in zotero
+(setq citar-open-entry-function 'citar-open-entry-in-zotero)
+;; map citar open entry to space o z
+(map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
