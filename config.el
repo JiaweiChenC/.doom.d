@@ -74,7 +74,8 @@
 (add-to-list 'cdlatex-math-modify-alist '( ?n   "\\mathbb"               nil        t   t   nil ))
 )
 
-(setq org-latex-listings t)
+;; (setq org-latex-listings t)
+(setq org-latex-src-block-backend "listings")
 
 (setq org-roam-directory "~/Documents/roam")
 
@@ -292,7 +293,6 @@
 (defalias 'eo 'find-file-other-window)
 
 ;; citar configuration
-;; paths
 (setq org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
 (setq! bibtex-completion-library-path '("~/Documents/roam/biblibrary/")
@@ -321,9 +321,6 @@
 ;; set yank from kill ring to space y
 (map! :leader :desc "yank from kill ring" "y" #'yank-from-kill-ring)
 
-;; openai
-(setq org-ai-openai-api-token "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")
-
 ;; projectile ignore a project
 (after! projectile
   (add-to-list 'projectile-ignored-projects "/Users/jiawei/Documents/roam/"))
@@ -333,3 +330,12 @@
 (setq citar-open-entry-function 'citar-open-entry-in-zotero)
 ;; map citar open entry to space o z
 (map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
+
+;; open warp terminal in current directory
+(defun open-warp-terminal-in-dir ()
+  "Open Warp Terminal in the current directory."
+  (interactive)
+  (let ((dir default-directory))
+    (shell-command (concat "open -a Warp " dir))))
+;; map space o w to open warp terminal in current directory
+(map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)

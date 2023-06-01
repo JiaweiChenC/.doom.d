@@ -50,6 +50,7 @@
 ;(unpin! t)
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl)
+(unpin! pdf-tools)
 (unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)
