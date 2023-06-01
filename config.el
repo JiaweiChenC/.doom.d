@@ -332,10 +332,17 @@
 (map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
 
 ;; open warp terminal in current directory
+(defvar last-warp-dir nil
+  "Directory where the last Warp Terminal was opened.")
+
 (defun open-warp-terminal-in-dir ()
-  "Open Warp Terminal in the current directory."
+  "Open Warp Terminal in the current directory if not already open."
   (interactive)
   (let ((dir default-directory))
-    (shell-command (concat "open -a Warp " dir))))
+    (if (equal dir last-warp-dir)
+        (shell-command "osascript -e 'tell application \"Warp\" to activate'")
+      (progn
+        (setq last-warp-dir dir)
+        (shell-command (concat "open -a Warp " dir))))))
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
