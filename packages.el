@@ -69,7 +69,7 @@
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el")
 )
-(package! company-posframe)
+;; (package! company-posframe)
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 

@@ -282,11 +282,11 @@
 ;; ;; (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
 ;; (add-to-list 'TeX-command-list '("pdflateX" "%`pdflatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
 
-;; use posframe
-(company-posframe-mode 1)
-(setq company-posframe-show-indicator nil
-       company-posframe-show-metadata nil)
-(setq company-posframe-show-indicator nil)
+;; ;; use posframe
+;; (company-posframe-mode 1)
+;; (setq company-posframe-show-indicator nil
+;;        company-posframe-show-metadata nil)
+;; (setq company-posframe-show-indicator nil)
 
 ;; alias open file
 (defalias 'e 'find-file)
@@ -299,12 +299,6 @@
        bibtex-completion-notes-path "~/Documents/roam/")
 (setq! citar-library-paths '("~/Documents/roam/biblibrary/")
        citar-notes-paths '("~/Documents/roam/"))
-;; citar symbols
-
-(setq citar-symbols
-      `((file ,(all-the-icons-faicon "file-o" :face 'all-the-icons-green :v-adjust -0.1) . " ")
-        (note ,(all-the-icons-material "speaker_notes" :face 'all-the-icons-blue :v-adjust -0.3) . " ")
-        (link ,(all-the-icons-octicon "link" :face 'all-the-icons-orange :v-adjust 0.01) . " ")))
 (setq citar-symbol-separator "  ")
 
 ;; accept completion from copilot and fallback to company
@@ -346,3 +340,16 @@
         (shell-command (concat "open -a Warp " dir))))))
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
+
+(with-eval-after-load 'company-box
+  (set-face-attribute 'company-box-selection nil :background "darkseagreen2")
+  (set-face-attribute 'company-box-background nil :background "#d8d8d8")
+  ;; disable company-box-scrollbar
+  (setq company-box-scrollbar nil))
+(set-face-attribute 'region nil :background "#d8d8d8")
+;; set pop up tip face color to d8d8d8
+;; after load popup package
+(with-eval-after-load 'popup
+  (set-face-attribute 'popup-tip-face nil :background "#d8d8d8")
+  ;; set foreground color to pink
+  (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
