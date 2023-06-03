@@ -35,8 +35,6 @@
 
 (setq auto-save-default t)
 
-(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
-
 (setq latex-preview-pane-use-frame t)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -94,7 +92,7 @@
 (setq org-log-done t)
 
 (setq org-preview-latex-default-process 'dvisvgm)
-;; (after! org (plist-put org-format-latex-options :scale 2.7))
+
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
@@ -110,9 +108,7 @@
        :map evil-org-mode-map
        )
       :o "o" #'evil-inner-symbol
-
       :leader
-      "h L" #'global-keycast-mode
       (:prefix "f"
        "t" #'find-in-dotfiles
        "T" #'browse-dotfiles)
@@ -141,8 +137,6 @@
 
 (setq auto-save-default nil)
 (setq super-save-remote-files nil)
-
-;; add integration with ace-window
 (add-to-list 'super-save-triggers 'ace-window)
 (add-to-list 'super-save-triggers '+vterm/toggle)
 
@@ -181,55 +175,12 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  (setq org-image-actual-width 400)
+  (setq org-image-actual-width 500)
   (map! :map org-mode-map
-        "C-c l a y" #'zz/org-download-paste-clipboard
         "C-M-y" #'zz/org-download-paste-clipboard))
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
-
-(after! lsp-clangd
-  (set-lsp-priority! 'clangd 2)
-  lsp-clients-clangd-args '("-j=7"
-                            "--background-index"
-                            "--clang-tidy"
-                            "--completion-style=detailed"
-                            "--suggest-missing-includes"
-                            "--header-insertion=never")
-  (lsp-register-client
-   (make-lsp-client :new-connection (lsp-tramp-connection (cons "clangd" lsp-clients-clangd-args))
-                    :major-modes '(c-mode c++-mode)
-                    :remote? t
-                    :server-id 'clangd-remote)))
-
-(after! lsp-pyright
-  (setq lsp-log-io t)
-  (setq lsp-pyright-use-library-code-for-types t)
-  (setq lsp-pyright-diagnostic-mode "workspace")
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-tramp-connection (lambda ()
-                                            (cons "pyright-langserver"
-                                                  lsp-pyright-langserver-command-args)))
-    :major-modes '(python-mode)
-    :remote? t
-    :server-id 'pyright-remote
-    :multi-root t
-    :priority 3
-    :initialization-options (lambda () (ht-merge (lsp-configuration-section "pyright")
-                                                 (lsp-configuration-section "python")))
-    :initialized-fn (lambda (workspace)
-                      (with-lsp-workspace workspace
-                        (lsp--set-configuration
-                         (ht-merge (lsp-configuration-section "pyright")
-                                   (lsp-configuration-section "python")))))
-    :download-server-fn (lambda (_client callback error-callback _update?)
-                          (lsp-package-ensure 'pyright callback error-callback))
-    :notification-handlers (lsp-ht ("pyright/beginProgress" 'lsp-pyright--begin-progress-callback)
-                                   ("pyright/reportProgress" 'lsp-pyright--report-progress-callback)
-                                   ("pyright/endProgress" 'lsp-pyright--end-progress-callback))))
-  )
 
 
 (after! org-roam
@@ -278,22 +229,10 @@
         '(("d" "default" entry "* %?"
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
 
-(setq org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
-;; ;; (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
-;; (add-to-list 'TeX-command-list '("pdflateX" "%`pdflatex --synctex=1%(mode)%' %t" TeX-run-TeX nil t))
-
-;; ;; use posframe
-;; (company-posframe-mode 1)
-;; (setq company-posframe-show-indicator nil
-;;        company-posframe-show-metadata nil)
-;; (setq company-posframe-show-indicator nil)
-
-;; alias open file
-(defalias 'e 'find-file)
-(defalias 'eo 'find-file-other-window)
+(setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 
 ;; citar configuration
-(setq org-cite-csl-styles-dir "~/Zotero/styles")
+(setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
 (setq! bibtex-completion-library-path '("~/Documents/roam/biblibrary/")
        bibtex-completion-notes-path "~/Documents/roam/")
@@ -301,7 +240,6 @@
        citar-notes-paths '("~/Documents/roam/"))
 (setq citar-symbol-separator "  ")
 
-;; accept completion from copilot and fallback to company
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
   :bind (("C-TAB" . 'copilot-accept-completion-by-word)
@@ -329,6 +267,7 @@
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
 
+;; warp terminal
 (defun open-warp-terminal-in-dir ()
   "Open Warp Terminal in the current directory if not already open."
   (interactive)
@@ -341,15 +280,20 @@
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
 
+;; company box related setting
 (with-eval-after-load 'company-box
   (set-face-attribute 'company-box-selection nil :background "darkseagreen2")
   (set-face-attribute 'company-box-background nil :background "#d8d8d8")
   ;; disable company-box-scrollbar
   (setq company-box-scrollbar nil))
-(set-face-attribute 'region nil :background "#d8d8d8")
+
 ;; set pop up tip face color to d8d8d8
 ;; after load popup package
 (with-eval-after-load 'popup
   (set-face-attribute 'popup-tip-face nil :background "#d8d8d8")
   ;; set foreground color to pink
   (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
+
+;; scroll other window
+(map! :n "s-;" #'scroll-other-window)
+(map! :n "s-'" #'scroll-other-window-down)

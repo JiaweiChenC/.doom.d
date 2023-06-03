@@ -20,13 +20,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight ((t (:background "#d8d8d8"))))
+ '(region ((t (:extend t :background "light green")))))
 
- ;; '(python-shell-completion-native-disabled-interpreters '("pypy"))
- ;; '(python-shell-completion-native-enable t)
- ;; '(python-shell-interpreter "ipython3")
- ;; '(python-shell-interpreter-args "--simple-prompt")
- ;; '(warning-suppress-types
- ;;   '(((python python-shell-completion-native-turn-on-maybe))
- ;;     (initialization)
- ;;     (initialization))))
