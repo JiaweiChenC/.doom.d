@@ -51,6 +51,7 @@
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl)
 (unpin! pdf-tools)
+(unpin! conda)
 (unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)
@@ -69,10 +70,7 @@
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el")
 )
-;; (package! company-posframe)
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 
-;; (package! org-ai
-;;   :recipe (:host github :repo "rksm/org-ai" :files ("*.el" "snippets" "README.md")))
-;; (package! org-ai)
+(package! org-remark)

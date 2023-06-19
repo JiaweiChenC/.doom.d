@@ -35,7 +35,6 @@
 
 (setq auto-save-default t)
 
-(setq latex-preview-pane-use-frame t)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -68,11 +67,10 @@
 
 
 (after! cdlatex
-(add-to-list 'cdlatex-math-modify-alist '( ?s   "\\boldsymbol"               nil        t   t   nil ))
+(add-to-list 'cdlatex-math-modify-alist '( ?s   "\\boldsymbol"           nil        t   t   nil ))
 (add-to-list 'cdlatex-math-modify-alist '( ?n   "\\mathbb"               nil        t   t   nil ))
 )
 
-;; (setq org-latex-listings t)
 (setq org-latex-src-block-backend "listings")
 
 (setq org-roam-directory "~/Documents/roam")
@@ -101,9 +99,8 @@
 
 (setq doom-modeline-major-mode-icon t)
 
-(define-key evil-normal-state-map (kbd "gj") 'evil-next-visual-line)
-(define-key evil-normal-state-map (kbd "gk") 'evil-previous-visual-line)
-
+(map! :n "gj" 'evil-next-visual-line)
+(map! :n "gk" 'evil-previous-visual-line)
 (map! (:after evil-org
        :map evil-org-mode-map
        )
@@ -175,18 +172,25 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  (setq org-image-actual-width 500)
+  (setq org-image-actual-width 400)
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard))
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
+;; set org-image-actual-width to 700 after entering doom big font mode
+;; and set it back to 400 after exiting doom big font mode
+(add-hook 'doom-big-font-mode-hook
+                (lambda ()
+                (if doom-big-font-mode
+                        (setq org-image-actual-width 700)
+                (setq org-image-actual-width 400))))
 
 (after! org-roam
   (setq org-roam-capture-templates
         `(("n" "note" plain
-           ,(format "#+title: ${title}\n%%[%s/template/note.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("b" "booknotes" plain
@@ -294,6 +298,47 @@
   ;; set foreground color to pink
   (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
 
-;; scroll other window
-(map! :n "s-;" #'scroll-other-window)
-(map! :n "s-'" #'scroll-other-window-down)
+(map! :n "C-;" #'scroll-other-window)
+(map! :n "C-'" #'scroll-other-window-down)
+
+(use-package! conda
+  :init
+  (conda-env-initialize-interactive-shells))
+
+(custom-set-variables
+ '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/"))
+
+(setq major-mode-remap-alist
+ '((yaml-mode . yaml-ts-mode)
+   (bash-mode . bash-ts-mode)
+   (js2-mode . js-ts-mode)
+   (c++-mode . c++-ts-mode)
+   (cpp-mode . cpp-ts-mode)
+   (typescript-mode . typescript-ts-mode)
+   (json-mode . json-ts-mode)
+   (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)))
+
+(add-to-list 'default-frame-alist '(undecorated-round . t))
+
+(defun zz/insert-file-name (filename &optional args)
+  "Insert name of file FILENAME into buffer after point.
+
+  Prefixed with \\[universal-argument], expand the file name to
+  its fully canocalized path.  See `expand-file-name'.
+
+  Prefixed with \\[negative-argument], use relative path to file
+  name from current directory, `default-directory'.  See
+  `file-relative-name'.
+
+  The default with no prefix is to insert the file name exactly as
+  it appears in the minibuffer prompt."
+  (interactive "*fInsert file name: \nP")
+  (cond ((eq '- args)
+         (insert (file-relative-name filename)))
+        ((not (null args))
+         (insert (expand-file-name filename)))
+        (t
+         (insert filename))))
+;; map this function to space i a
+(map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)

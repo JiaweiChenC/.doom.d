@@ -9,9 +9,6 @@
  '(package-selected-packages
    '(ox-reveal latex-preview-pane rg cdlatex nov srcery-theme jupyter))
  '(python-shell-interpreter "python")
- '(safe-local-variable-values
-   '((conda-env-autoactivate-mode . t)
-     (global-flycheck-mode . -1)))
  '(screenshot-line-numbers-p nil))
 (put 'customize-face 'disabled nil)
 (put 'customize-group 'disabled nil)
@@ -20,6 +17,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(highlight ((t (:background "#d8d8d8"))))
- '(region ((t (:extend t :background "light green")))))
-
+ '(highlight ((t (:background "gray90"))))
+ '(region ((t (:extend t :background "darkseagreen2")))))
+ ;; )
