@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'nil)
+(setq doom-theme 'doom-nano-light)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -172,7 +172,7 @@
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
-  (setq org-image-actual-width 400)
+  ;; (setq org-image-actual-width 400)
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard))
 
@@ -284,19 +284,19 @@
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
 
+;; open when disable theme
 ;; company box related setting
-(with-eval-after-load 'company-box
-  (set-face-attribute 'company-box-selection nil :background "darkseagreen2")
-  (set-face-attribute 'company-box-background nil :background "#d8d8d8")
-  ;; disable company-box-scrollbar
-  (setq company-box-scrollbar nil))
+;; (with-eval-after-load 'company-box
+;;   (set-face-attribute 'company-box-background nil :background "#d8d8d8")
+;;   ;; disable company-box-scrollbar
+;;   (setq company-box-scrollbar nil))
 
-;; set pop up tip face color to d8d8d8
-;; after load popup package
-(with-eval-after-load 'popup
-  (set-face-attribute 'popup-tip-face nil :background "#d8d8d8")
-  ;; set foreground color to pink
-  (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
+;; ;; set pop up tip face color to d8d8d8
+;; ;; after load popup package
+;; (with-eval-after-load 'popup
+;;   (set-face-attribute 'popup-tip-face nil :background "#d8d8d8")
+;;   ;; set foreground color to pink
+;;   (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
 
 (map! :n "C-;" #'scroll-other-window)
 (map! :n "C-'" #'scroll-other-window-down)
@@ -308,17 +308,7 @@
 (custom-set-variables
  '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/"))
 
-(setq major-mode-remap-alist
- '((yaml-mode . yaml-ts-mode)
-   (bash-mode . bash-ts-mode)
-   (js2-mode . js-ts-mode)
-   (c++-mode . c++-ts-mode)
-   (cpp-mode . cpp-ts-mode)
-   (typescript-mode . typescript-ts-mode)
-   (json-mode . json-ts-mode)
-   (css-mode . css-ts-mode)
-   (python-mode . python-ts-mode)))
-
+;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 
 (defun zz/insert-file-name (filename &optional args)
@@ -340,5 +330,17 @@
          (insert (expand-file-name filename)))
         (t
          (insert filename))))
-;; map this function to space i a
+
+;; map insert a file name function to space i a
 (map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
+
+(use-package! dap-python
+  :after python
+  :config
+  (setq dap-python-debugger 'debugpy)
+  (setq dap-ui-mode t)
+  )
+(use-package! doom-nano-modeline
+  :config
+  (doom-nano-modeline-mode 1)
+  (global-hide-mode-line-mode 1))
