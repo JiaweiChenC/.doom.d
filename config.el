@@ -340,6 +340,7 @@
   (setq dap-python-debugger 'debugpy)
   (setq dap-ui-mode t)
   )
+
 (use-package! doom-nano-modeline
   :config
   (doom-nano-modeline-mode 1)
