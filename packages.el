@@ -77,3 +77,6 @@
 (package! doom-nano-modeline
   :recipe (:host github
   :repo "ronisbr/doom-nano-modeline"))
+;; (package! golden-ratio
+;;   :recipe (:host github
+;;   :repo "roman/golden-ratio.el"))

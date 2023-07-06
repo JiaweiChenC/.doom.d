@@ -138,10 +138,10 @@
 (add-to-list 'super-save-triggers '+vterm/toggle)
 
 (use-package vertico
-  :init
-  (vertico-mode)
-  (setq vertico-resize 'grow-only)
-  )
+ :init
+ (vertico-mode)
+ (setq vertico-resize 'grow-only)
+ )
 
 (use-package! org-roam-ui
     :after org-roam ;; or :after org
@@ -345,3 +345,11 @@
   :config
   (doom-nano-modeline-mode 1)
   (global-hide-mode-line-mode 1))
+
+;; bind quickrun to space r r
+(map! :leader :desc "quickrun" "r r" #'quickrun)
+
+
+(use-package! dired
+  :config
+    (set-popup-rule! "^\\*image-dired" :ignore t))

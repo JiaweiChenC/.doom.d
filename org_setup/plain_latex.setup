@@ -12,7 +12,7 @@
 #+LATEX_HEADER: \hypersetup{colorlinks, linkcolor=blue, urlcolor=bblue}
 % Moving up the title.
 #+LATEX_HEADER: \usepackage{titling}
-#+LATEX_HEADER: \setlength{\droptitle}{-6em}
+#+LATEX_HEADER: \setlength{\droptitle}{-8em}
 
 #+LATEX_HEADER: \setlength{\parindent}{0pt}
 #+LATEX_HEADER: \setlength{\parskip}{1em}
