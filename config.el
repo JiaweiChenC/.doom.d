@@ -67,20 +67,20 @@
 
 
 (after! cdlatex
-(add-to-list 'cdlatex-math-modify-alist '( ?s   "\\boldsymbol"           nil        t   t   nil ))
-(add-to-list 'cdlatex-math-modify-alist '( ?n   "\\mathbb"               nil        t   t   nil ))
+(add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
+(add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
 )
 
 (setq org-latex-src-block-backend "listings")
 
-(setq org-roam-directory "~/Documents/roam")
+(setq org-roam-directory "~/Documents/roam/")
 
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/Documents/roam/daily/"))
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
-(add-to-list 'org-agenda-files "/Users/jiawei/Documents/roam/research/meetings.org")
+;; (add-to-list 'org-agenda-files "/Users/jiawei/Documents/roam/research/meetings.org")
 
 (setq org-fontify-done-headline t)
 
@@ -189,8 +189,8 @@
 
 (after! org-roam
   (setq org-roam-capture-templates
-        `(("n" "note" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
+          '(("n" "note" plain
+           ,(format "#+title: ${title}\n%%[%s/template/note.org]" org-roam-directory)
            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("b" "booknotes" plain
@@ -353,3 +353,9 @@
 (use-package! dired
   :config
     (set-popup-rule! "^\\*image-dired" :ignore t))
+
+
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+
+;; set org journal to weekly
+(setq org-journal-file-type 'weekly)

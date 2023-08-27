@@ -23,8 +23,8 @@
        :completion
        (company +childframe)          ; the ultimate code completion backend
        ;; company           ; the ultimate code completion backend
-       ;;helm              ; the *other* search engine for love and life
-       ;;ido               ; the other *other* search engine...
+       ;; helm              ; the *other* search engine for love and life
+       ;; ido               ; the other *other* search engine...
        ;; ivy               ; a search engine for love and life
        (vertico +icons)           ; the search engine of the future
 
@@ -37,15 +37,15 @@
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        ;;hydra
        ;;indent-guides     ; highlighted indent columns
-       ;;ligatures          ; ligatures and symbols to make your code pretty again
+       ;; ligatures          ; ligatures and symbols to make your code pretty again
        ;;minimap           ; show a map of the code on the side
        ;;modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
-       neotree           ; a project drawer, like NERDTree for vim
+       ;;neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
        (popup +defaults)   ; tame sudden yet inevitable temporary windows
        ;;tabs              ; a tab bar for Emacs
-       ;;treemacs          ; a project drawer, like neotree but cooler
+       treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        (vc-gutter         ; vcs diff in the fringe
         +diff-hl)
@@ -89,8 +89,8 @@
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
+       tree-sitter
        ;;ansible
-       ;; tree-sitter
        biblio            ; Writes a PhD for you (citation needed)
        (debugger +lsp)          ; FIXME stepping through code, to help you add bugs
        ;;direnv
@@ -120,7 +120,9 @@
        :lang
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
-       (cc +lsp)                ; C > C++ == 1
+       (cc
+        +tree-sitter
+        +lsp)                ; C > C++ == 1
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
@@ -161,8 +163,10 @@
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
        (org               ; organize your plain life in plain text
+        +noter
         +pretty
         +roam2
+        +journal
         )
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
@@ -171,6 +175,7 @@
         +lsp
         +pyright
         +conda
+        +tree-sitter
         )
        ;;qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
