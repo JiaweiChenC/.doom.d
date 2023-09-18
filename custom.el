@@ -3,12 +3,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-box-scrollbar nil)
  '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/")
  '(custom-safe-themes
-   '("bfccfb247a960bf15b95cd3dccc41ff87caaba93f064fcc724b646867f2f4766" "e3daa8f18440301f3e54f2093fe15f4fe951986a8628e98dcd781efbec7a46f2" "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef" "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "1a1ac598737d0fcdc4dfab3af3d6f46ab2d5048b8e72bc22f50271fd6d393a00" "02f57ef0a20b7f61adce51445b68b2a7e832648ce2e7efb19d217b6454c1b644" "944d52450c57b7cbba08f9b3d08095eb7a5541b0ecfb3a0a9ecd4a18f3c28948" default))
+   '("ac18cc10455c6c26a98354ba8f9d338842d7ecc9ae3d28c205ed154ef20d74ce" "7e377879cbd60c66b88e51fad480b3ab18d60847f31c435f15f5df18bdb18184" "06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "e1f4f0158cd5a01a9d96f1f7cdcca8d6724d7d33267623cc433fe1c196848554" "7a424478cb77a96af2c0f50cfb4e2a88647b3ccca225f8c650ed45b7f50d9525" "467dc6fdebcf92f4d3e2a2016145ba15841987c71fbe675dcfe34ac47ffb9195" "bfccfb247a960bf15b95cd3dccc41ff87caaba93f064fcc724b646867f2f4766" "e3daa8f18440301f3e54f2093fe15f4fe951986a8628e98dcd781efbec7a46f2" "afa47084cb0beb684281f480aa84dab7c9170b084423c7f87ba755b15f6776ef" "9d29a302302cce971d988eb51bd17c1d2be6cd68305710446f658958c0640f68" "51c71bb27bdab69b505d9bf71c99864051b37ac3de531d91fdad1598ad247138" "1a1ac598737d0fcdc4dfab3af3d6f46ab2d5048b8e72bc22f50271fd6d393a00" "02f57ef0a20b7f61adce51445b68b2a7e832648ce2e7efb19d217b6454c1b644" "944d52450c57b7cbba08f9b3d08095eb7a5541b0ecfb3a0a9ecd4a18f3c28948" default))
+ '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(org-babel-python-command "python" t)
  '(package-selected-packages
-   '(eglot ox-reveal latex-preview-pane rg cdlatex nov srcery-theme jupyter))
+   '(color-theme-sanityinc-tomorrow eglot ox-reveal latex-preview-pane rg cdlatex nov srcery-theme jupyter))
  '(python-shell-interpreter "python")
  '(safe-local-variable-values
    '((eval progn
@@ -32,12 +34,12 @@
       (make-local-variable 'compile-command)
       (format "python3 %s" buffer-file-name))))
  '(screenshot-line-numbers-p nil))
-;; (put 'customize-face 'disabled nil)
-;; (put 'customize-group 'disabled nil)
+(put 'customize-face 'disabled nil)
+(put 'customize-group 'disabled nil)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(ts-fold-replacement-face ((t (:foreground unspecified :box nil :inherit font-lock-comment-face :weight light)))))
 (put 'narrow-to-region 'disabled nil)

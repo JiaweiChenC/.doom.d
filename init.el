@@ -39,7 +39,7 @@
        ;;indent-guides     ; highlighted indent columns
        ;; ligatures          ; ligatures and symbols to make your code pretty again
        ;;minimap           ; show a map of the code on the side
-       ;;modeline          ; snazzy, Atom-inspired modeline, plus API
+       modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints           ; highlight the region an operation acts on
@@ -121,7 +121,6 @@
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        (cc
-        +tree-sitter
         +lsp)                ; C > C++ == 1
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
@@ -167,6 +166,7 @@
         +pretty
         +roam2
         +journal
+        +present
         )
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more

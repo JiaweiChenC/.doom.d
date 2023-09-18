@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-nano-light)
+(setq doom-theme 'sanityinc-tomorrow-day)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -53,23 +53,23 @@
 ;; they are implemented.
 
 (with-eval-after-load 'ox-latex
-(add-to-list 'org-latex-classes
-             '("org-plain-latex"
-               "\\documentclass{article}
+  (add-to-list 'org-latex-classes
+               '("org-plain-latex"
+                 "\\documentclass{article}
            [NO-DEFAULT-PACKAGES]
            [PACKAGES]
            [EXTRA]"
-               ("\\section{%s}" . "\\section*{%s}")
-               ("\\subsection{%s}" . "\\subsection*{%s}")
-               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-               ("\\paragraph{%s}" . "\\paragraph*{%s}")
-               ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 
 (after! cdlatex
-(add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
-(add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
-)
+  (add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
+  (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
+  )
 
 (setq org-latex-src-block-backend "listings")
 
@@ -95,7 +95,7 @@
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
-(setq org-startup-folded 'show2levels)
+(setq org-startup-folded 'content)
 
 (setq doom-modeline-major-mode-icon t)
 
@@ -107,16 +107,17 @@
       :o "o" #'evil-inner-symbol
       :leader
       (:prefix "f"
-       "t" #'find-in-dotfiles
-       "T" #'browse-dotfiles)
+               "t" #'find-in-dotfiles
+               "T" #'browse-dotfiles)
       (:prefix "n"
-       "b" #'org-roam-buffer-toggle
-       "d" #'org-roam-dailies-goto-today
-       "D" #'org-roam-dailies-goto-date
-       "e" (cmd! (find-file (doom-path org-directory "ledger.gpg")))
-       "i" #'org-roam-node-insert
-       "r" #'org-roam-node-find
-       "R" #'org-roam-capture))
+               "b" #'org-roam-buffer-toggle
+               "j" #'org-journal-open-current-journal-file
+               "d" #'org-journal-new-entry
+               "D" #'org-journal-new-date-entry
+               "e" (cmd! (find-file (doom-path org-directory "ledger.gpg")))
+               "i" #'org-roam-node-insert
+               "r" #'org-roam-node-find
+               "R" #'org-roam-capture))
 
 (use-package! mathpix.el
   :custom ((mathpix-app-id "chenjw12580_gmail_com_2ad82a_fb84ed")
@@ -126,7 +127,7 @@
 (setq mathpix-screenshot-method "screencapture -i %s")
 
 (use-package! websocket
-    :after org-roam)
+  :after org-roam)
 
 (use-package super-save
   :config
@@ -138,22 +139,22 @@
 (add-to-list 'super-save-triggers '+vterm/toggle)
 
 (use-package vertico
- :init
- (vertico-mode)
- (setq vertico-resize 'grow-only)
- )
+  :init
+  (vertico-mode)
+  (setq vertico-resize 'grow-only)
+  )
 
 (use-package! org-roam-ui
-    :after org-roam ;; or :after org
-;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-;;         a hookable mode anymore, you're advised to pick something yourself
-;;         if you don't care about startup time, use
-;;  :hook (after-init . org-roam-ui-mode)
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
@@ -182,14 +183,14 @@
 ;; set org-image-actual-width to 700 after entering doom big font mode
 ;; and set it back to 400 after exiting doom big font mode
 (add-hook 'doom-big-font-mode-hook
-                (lambda ()
-                (if doom-big-font-mode
-                        (setq org-image-actual-width 700)
-                (setq org-image-actual-width 400))))
+          (lambda ()
+            (if doom-big-font-mode
+                (setq org-image-actual-width 700)
+              (setq org-image-actual-width 400))))
 
 (after! org-roam
   (setq org-roam-capture-templates
-          '(("n" "note" plain
+        `(("n" "note" plain
            ,(format "#+title: ${title}\n%%[%s/template/note.org]" org-roam-directory)
            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
@@ -241,8 +242,9 @@
 (setq! bibtex-completion-library-path '("~/Documents/roam/biblibrary/")
        bibtex-completion-notes-path "~/Documents/roam/")
 (setq! citar-library-paths '("~/Documents/roam/biblibrary/")
-       citar-notes-paths '("~/Documents/roam/"))
+       citar-notes-paths '("~/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
+(setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
@@ -254,6 +256,7 @@
 
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
+
 ;; set yank from kill ring to space y
 (map! :leader :desc "yank from kill ring" "y" #'yank-from-kill-ring)
 
@@ -283,20 +286,6 @@
         (shell-command (concat "open -a Warp " dir))))))
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
-
-;; open when disable theme
-;; company box related setting
-;; (with-eval-after-load 'company-box
-;;   (set-face-attribute 'company-box-background nil :background "#d8d8d8")
-;;   ;; disable company-box-scrollbar
-;;   (setq company-box-scrollbar nil))
-
-;; ;; set pop up tip face color to d8d8d8
-;; ;; after load popup package
-;; (with-eval-after-load 'popup
-;;   (set-face-attribute 'popup-tip-face nil :background "#d8d8d8")
-;;   ;; set foreground color to pink
-;;   (set-face-attribute 'popup-tip-face nil :foreground "dark magenta"))
 
 (map! :n "C-;" #'scroll-other-window)
 (map! :n "C-'" #'scroll-other-window-down)
@@ -334,6 +323,15 @@
 ;; map insert a file name function to space i a
 (map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
 
+(defun find-file-with-default-program ()
+  "Select a file in Emacs and open it using the default program on your Mac."
+  (interactive)
+  (let ((file-name (read-file-name "Select file: ")))
+    (call-process-shell-command (concat "open " file-name))))
+
+;; map open file with mac default to space m m
+(map! :leader :desc "find file with mac default" "m m" #'find-file-with-default-program)
+
 (use-package! dap-python
   :after python
   :config
@@ -341,21 +339,24 @@
   (setq dap-ui-mode t)
   )
 
-(use-package! doom-nano-modeline
-  :config
-  (doom-nano-modeline-mode 1)
-  (global-hide-mode-line-mode 1))
-
 ;; bind quickrun to space r r
 (map! :leader :desc "quickrun" "r r" #'quickrun)
 
 
 (use-package! dired
   :config
-    (set-popup-rule! "^\\*image-dired" :ignore t))
+  (set-popup-rule! "^\\*image-dired" :ignore t))
 
-
-(add-hook 'org-mode-hook 'org-fragtog-mode)
 
 ;; set org journal to weekly
 (setq org-journal-file-type 'weekly)
+
+;; temperal disable org element cache warning because it is a org error
+(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
+
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (+vertico/switch-workspace-buffer))
+
+
