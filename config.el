@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'sanityinc-tomorrow-day)
+(setq doom-theme 'modus-operandi)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -77,10 +77,11 @@
 
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
-(setq org-agenda-files '("~/Documents/roam/daily/"))
+(setq org-agenda-files '("~/org/journal/"))
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
-;; (add-to-list 'org-agenda-files "/Users/jiawei/Documents/roam/research/meetings.org")
+(setq org-agenda-file-regexp "\\`\\\([^.].*\\.org\\\|[0-9]\\\{8\\\}\\\(\\.gpg\\\)?\\\)\\'")
+(setq org-journal-enable-agenda-integration t)
 
 (setq org-fontify-done-headline t)
 
@@ -359,4 +360,7 @@
   :after '(evil-window-split evil-window-vsplit)
   (+vertico/switch-workspace-buffer))
 
-
+;; ;; set C-n and C-p in insert mode to next line and previous line
+(map! :map evil-insert-state-map
+      "C-n" #'next-line
+      "C-p" #'previous-line)
