@@ -364,3 +364,7 @@
 (map! :map evil-insert-state-map
       "C-n" #'next-line
       "C-p" #'previous-line)
+
+;; initial frame size
+(setq initial-frame-alist
+      '((width . 150) (height . 65)))
