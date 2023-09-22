@@ -368,3 +368,12 @@
 ;; initial frame size
 (setq initial-frame-alist
       '((width . 150) (height . 65)))
+
+;; projectile switch buffer behavior
+(setq +workspaces-on-switch-project-behavior 't)
+
+;; ;; tell zotero to open zotero:// links
+;; (org-link-set-parameters "zotero"
+;;                          :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
+
+(setq org-journal-file-format "%Y-%m-%d.org")
