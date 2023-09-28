@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi)
+(setq doom-theme 'doom-one-light)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -175,6 +175,8 @@
   (setq org-download-heading-lvl nil)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
   ;; (setq org-image-actual-width 400)
+  (org-link-set-parameters "zotero"
+                           :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard))
 
@@ -358,7 +360,7 @@
 
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
-  (+vertico/switch-workspace-buffer))
+  (find-file (read-file-name "Find file in new window: ")))
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
@@ -373,7 +375,5 @@
 (setq +workspaces-on-switch-project-behavior 't)
 
 ;; ;; tell zotero to open zotero:// links
-;; (org-link-set-parameters "zotero"
-;;                          :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
-
 (setq org-journal-file-format "%Y-%m-%d.org")
+
