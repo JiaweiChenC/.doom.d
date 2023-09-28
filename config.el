@@ -269,9 +269,9 @@
 
 
 ;; citar open file in zotero
-(setq citar-open-entry-function 'citar-open-entry-in-zotero)
+;; (setq citar-open-entry-function 'citar-open-entry-in-zotero)
 ;; map citar open entry to space o z
-(map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
+;; (map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
