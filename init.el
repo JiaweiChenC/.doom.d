@@ -92,7 +92,7 @@
        tree-sitter
        ;;ansible
        biblio            ; Writes a PhD for you (citation needed)
-       (debugger +lsp)          ; FIXME stepping through code, to help you add bugs
+       debugger          ; FIXME stepping through code, to help you add bugs
        ;;direnv
        ;;docker
        ;;editorconfig      ; let someone else argue about tabs vs spaces
@@ -174,6 +174,7 @@
         +lsp
         +pyright
         +conda
+        +pyenv
         +tree-sitter
         )
        ;;qt                ; the 'cutest' gui framework ever

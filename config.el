@@ -23,7 +23,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one-light)
+(setq doom-theme 'modus-operandi)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -267,12 +267,6 @@
 (after! projectile
   (add-to-list 'projectile-ignored-projects "/Users/jiawei/Documents/roam/"))
 
-
-;; citar open file in zotero
-;; (setq citar-open-entry-function 'citar-open-entry-in-zotero)
-;; map citar open entry to space o z
-;; (map! :leader :desc "citar open entry in zotero" "o z" #'citar-open-entry)
-
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
@@ -335,13 +329,6 @@
 ;; map open file with mac default to space m m
 (map! :leader :desc "find file with mac default" "m m" #'find-file-with-default-program)
 
-(use-package! dap-python
-  :after python
-  :config
-  (setq dap-python-debugger 'debugpy)
-  (setq dap-ui-mode t)
-  )
-
 ;; bind quickrun to space r r
 (map! :leader :desc "quickrun" "r r" #'quickrun)
 
@@ -365,7 +352,8 @@
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
       "C-n" #'next-line
-      "C-p" #'previous-line)
+      "C-p" #'previous-line
+      )
 
 ;; initial frame size
 (setq initial-frame-alist
@@ -375,5 +363,10 @@
 (setq +workspaces-on-switch-project-behavior 't)
 
 ;; ;; tell zotero to open zotero:// links
-(setq org-journal-file-format "%Y-%m-%d.org")
+(setq org-journal-file-format "%Y-%m-%d")
 
+;; (setq pyenv-mode-mode-line-format nil)
+
+;; (setq mode-line-misc-info 'nil)
+(setq mode-line-misc-info
+      (delete pyenv-mode-mode-line-format mode-line-misc-info))
