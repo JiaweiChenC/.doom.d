@@ -23,11 +23,10 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi)
+(setq doom-theme 'doom-gruvbox)
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
-
 (setq org-log-into-drawer t)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -173,6 +172,7 @@
   (setq org-download-method 'directory)
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
+  (org-zotxt-mode 1)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
   ;; (setq org-image-actual-width 400)
   (org-link-set-parameters "zotero"
@@ -362,7 +362,6 @@
 ;; projectile switch buffer behavior
 (setq +workspaces-on-switch-project-behavior 't)
 
-;; ;; tell zotero to open zotero:// links
 (setq org-journal-file-format "%Y-%m-%d")
 
 ;; (setq pyenv-mode-mode-line-format nil)
@@ -370,3 +369,6 @@
 ;; (setq mode-line-misc-info 'nil)
 (setq mode-line-misc-info
       (delete pyenv-mode-mode-line-format mode-line-misc-info))
+
+(setq org-zotxt-link-description-style :title)
+

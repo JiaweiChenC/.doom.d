@@ -74,4 +74,4 @@
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 ;; (package! doom-nano-modeline
 ;;   :recipe (:host github
-;;   :repo "ronisbr/doom-nano-modeline"))
+;;            :repo "ronisbr/doom-nano-modeline"))
