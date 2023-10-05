@@ -50,7 +50,7 @@
                                         ;(unpin! t)
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl tree-sitter)
-(unpin! pdf-tools)
+(unpin! pdf-tools evil-collection)
 (unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)
@@ -66,6 +66,7 @@
 (package! ox-hugo)
 (package! cdlatex)
 (package! super-save)
+(package! evil-snipe :disable t)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el")
   )

@@ -376,4 +376,6 @@
 (setq org-zotxt-link-description-style :title)
 
 (use-package! diff-hl
-  :hook (after-init . global-diff-hl-show-hunk-mouse-mode))
+  :hook
+  (after-init . global-diff-hl-show-hunk-mouse-mode)
+  )
