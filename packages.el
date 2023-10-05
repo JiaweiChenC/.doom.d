@@ -51,7 +51,6 @@
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl tree-sitter)
 (unpin! pdf-tools)
-(unpin! conda)
 (unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)

@@ -174,7 +174,7 @@
        (python            ; beautiful is better than ugly
         +lsp
         +pyright
-        +conda
+        ;; +conda
         +pyenv
         +tree-sitter
         )

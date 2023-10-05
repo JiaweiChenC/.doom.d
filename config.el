@@ -14,7 +14,8 @@
 ;; + `doom-variable-pitch-font'
 ;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
 ;;   presentations or streaming.
-;;
+                                        ;
+                                        ;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
 ;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
@@ -287,12 +288,12 @@
 (map! :n "C-;" #'scroll-other-window)
 (map! :n "C-'" #'scroll-other-window-down)
 
-(use-package! conda
-  :init
-  (conda-env-initialize-interactive-shells))
+;; (use-package! conda
+;;   :init
+;;   (conda-env-initialize-interactive-shells))
 
-(custom-set-variables
- '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/"))
+;; (custom-set-variables
+;;  '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/"))
 
 ;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
@@ -367,8 +368,12 @@
 ;; (setq pyenv-mode-mode-line-format nil)
 
 ;; (setq mode-line-misc-info 'nil)
-(setq mode-line-misc-info
-      (delete pyenv-mode-mode-line-format mode-line-misc-info))
+(use-package! pyenv-mode
+  :config
+  (setq mode-line-misc-info
+        (delete pyenv-mode-mode-line-format mode-line-misc-info)))
 
 (setq org-zotxt-link-description-style :title)
 
+(use-package! diff-hl
+  :hook (after-init . global-diff-hl-show-hunk-mouse-mode))
