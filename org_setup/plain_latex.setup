@@ -26,8 +26,6 @@
 % Disables flush alighment on the right side. Personal preference.
 # #+LATEX_HEADER: \RaggedRight
 
-% Page geometry
-#+LATEX_HEADER: \usepackage[top=1in, bottom=1.25in, left=1.55in, right=1.55in]{geometry}
 
 % Line spacing
 #+LATEX_HEADER: \renewcommand{\baselinestretch}{1.15}

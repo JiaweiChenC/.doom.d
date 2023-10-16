@@ -117,7 +117,6 @@
                "j" #'org-journal-open-current-journal-file
                "d" #'org-journal-new-entry
                "D" #'org-journal-new-date-entry
-               "e" (cmd! (find-file (doom-path org-directory "ledger.gpg")))
                "i" #'org-roam-node-insert
                "r" #'org-roam-node-find
                "R" #'org-roam-capture))
@@ -254,8 +253,8 @@
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (("C-TAB" . 'copilot-accept-completion-by-word)
-         ("C-<tab>" . 'copilot-accept-completion-by-word)
+  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
+         ("M-<tab>" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion)))
@@ -360,14 +359,12 @@
 
 ;; initial frame size
 (setq initial-frame-alist
-      '((width . 150) (height . 65)))
+      '((width . 150) (height . 55)))
 
 ;; projectile switch buffer behavior
-(setq +workspaces-on-switch-project-behavior 't)
+;; (setq +workspaces-on-switch-project-behavior 't)
 
 (setq org-journal-file-format "%Y-%m-%d")
-
-;; (setq pyenv-mode-mode-line-format nil)
 
 ;; (setq mode-line-misc-info 'nil)
 (use-package! pyenv-mode
@@ -377,7 +374,8 @@
 
 (setq org-zotxt-link-description-style :title)
 
-;; (use-package! diff-hl
-;;   :hook
-;;   (after-init . global-diff-hl-show-hunk-mouse-mode)
-;;   )
+(setq projectile-indexing-method 'native)
+(use-package! gptel
+  :config
+  (setq! gptel-api-key "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")
+  (setq! gptel-model 'gpt-4))
