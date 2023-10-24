@@ -51,7 +51,7 @@
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl tree-sitter doom-modeline)
 (unpin! pdf-tools evil-collection org-journal)
-(unpin! citar-org-roam citar citar-embark)
+(unpin! citar-org-roam citar citar-embark eglot)
 (package! org-roam-ui)
 (package! evil-matchit)
 (package! color-theme-sanityinc-tomorrow)
