@@ -82,7 +82,6 @@
 (setq org-agenda-files '("~/org/journal/"))
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
 (add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
-(setq org-agenda-file-regexp "\\`\\\([^.].*\\.org\\\|[0-9]\\\{8\\\}\\\(\\.gpg\\\)?\\\)\\'")
 (setq org-journal-enable-agenda-integration t)
 
 (setq org-fontify-done-headline t)
@@ -364,7 +363,6 @@
 ;; projectile switch buffer behavior
 ;; (setq +workspaces-on-switch-project-behavior 't)
 
-(setq org-journal-file-format "%Y-%m-%d")
 
 ;; (setq mode-line-misc-info 'nil)
 (use-package! pyenv-mode
@@ -379,3 +377,10 @@
   :config
   (setq! gptel-api-key "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")
   (setq! gptel-model 'gpt-4))
+
+(setq! citar-open-entry-function #'citar-open-entry-in-zotero)
+
+;; set quick run do not stop
+(setq! quickrun-timeout-seconds nil)
+
+(setq! dired-mouse-drag-files t)
