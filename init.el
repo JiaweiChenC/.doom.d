@@ -27,6 +27,7 @@
        ;; ido               ; the other *other* search engine...
        ;; ivy               ; a search engine for love and life
        (vertico +icons)           ; the search engine of the future
+
        :ui
        ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
@@ -46,10 +47,9 @@
        ;;tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       (vc-gutter         ; vcs diff in the fringe
-        +diff-hl
-        )
-       ;; +pretty)
+       ;; (vc-gutter         ; vcs diff in the fringe
+       ;;  +diff-hl
+       ;;  )
        ;;vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
@@ -102,6 +102,7 @@
        ;;gist              ; interacting with github gists
        lookup              ; navigate your code and its documentation
        (lsp +eglot)                     ; M-x vscode
+       ;; lsp
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -176,7 +177,7 @@
         +lsp
         +pyright
         ;; +conda
-        +pyenv
+        ;; +pyenv
         +tree-sitter
         )
        ;;qt                ; the 'cutest' gui framework ever

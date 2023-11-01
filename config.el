@@ -30,7 +30,9 @@
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
+
 (setq org-log-into-drawer t)
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
@@ -80,9 +82,10 @@
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/org/journal/"))
-(add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
-(add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
+;; (add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
+;; (add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
 (setq org-journal-enable-agenda-integration t)
+;; add all the todo.org file to the agenda
 
 (setq org-fontify-done-headline t)
 
@@ -343,7 +346,7 @@
 (setq org-journal-file-type 'weekly)
 
 ;; temperal disable org element cache warning because it is a org error
-(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
 
 (defadvice! prompt-for-buffer (&rest _)
@@ -365,14 +368,15 @@
 
 
 ;; (setq mode-line-misc-info 'nil)
-(use-package! pyenv-mode
-  :config
-  (setq mode-line-misc-info
-        (delete pyenv-mode-mode-line-format mode-line-misc-info)))
+;; (use-package! pyenv-mode
+;;   :config
+;;   (setq mode-line-misc-info
+;;         (delete pyenv-mode-mode-line-format mode-line-misc-info)))
 
 (setq org-zotxt-link-description-style :title)
 
-(setq projectile-indexing-method 'native)
+;; (setq projectile-indexing-method 'native)
+
 (use-package! gptel
   :config
   (setq! gptel-api-key "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")
@@ -381,6 +385,6 @@
 (setq! citar-open-entry-function #'citar-open-entry-in-zotero)
 
 ;; set quick run do not stop
-(setq! quickrun-timeout-seconds nil)
+;; (setq! quickrun-timeout-seconds nil)
 
 (setq! dired-mouse-drag-files t)
