@@ -51,11 +51,10 @@
 (unpin! org-roam company-org-roam)
 (unpin! evil diredfl tree-sitter doom-modeline)
 (unpin! pdf-tools evil-collection org-journal)
-(unpin! citar-org-roam citar citar-embark apheleia)
+(unpin! citar-org-roam citar citar-embark)
 (package! org-roam-ui)
 (package! evil-matchit)
 (package! color-theme-sanityinc-tomorrow)
-(package! zotxt)
 (package! olivetti)
 (package! dumb-jump :disable t)
 (package! auctex)
@@ -72,8 +71,6 @@
   )
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
-
 (package! doom-nano-modeline
   :recipe (:host github
            :repo "ronisbr/doom-nano-modeline"))
-(package! gptel)

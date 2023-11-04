@@ -176,7 +176,6 @@
   (setq org-download-method 'directory)
   (setq org-download-image-dir "images")
   (setq org-download-heading-lvl nil)
-  (org-zotxt-mode 1)
   ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
   ;; (setq org-image-actual-width 400)
   (org-link-set-parameters "zotero"
@@ -251,7 +250,6 @@
 (setq! citar-library-paths '("~/Documents/roam/biblibrary/")
        citar-notes-paths '("~/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
-(setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
@@ -341,12 +339,8 @@
   :config
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
-
 ;; set org journal to weekly
 (setq org-journal-file-type 'weekly)
-
-;; temperal disable org element cache warning because it is a org error
-;; (setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
 
 (defadvice! prompt-for-buffer (&rest _)
@@ -366,25 +360,14 @@
 ;; projectile switch buffer behavior
 ;; (setq +workspaces-on-switch-project-behavior 't)
 
-
-;; (setq mode-line-misc-info 'nil)
-;; (use-package! pyenv-mode
-;;   :config
-;;   (setq mode-line-misc-info
-;;         (delete pyenv-mode-mode-line-format mode-line-misc-info)))
-
-(setq org-zotxt-link-description-style :title)
-
-;; (setq projectile-indexing-method 'native)
-
-(use-package! gptel
+(use-package! pyenv-mode
   :config
-  (setq! gptel-api-key "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")
-  (setq! gptel-model 'gpt-4))
+  (setq mode-line-misc-info
+        (delete pyenv-mode-mode-line-format mode-line-misc-info)))
+
+(setq projectile-indexing-method 'native)
 
 (setq! citar-open-entry-function #'citar-open-entry-in-zotero)
 
-;; set quick run do not stop
-;; (setq! quickrun-timeout-seconds nil)
-
-(setq! dired-mouse-drag-files t)
+;; after python mode, start evil vimish fold mode
+(add-hook 'python-mode-hook #'evil-vimish-fold-mode)
