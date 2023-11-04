@@ -289,13 +289,6 @@
 (map! :n "C-;" #'scroll-other-window)
 (map! :n "C-'" #'scroll-other-window-down)
 
-;; (use-package! conda
-;;   :init
-;;   (conda-env-initialize-interactive-shells))
-
-;; (custom-set-variables
-;;  '(conda-anaconda-home "/Users/jiawei/opt/anaconda3/"))
-
 ;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
 
