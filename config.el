@@ -364,3 +364,5 @@
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
+
+(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
