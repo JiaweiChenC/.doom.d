@@ -315,7 +315,7 @@
 ;; map insert a file name function to space i a
 (map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
 
-(defun find-file-with-default-program ()
+(defun +macos/find-file-with-default-program ()
   "Select a file in Emacs and open it using the default program on your Mac."
   (interactive)
   (let ((file-name (read-file-name "Select file: ")))
