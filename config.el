@@ -265,10 +265,6 @@
 ;; set yank from kill ring to space y
 (map! :leader :desc "yank from kill ring" "y" #'yank-from-kill-ring)
 
-;; projectile ignore a project
-(after! projectile
-  (add-to-list 'projectile-ignored-projects "/Users/jiawei/Documents/roam/"))
-
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
@@ -322,10 +318,12 @@
     (call-process-shell-command (concat "open " file-name))))
 
 ;; map open file with mac default to space m m
-(map! :leader :desc "find file with mac default" "m m" #'find-file-with-default-program)
+(map! :leader :desc "find file with mac default" "m m" #'+macos/find-file-with-default-program)
 
 ;; bind quickrun to space r r
 (map! :leader :desc "quickrun" "r r" #'quickrun)
+;; bind quickrun kill process to space r k
+(map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
 
 (use-package! dired
@@ -338,7 +336,7 @@
 
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
-  (find-file (read-file-name "Find file in new window: ")))
+  (projectile-find-file))
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
@@ -349,9 +347,6 @@
 ;; initial frame size
 (setq initial-frame-alist
       '((width . 150) (height . 55)))
-
-;; projectile switch buffer behavior
-;; (setq +workspaces-on-switch-project-behavior 't)
 
 (use-package! pyenv-mode
   :config
@@ -365,4 +360,27 @@
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
 
-(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+(setq! warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
+(setq! quickrun-timeout-seconds 10000)
+
+;; ;; a function to open the link in macos default program
+;; (defun +macos/open-link-in-default-program ()
+;;   "Open the link in macos default program."
+;;   (interactive)
+;;   (let ((link (org-element-property :raw-link (org-element-context))))
+;;     (call-process-shell-command (concat "open " link))))
+
+;; (map! :map org-mode-map
+;;       :leader
+;;       :desc "open link in default program" "o p" #'+macos/open-link-in-default-program)
+(defun +macos/open-link-in-default-program ()
+  "Open the file under the cursor with the system's default application."
+  (interactive)
+  (let* ((file-path (thing-at-point 'filename))
+         (clean-path (replace-regexp-in-string "^[^:]+:" "" file-path))) ; strip everything before the colon
+    (if (and clean-path (file-exists-p clean-path))
+        (shell-command (concat "open " (shell-quote-argument clean-path)))
+      (message "No file under cursor found."))))
+
+(map! :leader :desc "macos open link with default programe" "o [" #'+macos/open-link-in-default-program)
