@@ -49,11 +49,11 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
 (unpin! org-roam company-org-roam)
-(unpin! evil diredfl tree-sitter doom-modeline)
-(unpin! pdf-tools evil-collection org-journal)
+(unpin! diredfl doom-modeline)
+(unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
+(package! org-appear)
 (package! org-roam-ui)
-(package! evil-matchit)
 (package! color-theme-sanityinc-tomorrow)
 (package! olivetti)
 (package! dumb-jump :disable t)
@@ -67,8 +67,7 @@
 (package! super-save)
 (package! evil-snipe :disable t)
 (package! mathpix.el
-  :recipe (:host github :repo "jethrokuan/mathpix.el")
-  )
+  :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! doom-nano-modeline

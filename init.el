@@ -37,7 +37,7 @@
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
        ;;hydra
        ;;indent-guides     ; highlighted indent columns
-       ;;ligatures          ; ligatures and symbols to make your code pretty again
+       ;; ligatures          ; ligatures and symbols to make your code pretty again
        ;;minimap           ; show a map of the code on the side
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
@@ -99,7 +99,7 @@
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
-       lookup              ; navigate your code and its documentation
+       (lookup +docsets +dictionary)              ; navigate your code and its documentation
        (lsp +eglot)                     ; M-x vscode
        ;; lsp
        magit             ; a git porcelain for Emacs
@@ -167,7 +167,7 @@
         +pretty
         +roam2
         +journal
-        +present
+        ;; +present
         )
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
@@ -175,7 +175,7 @@
        (python            ; beautiful is better than ugly
         +lsp
         ;; +pyright
-        +pyenv
+        ;; +pyenv
         +tree-sitter
         )
        ;;qt                ; the 'cutest' gui framework ever
@@ -193,8 +193,8 @@
        ;;swift             ; who asked for emoji variables?
        ;;terra             ; Earth and Moon in alignment for performance.
        ;;web               ; the tubes
-       (yaml              ; JSON, but readable
-        +tree-sitter)
+       yaml              ; JSON, but readable
+        ;; +tree-sitter)
        ;;zig               ; C, but simpler
 
        :email

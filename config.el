@@ -364,23 +364,82 @@
 
 (setq! quickrun-timeout-seconds 10000)
 
-;; ;; a function to open the link in macos default program
-;; (defun +macos/open-link-in-default-program ()
-;;   "Open the link in macos default program."
-;;   (interactive)
-;;   (let ((link (org-element-property :raw-link (org-element-context))))
-;;     (call-process-shell-command (concat "open " link))))
-
-;; (map! :map org-mode-map
-;;       :leader
-;;       :desc "open link in default program" "o p" #'+macos/open-link-in-default-program)
 (defun +macos/open-link-in-default-program ()
   "Open the file under the cursor with the system's default application."
   (interactive)
   (let* ((file-path (thing-at-point 'filename))
-         (clean-path (replace-regexp-in-string "^[^:]+:" "" file-path))) ; strip everything before the colon
-    (if (and clean-path (file-exists-p clean-path))
-        (shell-command (concat "open " (shell-quote-argument clean-path)))
+         (clean-path (replace-regexp-in-string "^[^:]+:" "" file-path))
+         (expanded-path (expand-file-name clean-path))) ; expand ~ to the user's home directory
+    (if (and expanded-path (file-exists-p expanded-path))
+        (shell-command (concat "open " (shell-quote-argument expanded-path)))
       (message "No file under cursor found."))))
-
 (map! :leader :desc "macos open link with default programe" "o [" #'+macos/open-link-in-default-program)
+
+;; paste image
+(defun zz/org-download-paste-clipboard (&optional use-default-filename)
+  (interactive "P")
+  (require 'org-download)
+  (let ((file
+         (if (not use-default-filename)
+             (read-string (format "Filename [%s]: "
+                                  org-download-screenshot-basename)
+                          nil nil org-download-screenshot-basename)
+           nil)))
+    (org-download-clipboard file)))
+
+;; warp terminal
+(defun open-warp-terminal-in-dir ()
+  "Open Warp Terminal in the current directory if not already open."
+  (interactive)
+  (let ((dir default-directory))
+    (if (equal dir last-warp-dir)
+        (shell-command "osascript -e 'tell application \"Warp\" to activate'")
+      (progn
+        (setq last-warp-dir dir)
+        (shell-command (concat "open -a Warp " dir))))))
+;; map space o w to open warp terminal in current directory
+(map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
+
+(defun zz/insert-file-name (filename &optional args)
+  "Insert name of file FILENAME into buffer after point.
+
+  Prefixed with \\[universal-argument], expand the file name to
+  its fully canocalized path.  See `expand-file-name'.
+
+  Prefixed with \\[negative-argument], use relative path to file
+  name from current directory, `default-directory'.  See
+  `file-relative-name'.
+
+  The default with no prefix is to insert the file name exactly as
+  it appears in the minibuffer prompt."
+  (interactive "*fInsert file name: \nP")
+  (cond ((eq '- args)
+         (insert (file-relative-name filename)))
+        ((not (null args))
+         (insert (expand-file-name filename)))
+        (t
+         (insert filename))))
+
+;; map insert a file name function to space i a
+(map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
+
+(defun +macos/find-file-with-default-program ()
+  "Select a file in Emacs and open it using the default program on your Mac."
+  (interactive)
+  (let ((file-name (read-file-name "Select file: ")))
+    (call-process-shell-command (concat "open " file-name))))
+
+;; map open file with mac default to space m m
+(map! :leader :desc "find file with mac default" "m m" #'+macos/find-file-with-default-program)
+
+;; use org-appear package
+(use-package! org-appear
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq org-appear-autoemphasis t
+        org-appear-autosubmarkers t
+        org-appear-autolinks t
+        org-appear-autosubmarkers t
+        org-appear-autoentities t
+        org-appear-autokeywords t))
+
