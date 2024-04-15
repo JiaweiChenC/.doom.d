@@ -48,7 +48,7 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-roam company-org-roam)
+(unpin! org-roam)
 (unpin! doom-themes)
 (unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
@@ -56,7 +56,6 @@
 (package! org-roam-ui)
 (package! color-theme-sanityinc-tomorrow)
 (package! olivetti)
-(package! doom-modeline :pin "cfc7bcf1494cb0634a1464dc40a4a1a1e337cb37")
 (package! auctex)
 (package! htmlize)
 (package! impatient-showdown)
@@ -65,11 +64,9 @@
 (package! ox-hugo)
 (package! cdlatex)
 (package! super-save)
+(package! matlab-mode)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
-  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist"))
-  :pin "653fe7b12990b5b7a050971bed4579022ce4b4f8")
-(package! doom-nano-modeline
-  :recipe (:host github
-           :repo "ronisbr/doom-nano-modeline"))
+  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+(package! jupyter)

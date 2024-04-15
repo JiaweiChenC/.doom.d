@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi
+(setq doom-theme 'nil
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -59,20 +59,6 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(with-eval-after-load 'ox-latex
-  (add-to-list 'org-latex-classes
-               '("org-plain-latex"
-                 "\\documentclass{article}
-           [NO-DEFAULT-PACKAGES]
-           [PACKAGES]
-           [EXTRA]"
-                 ("\\section{%s}" . "\\section*{%s}")
-                 ("\\subsection{%s}" . "\\subsection*{%s}")
-                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
-
-
 (after! cdlatex
   (add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
   (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
@@ -85,13 +71,15 @@
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/org/journal/"))
-;; (add-to-list 'org-agenda-files "/Users/jiawei/Projects/TruST/")
-;; (add-to-list 'org-agenda-files "/Users/jiawei/Projects/modern_control_projects/")
 (setq org-journal-enable-agenda-integration t)
 ;; add all the todo.org file to the agenda
 
 ;; do not highlight the current line
 (setq org-fontify-done-headline t)
+
+;; do not highlight the current line
+;; (setq global-hl-line-mode nil)
+(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
 
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
@@ -166,18 +154,21 @@
 
 
 (after! org
+  (defadvice! recover-paragraph-seperate ()
+    "Recover org paragraph mark position."
+    :after 'org-setup-filling
+    (setq-local paragraph-start "[\f\\|[ \t]*$]")
+    (setq-local paragraph-separate "[ \t\f]*$"))
   (setq org-startup-folded 'content)
   (setq org-download-method 'directory)
   (setq org-download-image-dir "images")
+  (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
-  ;; (setq org-download-timestamp "%Y%m%d-%H%M%S_")
   (setq org-image-actual-width 400)
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard)
-  ;; map space l i to citar insert citation
-(map! :leader :desc "citar insert citation" "l i" #'citar-insert-citation)
   )
 
 (after! tramp
@@ -242,11 +233,11 @@
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
-(setq! bibtex-completion-library-path '("~/Documents/roam/biblibrary/")
-       bibtex-completion-notes-path "~/Documents/roam/")
-(setq! citar-library-paths '("~/Documents/roam/biblibrary/")
-       citar-notes-paths '("~/Documents/roam/paper/"))
+(setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
+(setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
+(setq citar-org-roam-note-title-template "${title}")
+(setq! citar-org-roam-subdir "paper/")
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
@@ -269,9 +260,22 @@
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
 
+(defun send-scroll-up-to-other-frame ()
+  "Send a scroll-up command to the other frame."
+  (interactive)
+  (let ((other-frame (next-frame)))
+    (with-selected-frame other-frame
+      (pdf-view-next-page))))
 
-(map! :n "C-;" #'scroll-other-window)
-(map! :n "C-'" #'scroll-other-window-down)
+(defun send-scroll-down-to-other-frame ()
+  "Send a scroll-down command to the other frame."
+  (interactive)
+  (let ((other-frame (next-frame)))
+    (with-selected-frame other-frame
+      (pdf-view-previous-page))))
+
+(map! :n "C-;" #'send-scroll-up-to-other-frame)
+(map! :n "C-'" #'send-scroll-down-to-other-frame)
 
 ;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
@@ -290,10 +294,6 @@
 (setq org-journal-file-type 'weekly)
 
 
-;; (defadvice! prompt-for-buffer (&rest _)
-;;   :after '(evil-window-split evil-window-vsplit)
-;;   (projectile-find-file))
-
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
       "C-n" #'next-line
@@ -302,7 +302,11 @@
 
 ;; initial frame size
 (setq initial-frame-alist
-      '((width . 150) (height . 55)))
+      '((width . 170) (height . 60)))
+;; Set the default frame width and height
+(add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
+(add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
+
 
 (setq projectile-indexing-method 'native)
 
@@ -350,28 +354,7 @@
         (shell-command (concat "open -a Warp " dir))))))
 ;; map space o w to open warp terminal in current directory
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
-(defun zz/insert-file-name (filename &optional args)
-  "Insert name of file FILENAME into buffer after point.
 
-  Prefixed with \\[universal-argument], expand the file name to
-  its fully canocalized path.  See `expand-file-name'.
-
-  Prefixed with \\[negative-argument], use relative path to file
-  name from current directory, `default-directory'.  See
-  `file-relative-name'.
-
-  The default with no prefix is to insert the file name exactly as
-  it appears in the minibuffer prompt."
-  (interactive "*fInsert file name: \nP")
-  (cond ((eq '- args)
-         (insert (file-relative-name filename)))
-        ((not (null args))
-         (insert (expand-file-name filename)))
-        (t
-         (insert filename))))
-
-;; map insert a file name function to space i a
-(map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
 
 (defun +macos/find-file-with-default-program ()
   "Select a file in Emacs and open it using the default program on your Mac."
@@ -411,7 +394,6 @@
 ;; map to space l b
 (map! :leader :desc "export latex body only" "l b" #'org-export-latex-body-only)
 
-
 (defun org-compile-latex ()
   "Export current Org file to a LaTeX file with body only,
 compile it, then switch back to the Org file."
@@ -421,13 +403,116 @@ compile it, then switch back to the Org file."
     (find-file output-file) ; Open the LaTeX file
     (call-interactively '+latex/compile) ; Run the compile command
     (switch-to-buffer original-buffer)
-    ;; (when (file-exists-p output-file)
-    ;;   (start-process "open-pdf" "*open-pdf-output*" "open" "-a" "Preview" output-file))
     ))
 
 ;; map compile latex to space l c
 (map! :leader :desc "compile latex" "l c" #'org-compile-latex)
 
-;; map to space y m
-(map! :leader :desc "convert markdown links to org and paste" "y m" #'convert-markdown-links-to-org-and-paste)
+(setq split-width-threshold nil)
 
+(require 'ob-jupyter)
+(org-babel-do-load-languages 'org-babel-load-languages
+                             '((emacs-lisp . t)
+                              (python . t)
+                              (jupyter . t)))
+
+(use-package jupyter
+  :defer t
+  :init
+  (org-babel-jupyter-override-src-block "python")
+  (setq jupyter-repl-echo-eval-p t)
+  (setq org-babel-default-header-args:python '((:async . "yes")
+                                               (:session . "py")
+                                               (:kernel . "python3"))))
+
+(defun my/switch-to-workspace-in-new-frame ()
+  "Prompt for an existing workspace, then open it in a new frame."
+  (interactive)
+  (let* ((workspaces (+workspace-list-names)) ; Get a list of existing workspace names
+         (workspace (completing-read "Select workspace: " workspaces))) ; Prompt to select
+    (let ((new-frame (make-frame))) ; Create a new frame
+      (select-frame-set-input-focus new-frame) ; Focus the new frame
+      (+workspace/switch-to workspace) ; Switch to the selected workspace in the new frame
+      (+workspace/display))) ; Display the workspace tab bar in the new frame
+  )
+
+;; map to space tab ,
+(map! :leader :desc "switch to workspace in new frame" "TAB ," #'my/switch-to-workspace-in-new-frame)
+
+
+;;;;;;;;;;;;;;;;;;;;;;; hack to make org table work perfectly ;;;;;;;;;;;;;;;;;;;;;;
+(defun org-export-cmidrule-filter-latex (row backend info)
+  "Replace <startcidend> with \\cmidrule{start-end} in LaTeX export."
+  (while (string-match "\\(<\\([0-9]+\\)cid\\([0-9]+\\)?>[[:blank:]]*\\)" row)
+    (let ((start (string-to-number (match-string 2 row)))
+          (end (string-to-number (match-string 3 row))))
+      (setq row (replace-match (format "\\\\\\cmidrule(lr){%d-%d}" start end) t t row)))
+    ;; Clean up unnecessary spaces and & that might be left over around the cmidrule
+    (setq row (replace-regexp-in-string "\\(&\\s-*\\|\\s-*\\\\\\\\\\)" "" row))
+    (setq row (replace-regexp-in-string "\\[0pt\\]" "" row)))
+  row)
+
+(defun my-org-export-remove-amps (row backend info)
+  "Filter function to remove a number of '&' signs as specified in <rm[0-9]> pattern."
+  (when (eq backend 'latex)  ; Only apply this for LaTeX export, adjust as necessary
+    (let ((new-row row)
+          match number)
+      ;; Find the pattern and extract the number
+      (when (string-match "<rm\\([0-9]+\\)>" row)
+        (setq number (string-to-number (match-string 1 row)))  ; Get the number following 'rm'
+        ;; Remove the pattern itself from the row
+        (setq new-row (replace-regexp-in-string "<rm[0-9]+>" "" row))
+        ;; Remove the specified number of '&' signs after the pattern
+        (with-temp-buffer
+          (insert new-row)
+          (goto-char (point-min))
+          (cl-loop repeat number
+                   when (search-forward "&" nil t)  ; Search for '&'
+                   do (replace-match "" nil t))  ; Replace '&' with nothing
+          (setq new-row (buffer-string))))
+      new-row)))
+
+;; Add the function to the org export filter for table rows
+(with-eval-after-load 'ox-latex
+  (add-to-list 'org-export-filter-table-row-functions
+               'org-export-cmidrule-filter-latex)
+  (add-to-list 'org-export-filter-table-row-functions
+               'my-org-export-remove-amps))
+
+(setq org-hide-macro-markers t)
+
+(setq font-latex-fontify-script nil)
+
+(defun my/org-tab-conditional ()
+  (interactive)
+  (if (yas-active-snippets)
+      (yas-next-field-or-maybe-expand)
+    (org-cycle)))
+
+(map! :after evil-org
+      :map evil-org-mode-map
+      :i "<tab>" #'my/org-tab-conditional)
+
+(setq! corfu-max-width 60)
+;; (defun zz/insert-file-name (filename &optional args)
+;;   "Insert name of file FILENAME into buffer after point.
+
+;;   Prefixed with \\[universal-argument], expand the file name to
+;;   its fully canocalized path.  See `expand-file-name'.
+
+;;   Prefixed with \\[negative-argument], use relative path to file
+;;   name from current directory, `default-directory'.  See
+;;   `file-relative-name'.
+
+;;   The default with no prefix is to insert the file name exactly as
+;;   it appears in the minibuffer prompt."
+;;   (interactive "*fInsert file name: \nP")
+;;   (cond ((eq '- args)
+;;          (insert (file-relative-name filename)))
+;;         ((not (null args))
+;;          (insert (expand-file-name filename)))
+;;         (t
+;;          (insert filename))))
+
+;; ;; map insert a file name function to space i a
+;; (map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)

@@ -1,0 +1,2 @@
+#+latex_header: \usepackage{/Users/jiawei/.doom.d/org_setup/jrnl_setup}
+#+MACRO: tc1 \mymulticolumn{$1}{$2}

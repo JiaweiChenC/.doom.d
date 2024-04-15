@@ -21,7 +21,12 @@
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-       (company +childframe)          ; the ultimate code completion backend
+       ;; (company +childframe)          ; the ultimate code completion backend
+       (corfu
+        +icons
+        +orderless
+        +dabbrev
+        )           ; the ultimate code completion backend
        ;; company           ; the ultimate code completion backend
        ;; helm              ; the *other* search engine for love and life
        ;; ido               ; the other *other* search engine...
@@ -42,7 +47,7 @@
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;;nav-flash         ; blink cursor line after big motions
        ;;neotree           ; a project drawer, like NERDTree for vim
-       ophints           ; highlight the region an operation acts on
+       ;; ophints           ; highlight the region an operation acts on
        (popup +defaults)   ; tame sudden yet inevitable temporary windows
        ;;tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
@@ -175,7 +180,7 @@
        ;;purescript        ; javascript, but functional
        (python            ; beautiful is better than ugly
         +lsp
-        ;; +pyright
+        +pyright
         ;; +pyenv
         +tree-sitter
         )
