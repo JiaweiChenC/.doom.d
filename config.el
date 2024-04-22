@@ -154,6 +154,8 @@
 
 
 (after! org
+  ;; (+org-babel-load-jupyter-h 'jupyter-python)  ; Adjust this for other languages if needed
+  ;; (org-babel-jupyter-override-src-block "python")
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
     :after 'org-setup-filling
@@ -208,6 +210,13 @@
            ,(format "#+title: ${title}\n%%[%s/template/research.org]" org-roam-directory)
            :target (file "research/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
+          ("z" "literature note" plain
+           "%?"
+           :target
+           (file+head
+            "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
+            "#+title: ${note-title}.\n#+created: %U\n#+last_modified: %U\n\n* ${note-title}\n")
+           :unnarrowed t)
           ("a" "paper" plain
            ,(format "#+title: ${title}\n%%[%s/template/paper.org]" org-roam-directory)
            :target (file "paper/%<%Y%m%d>-${slug}.org")
@@ -229,21 +238,21 @@
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
-
+(setq citar-org-roam-capture-template-key "z")
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
 (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
-(setq citar-org-roam-note-title-template "${title}")
 (setq! citar-org-roam-subdir "paper/")
+(setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
   :config
   ;; set delay to 0.5s
-        (setq copilot-idle-delay 0.5)
+  (setq copilot-idle-delay 0.5)
   :bind (("M-TAB" . 'copilot-accept-completion-by-word)
          ("M-<tab>" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
@@ -261,18 +270,22 @@
   "Directory where the last Warp Terminal was opened.")
 
 (defun send-scroll-up-to-other-frame ()
-  "Send a scroll-up command to the other frame."
+  "Send a scroll-up command to the other frame, specialized for PDF viewing."
   (interactive)
   (let ((other-frame (next-frame)))
     (with-selected-frame other-frame
-      (pdf-view-next-page))))
+      (if (derived-mode-p 'pdf-view-mode)
+          (pdf-view-next-page)
+        (scroll-up-command)))))
 
 (defun send-scroll-down-to-other-frame ()
-  "Send a scroll-down command to the other frame."
+  "Send a scroll-down command to the other frame, specialized for PDF viewing."
   (interactive)
   (let ((other-frame (next-frame)))
     (with-selected-frame other-frame
-      (pdf-view-previous-page))))
+      (if (derived-mode-p 'pdf-view-mode)
+          (pdf-view-previous-page)
+        (scroll-down-command)))))
 
 (map! :n "C-;" #'send-scroll-up-to-other-frame)
 (map! :n "C-'" #'send-scroll-down-to-other-frame)
@@ -285,14 +298,12 @@
 ;; bind quickrun kill process to space r k
 (map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
-
 (use-package! dired
   :config
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
 ;; set org journal to weekly
 (setq org-journal-file-type 'weekly)
-
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
@@ -302,7 +313,7 @@
 
 ;; initial frame size
 (setq initial-frame-alist
-      '((width . 170) (height . 60)))
+      '((width . 150) (height . 50)))
 ;; Set the default frame width and height
 (add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
 (add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
@@ -410,21 +421,6 @@ compile it, then switch back to the Org file."
 
 (setq split-width-threshold nil)
 
-(require 'ob-jupyter)
-(org-babel-do-load-languages 'org-babel-load-languages
-                             '((emacs-lisp . t)
-                              (python . t)
-                              (jupyter . t)))
-
-(use-package jupyter
-  :defer t
-  :init
-  (org-babel-jupyter-override-src-block "python")
-  (setq jupyter-repl-echo-eval-p t)
-  (setq org-babel-default-header-args:python '((:async . "yes")
-                                               (:session . "py")
-                                               (:kernel . "python3"))))
-
 (defun my/switch-to-workspace-in-new-frame ()
   "Prompt for an existing workspace, then open it in a new frame."
   (interactive)
@@ -493,26 +489,63 @@ compile it, then switch back to the Org file."
       :map evil-org-mode-map
       :i "<tab>" #'my/org-tab-conditional)
 
-(setq! corfu-max-width 60)
-;; (defun zz/insert-file-name (filename &optional args)
-;;   "Insert name of file FILENAME into buffer after point.
 
-;;   Prefixed with \\[universal-argument], expand the file name to
-;;   its fully canocalized path.  See `expand-file-name'.
+;; map space o c to citar create note
+(map! :leader :desc "citar create note" "o c" #'citar-create-note)
 
-;;   Prefixed with \\[negative-argument], use relative path to file
-;;   name from current directory, `default-directory'.  See
-;;   `file-relative-name'.
+(after! corfu
+  (setq corfu-max-width 60)
+  )
 
-;;   The default with no prefix is to insert the file name exactly as
-;;   it appears in the minibuffer prompt."
-;;   (interactive "*fInsert file name: \nP")
-;;   (cond ((eq '- args)
-;;          (insert (file-relative-name filename)))
-;;         ((not (null args))
-;;          (insert (expand-file-name filename)))
-;;         (t
-;;          (insert filename))))
+(after! dabbrev
+  ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
+  (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
-;; ;; map insert a file name function to space i a
-;; (map! :leader :desc "insert another file name" "i a" #'zz/insert-file-name)
+(use-package! dape
+  :hook
+  ((kill-emacs . dape-breakpoint-save)
+   (after-init . dape-breakpoint-load))
+  :init
+  :config
+  (add-hook 'dape-on-start-hooks (lambda () (dape-breakpoint-global-mode 1)))
+  (add-hook 'dape-on-stopped-hooks (lambda () (dape-breakpoint-global-mode -1)))
+  (setq dape-buffer-window-arrangement 'right)
+  (setq dape-cwd-fn 'projectile-project-root)
+  )
+
+
+;; config jupyter
+
+(use-package! jupyter
+  :defer t
+  :init
+  (require 'ob-jupyter)
+  :config
+  (org-babel-jupyter-override-src-block "python")
+  (org-babel-do-load-languages 'org-babel-load-languages
+                        '((emacs-lisp . t)
+                        (python . t)
+                        (jupyter . t)))
+  (setq jupyter-repl-echo-eval-p t)
+  (setq org-babel-default-header-args:python '((:async . "yes")
+                                               (:session . "py")
+                                               (:kernel . "python3"))))
+(use-package! citre
+  :defer t
+  :init
+  ;; This is needed in `:init' block for lazy load to work.
+  (require 'citre-config)
+  ;; Bind your frequently used commands.  Alternatively, you can define them
+  ;; in `citre-mode-map' so you can only use them when `citre-mode' is enabled.
+  (global-set-key (kbd "C-x c j") 'citre-jump)
+  (global-set-key (kbd "C-x c J") 'citre-jump-back)
+  (map! :n "gb" 'citre-peek)
+  (global-set-key (kbd "C-x c u") 'citre-update-this-tags-file)
+  :config
+  (setq
+   citre-project-root-function #'projectile-project-root
+   citre-default-create-tags-file-location 'global-cache
+   citre-edit-ctags-options-manually nil
+   citre-auto-enable-citre-mode-modes '(prog-mode)))
+
+;; (setq doom-modeline-hud t)

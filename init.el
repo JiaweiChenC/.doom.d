@@ -77,6 +77,7 @@
        :emacs
        (dired
         +icons
+        ;; +dirvish
         )             ; making dired pretty [functional]
        electric          ; smarter, keyword-based electric-indent
        (ibuffer +icons)         ; interactive buffer management
@@ -173,6 +174,7 @@
         +pretty
         +roam2
         +journal
+        +jupyter
         ;; +present
         )
        ;;php               ; perl's insecure younger brother
@@ -180,7 +182,7 @@
        ;;purescript        ; javascript, but functional
        (python            ; beautiful is better than ugly
         +lsp
-        +pyright
+        ;; +pyright
         ;; +pyenv
         +tree-sitter
         )
@@ -200,7 +202,7 @@
        ;;terra             ; Earth and Moon in alignment for performance.
        ;;web               ; the tubes
        yaml              ; JSON, but readable
-        ;; +tree-sitter)
+       ;; +tree-sitter)
        ;;zig               ; C, but simpler
 
        :email

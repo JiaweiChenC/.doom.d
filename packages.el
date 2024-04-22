@@ -48,8 +48,8 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-roam)
-(unpin! doom-themes)
+(unpin! org-roam eglot)
+(unpin! doom-themes jupyter)
 (unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
 (package! org-appear)
@@ -69,4 +69,6 @@
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
-(package! jupyter)
+(package! dape)
+(package! diredfl :disable t)
+(package! citre)
