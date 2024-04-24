@@ -71,4 +71,4 @@
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! dape)
 (package! diredfl :disable t)
-(package! citre)
+;; (package! citre)

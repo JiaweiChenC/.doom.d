@@ -187,51 +187,51 @@
 (after! org-roam
   (setq org-roam-capture-templates
         `(("n" "note" plain
-           ,(format "#+title: ${title}\n%%[%s/template/note.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("b" "booknotes" plain
-           ,(format "#+title: ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
            :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("c" "coding" plain
-           ,(format "#+title: ${title}\n%%[%s/template/coding.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/coding.org]" org-roam-directory)
            :target (file "coding/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("l" "lectures" plain
-           ,(format "#+title: ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
            :target (file "lectures/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("p" "project" plain
-           ,(format "#+title: ${title}\n%%[%s/template/project.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/project.org]" org-roam-directory)
            :target (file "project/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
           ("r" "research" plain
-           ,(format "#+title: ${title}\n%%[%s/template/research.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/research.org]" org-roam-directory)
            :target (file "research/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
-          ("z" "literature note" plain
-           "%?"
-           :target
-           (file+head
-            "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
-            "#+title: ${note-title}.\n#+created: %U\n#+last_modified: %U\n\n* ${note-title}\n")
-           :unnarrowed t)
           ("a" "paper" plain
-           ,(format "#+title: ${title}\n%%[%s/template/paper.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/paper.org]" org-roam-directory)
            :target (file "paper/%<%Y%m%d>-${slug}.org")
            :unnarrowed t)
           ("w" "works" plain
-           ,(format "#+title: ${title}\n%%[%s/template/works.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/works.org]" org-roam-directory)
            :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("m" "math" plain
-           ,(format "#+title: ${title}\n%%[%s/template/math.org]" org-roam-directory)
+           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/math.org]" org-roam-directory)
            :target (file "math/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
           ("s" "secret" plain "#+title: ${title}\n\n"
            :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t))
+           :unnarrowed t)
+          ("z" "literature note" plain
+           "%?"
+           :target (file+head
+            "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
+            "#+title: ${note-title}.\n#+created: %U\n#+last_modified: %U\n\n* ${note-title}\n")
+           :unnarrowed t)
+          )
         ;; Use human readable dates for dailies titles
         org-roam-dailies-capture-templates
         '(("d" "default" entry "* %?"
@@ -513,7 +513,6 @@ compile it, then switch back to the Org file."
   (setq dape-cwd-fn 'projectile-project-root)
   )
 
-
 ;; config jupyter
 
 (use-package! jupyter
@@ -530,22 +529,26 @@ compile it, then switch back to the Org file."
   (setq org-babel-default-header-args:python '((:async . "yes")
                                                (:session . "py")
                                                (:kernel . "python3"))))
-(use-package! citre
-  :defer t
-  :init
-  ;; This is needed in `:init' block for lazy load to work.
-  (require 'citre-config)
-  ;; Bind your frequently used commands.  Alternatively, you can define them
-  ;; in `citre-mode-map' so you can only use them when `citre-mode' is enabled.
-  (global-set-key (kbd "C-x c j") 'citre-jump)
-  (global-set-key (kbd "C-x c J") 'citre-jump-back)
-  (map! :n "gb" 'citre-peek)
-  (global-set-key (kbd "C-x c u") 'citre-update-this-tags-file)
-  :config
-  (setq
-   citre-project-root-function #'projectile-project-root
-   citre-default-create-tags-file-location 'global-cache
-   citre-edit-ctags-options-manually nil
-   citre-auto-enable-citre-mode-modes '(prog-mode)))
 
-;; (setq doom-modeline-hud t)
+
+(use-package! tab-bar
+  :config
+  (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
+  (setq tab-bar-separator ""
+        tab-bar-new-tab-choice "*scratch*"
+        tab-bar-tab-name-truncated-max 20
+        tab-bar-close-button-show nil
+        tab-bar-tab-hints t)
+   (map! :leader
+        (:prefix ("t" . "tab")
+        :desc "Switch to tab number"
+        "1" #'(lambda () (interactive) (tab-bar-select-tab 1))
+        "2" #'(lambda () (interactive) (tab-bar-select-tab 2))
+        "3" #'(lambda () (interactive) (tab-bar-select-tab 3))
+        "4" #'(lambda () (interactive) (tab-bar-select-tab 4))
+        "5" #'(lambda () (interactive) (tab-bar-select-tab 5))
+        "6" #'(lambda () (interactive) (tab-bar-select-tab 6))
+        "7" #'(lambda () (interactive) (tab-bar-select-tab 7))
+        "8" #'(lambda () (interactive) (tab-bar-select-tab 8))
+        "9" #'(lambda () (interactive) (tab-bar-select-tab 9))
+)))
