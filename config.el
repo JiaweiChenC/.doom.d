@@ -157,10 +157,7 @@
 ;;  (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
 
 (after! org
-
-  (setq! org-indent-mode 'nil)
-  ;; (+org-babel-load-jupyter-h 'jupyter-python)  ; Adjust this for other languages if needed
-  ;; (org-babel-jupyter-override-src-block "python")
+  ;; (setq org-startup-indented nil)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
     :after 'org-setup-filling
@@ -509,25 +506,6 @@ compile it, then switch back to the Org file."
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
-;; ;; config jupyter
-;; (use-package! jupyter
-;;   :defer t
-;;   :init
-;;   (require 'ob-jupyter)
-;;   :config
-;;   (setq! jupyter-repl-echo-eval-p 't)
-;;   (org-babel-jupyter-override-src-block "python")
-;;   (org-babel-do-load-languages 'org-babel-load-languages
-;;                         '((emacs-lisp . t)
-;;                         (R . t)
-;;                         (python . t)
-;;                         (jupyter . t)))
-;;   (setq jupyter-repl-echo-eval-p t)
-;;   (setq org-babel-default-header-args:python '((:async . "yes")
-;;                                                (:session . "py")
-;;                                                (:kernel . "python3"))))
-
-
 (use-package! tab-bar
   :config
   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
@@ -598,29 +576,7 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! ess-startup-directory 'default-directory)
 
-;; Add frame borders and window dividers
-(setq
- ;; Edit settings
- org-auto-align-tags nil
- org-tags-column 0
- org-special-ctrl-a/e t
- org-insert-heading-respect-content t
-
- ;; Org styling, hide markup etc.
- org-hide-emphasis-markers t
- org-pretty-entities t
-
- ;; Agenda styling
- org-agenda-tags-column 0
- org-agenda-block-separator ?─
- org-agenda-time-grid
- '((daily today require-timed)
-   (800 1000 1200 1400 1600 1800 2000)
-   " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
- org-agenda-current-time-string
- "◀── now ─────────────────────────────────────────────────")
-
-(global-org-modern-mode)
-
-
-(remove-hook! org-mode-hook 'org-indent-mode)
+(use-package! org-modern-indent
+  :config
+  (add-hook 'org-mode-hook 'org-modern-indent-mode 90)
+  )

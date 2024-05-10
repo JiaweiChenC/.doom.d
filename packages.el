@@ -72,4 +72,5 @@
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! diredfl :disable t)
 (package! code-cells)
-(package! org-modern)
+(package! org-modern-indent
+  :recipe (:host github :repo "jdtsmith/org-modern-indent"))
