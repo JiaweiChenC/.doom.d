@@ -55,7 +55,7 @@
        ;; (vc-gutter         ; vcs diff in the fringe
        ;;  +pretty
        ;;  +diff-hl)
-       ;;vi-tilde-fringe   ; fringe tildes to mark beyond EOB
+       ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
        ;;zen               ; distraction-free coding or writing
@@ -142,7 +142,8 @@
        ;;elm               ; care for a cup of TEA?
        (emacs-lisp +lsp)        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
-       ess               ; emacs speaks statistics
+       (ess
+        +tree-sitter)                                ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
        ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
@@ -175,7 +176,7 @@
         +pretty
         +roam2
         +journal
-        +jupyter
+        ;; +jupyter
         ;; +present
         )
        ;;php               ; perl's insecure younger brother

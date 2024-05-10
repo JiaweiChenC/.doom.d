@@ -152,8 +152,13 @@
         org-roam-ui-open-on-start t))
 
 
+;; (defun display-ansi-colors ()
+;;   (ansi-color-apply-on-region (point-min) (point-max)))
+;;  (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
 
 (after! org
+
+  (setq! org-indent-mode 'nil)
   ;; (+org-babel-load-jupyter-h 'jupyter-python)  ; Adjust this for other languages if needed
   ;; (org-babel-jupyter-override-src-block "python")
   (defadvice! recover-paragraph-seperate ()
@@ -169,6 +174,8 @@
   (setq org-image-actual-width 400)
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
+  (org-link-set-parameters "skim"
+                           :follow (lambda (url arg) (browse-url (format "skim:%s" url) arg)))
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard)
   )
@@ -262,30 +269,31 @@
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
 
-;; set yank from kill ring to space y
-(map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
-
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
 
 (defun send-scroll-up-to-other-frame ()
-  "Send a scroll-up command to the other frame, specialized for PDF viewing."
   (interactive)
-  (let ((other-frame (next-frame)))
-    (with-selected-frame other-frame
-      (if (derived-mode-p 'pdf-view-mode)
-          (pdf-view-next-page)
-        (scroll-up-command)))))
+  (let ((other-frame (next-frame)))  ; Get the next frame
+    (with-selected-frame other-frame  ; Work within the context of the other frame
+      (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
+             (pdf-view-next-page))  ; If true, go to the next page in the PDF
+            ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
+             (image-next-file 1))  ; If true, go to the next image file
+            (t
+             (scroll-up-command))))))  ; For all other modes, perform a normal scroll up
 
 (defun send-scroll-down-to-other-frame ()
-  "Send a scroll-down command to the other frame, specialized for PDF viewing."
   (interactive)
-  (let ((other-frame (next-frame)))
-    (with-selected-frame other-frame
-      (if (derived-mode-p 'pdf-view-mode)
-          (pdf-view-previous-page)
-        (scroll-down-command)))))
+  (let ((other-frame (next-frame)))  ; Get the next frame
+    (with-selected-frame other-frame  ; Work within the context of the other frame
+      (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
+             (pdf-view-next-page))  ; If true, go to the next page in the PDF
+            ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
+             (image-next-file 1))  ; If true, go to the next image file
+            (t
+             (scroll-down-command))))))  ; For all other modes, perform a normal scroll up
 
 (map! :n "C-;" #'send-scroll-up-to-other-frame)
 (map! :n "C-'" #'send-scroll-down-to-other-frame)
@@ -303,7 +311,7 @@
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
 ;; set org journal to weekly
-(setq org-journal-file-type 'weekly)
+(setq org-journal-file-type 'monthly)
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
 (map! :map evil-insert-state-map
@@ -501,54 +509,118 @@ compile it, then switch back to the Org file."
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
-(use-package! dape
-  :hook
-  ((kill-emacs . dape-breakpoint-save)
-   (after-init . dape-breakpoint-load))
-  :init
-  :config
-  (add-hook 'dape-on-start-hooks (lambda () (dape-breakpoint-global-mode 1)))
-  (add-hook 'dape-on-stopped-hooks (lambda () (dape-breakpoint-global-mode -1)))
-  (setq dape-buffer-window-arrangement 'right)
-  (setq dape-cwd-fn 'projectile-project-root)
-  )
-
-;; config jupyter
-
-(use-package! jupyter
-  :defer t
-  :init
-  (require 'ob-jupyter)
-  :config
-  (org-babel-jupyter-override-src-block "python")
-  (org-babel-do-load-languages 'org-babel-load-languages
-                        '((emacs-lisp . t)
-                        (python . t)
-                        (jupyter . t)))
-  (setq jupyter-repl-echo-eval-p t)
-  (setq org-babel-default-header-args:python '((:async . "yes")
-                                               (:session . "py")
-                                               (:kernel . "python3"))))
+;; ;; config jupyter
+;; (use-package! jupyter
+;;   :defer t
+;;   :init
+;;   (require 'ob-jupyter)
+;;   :config
+;;   (setq! jupyter-repl-echo-eval-p 't)
+;;   (org-babel-jupyter-override-src-block "python")
+;;   (org-babel-do-load-languages 'org-babel-load-languages
+;;                         '((emacs-lisp . t)
+;;                         (R . t)
+;;                         (python . t)
+;;                         (jupyter . t)))
+;;   (setq jupyter-repl-echo-eval-p t)
+;;   (setq org-babel-default-header-args:python '((:async . "yes")
+;;                                                (:session . "py")
+;;                                                (:kernel . "python3"))))
 
 
 (use-package! tab-bar
   :config
   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
-  (setq tab-bar-separator ""
-        tab-bar-new-tab-choice "*scratch*"
+  (setq tab-bar-new-tab-choice "*scratch*"
         tab-bar-tab-name-truncated-max 20
-        tab-bar-close-button-show nil
         tab-bar-tab-hints t)
+  (map! :n "]T" 'tab-bar-switch-to-next-tab)
+  (map! :n "[T" 'tab-bar-switch-to-prev-tab)
+
    (map! :leader
         (:prefix ("t" . "tab")
         :desc "Switch to tab number"
-        "1" #'(lambda () (interactive) (tab-bar-select-tab 1))
-        "2" #'(lambda () (interactive) (tab-bar-select-tab 2))
-        "3" #'(lambda () (interactive) (tab-bar-select-tab 3))
-        "4" #'(lambda () (interactive) (tab-bar-select-tab 4))
-        "5" #'(lambda () (interactive) (tab-bar-select-tab 5))
-        "6" #'(lambda () (interactive) (tab-bar-select-tab 6))
-        "7" #'(lambda () (interactive) (tab-bar-select-tab 7))
-        "8" #'(lambda () (interactive) (tab-bar-select-tab 8))
-        "9" #'(lambda () (interactive) (tab-bar-select-tab 9))
+        "1" #'(lambda () (interactive) (tab-bar-select-tab))
+        "2" #'(lambda () (interactive) (tab-bar-select-tab))
+        "3" #'(lambda () (interactive) (tab-bar-select-tab))
+        "4" #'(lambda () (interactive) (tab-bar-select-tab))
+        "5" #'(lambda () (interactive) (tab-bar-select-tab))
+        "6" #'(lambda () (interactive) (tab-bar-select-tab))
+        "7" #'(lambda () (interactive) (tab-bar-select-tab))
+        "8" #'(lambda () (interactive) (tab-bar-select-tab))
+        "9" #'(lambda () (interactive) (tab-bar-select-tab))
 )))
+
+
+(setq! dired-kill-when-opening-new-dired-buffer t)
+
+
+;; map space y to yank from kill ring
+(map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
+
+
+(defun copy-image-to-clipboard ()
+  "Copy the image at point or current image buffer to the clipboard in macOS.
+Handles Org mode, Dired mode, and image buffers."
+  (interactive)
+  (cond
+   ;; In Org mode, try to get the path and copy file
+   ((derived-mode-p 'org-mode)
+    (if-let ((image-path (org-element-property :path (org-element-context))))
+        (let ((full-path (expand-file-name image-path)))
+          (if (file-exists-p full-path)
+              (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+                                     full-path
+                                     "\") as JPEG picture)'"))
+            (message "File does not exist: %s" full-path)))
+      (message "No image file at point!")))
+   ;; In Dired mode, copy the file at point
+   ((derived-mode-p 'dired-mode)
+    (let ((file-path (dired-get-file-for-visit)))
+      (if (file-exists-p file-path)
+          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+                                 file-path
+                                 "\") as JPEG picture)'"))
+        (message "Selected file does not exist!"))))
+   ;; In image mode, copy the image data directly
+   ((eq major-mode 'image-mode)
+    (let ((image-file (buffer-file-name)))
+      (if image-file
+          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+                                 image-file
+                                 "\") as JPEG picture)'"))
+        (message "No file associated with this buffer!"))))
+   ;; Default message when not in applicable mode
+   (t (message "Not in an Org, Dired, or Image buffer!"))))
+
+;; map space y p
+(map! :leader :desc "copy image file at point to clipboard" "y p" #'copy-image-to-clipboard)
+
+(setq! ess-startup-directory 'default-directory)
+
+;; Add frame borders and window dividers
+(setq
+ ;; Edit settings
+ org-auto-align-tags nil
+ org-tags-column 0
+ org-special-ctrl-a/e t
+ org-insert-heading-respect-content t
+
+ ;; Org styling, hide markup etc.
+ org-hide-emphasis-markers t
+ org-pretty-entities t
+
+ ;; Agenda styling
+ org-agenda-tags-column 0
+ org-agenda-block-separator ?─
+ org-agenda-time-grid
+ '((daily today require-timed)
+   (800 1000 1200 1400 1600 1800 2000)
+   " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+ org-agenda-current-time-string
+ "◀── now ─────────────────────────────────────────────────")
+
+(global-org-modern-mode)
+
+
+(remove-hook! org-mode-hook 'org-indent-mode)
