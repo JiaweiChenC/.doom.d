@@ -152,9 +152,9 @@
         org-roam-ui-open-on-start t))
 
 
-;; (defun display-ansi-colors ()
-;;   (ansi-color-apply-on-region (point-min) (point-max)))
-;;  (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
+(defun display-ansi-colors ()
+  (ansi-color-apply-on-region (point-min) (point-max)))
+ (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
 
 (after! org
   ;; (setq org-startup-indented nil)
@@ -168,7 +168,7 @@
   (setq org-download-image-dir "images")
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
-  (setq org-image-actual-width 400)
+  (setq org-image-actual-width '(400))
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (org-link-set-parameters "skim"
@@ -275,7 +275,7 @@
   (let ((other-frame (next-frame)))  ; Get the next frame
     (with-selected-frame other-frame  ; Work within the context of the other frame
       (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
-             (pdf-view-next-page))  ; If true, go to the next page in the PDF
+             (pdf-view-next-line-or-next-page 5))  ; If true, go to the next page in the PDF
             ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
              (image-next-file 1))  ; If true, go to the next image file
             (t
@@ -286,7 +286,7 @@
   (let ((other-frame (next-frame)))  ; Get the next frame
     (with-selected-frame other-frame  ; Work within the context of the other frame
       (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
-             (pdf-view-next-page))  ; If true, go to the next page in the PDF
+             (pdf-view-previous-line-or-previous-page 5))  ; If true, go to the next page in the PDF
             ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
              (image-next-file 1))  ; If true, go to the next image file
             (t
@@ -326,7 +326,6 @@
 
 (setq projectile-indexing-method 'native)
 
-(setq! citar-open-entry-function #'citar-open-entry-in-zotero)
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
@@ -577,6 +576,28 @@ Handles Org mode, Dired mode, and image buffers."
 (setq! ess-startup-directory 'default-directory)
 
 (use-package! org-modern-indent
-  :config
-  (add-hook 'org-mode-hook 'org-modern-indent-mode 90)
-  )
+  :after org
+  :config ; add late to hook
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90)
+  ;; https://github.com/jdtsmith/org-modern-indent/issues/10#issuecomment-1671726529
+  (add-hook 'org-mode-hook (lambda() (aset org-indent--text-line-prefixes 0 (propertize " " 'face 'org-indent)))))
+
+(defun my/move-buffer-to-new-frame ()
+  "Move the current buffer to a new frame."
+  (interactive)
+  (let ((buffer (current-buffer))) ; Store the current buffer
+    (unless (one-window-p t)
+      (delete-window)) ; If there's more than one window, delete the current one
+    (display-buffer-pop-up-frame buffer nil))) ; Display the buffer in a new frame
+(map! :leader
+      :desc "Move buffer to new frame"
+      "w F" #'my/move-buffer-to-new-frame)
+
+(after! pdf-tools
+  (setq-default pdf-view-display-size 'fit-width))
+
+;; add to citar file open functions
+;; (use-package! citar (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external)))
+(eval-after-load 'citar-file
+  '(progn
+     (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))))
