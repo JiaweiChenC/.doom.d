@@ -596,8 +596,6 @@ Handles Org mode, Dired mode, and image buffers."
 (after! pdf-tools
   (setq-default pdf-view-display-size 'fit-width))
 
-;; add to citar file open functions
-;; (use-package! citar (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external)))
 (eval-after-load 'citar-file
   '(progn
      (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))))
