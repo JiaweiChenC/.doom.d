@@ -176,6 +176,7 @@
         +pretty
         +roam2
         +journal
+        +dragndrop
         ;; +jupyter
         ;; +present
         )

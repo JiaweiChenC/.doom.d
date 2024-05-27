@@ -152,11 +152,14 @@
         org-roam-ui-open-on-start t))
 
 
-(defun display-ansi-colors ()
+(defun my/display-ansi-colors ()
   (ansi-color-apply-on-region (point-min) (point-max)))
  (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
 
 (after! org
+  ;; (setq org-download-annotate-function (lambda (link) ""))
+  ;; (setq org-download-heading-lvl nil)
+  ;; (setq org-download-image-dir "images")
   ;; (setq org-startup-indented nil)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
@@ -164,18 +167,15 @@
     (setq-local paragraph-start "[\f\\|[ \t]*$]")
     (setq-local paragraph-separate "[ \t\f]*$"))
   (setq org-startup-folded 'content)
-  (setq org-download-method 'directory)
-  (setq org-download-image-dir "images")
-  (setq org-download-annotate-function (lambda (link) ""))
-  (setq org-download-heading-lvl nil)
   (setq org-image-actual-width '(400))
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (org-link-set-parameters "skim"
                            :follow (lambda (url arg) (browse-url (format "skim:%s" url) arg)))
-  (map! :map org-mode-map
-        "C-M-y" #'zz/org-download-paste-clipboard)
+  ;; (map! :map org-mode-map
+  ;;       "C-M-y" #'zz/org-download-paste-clipboard)
   )
+
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
@@ -233,7 +233,7 @@
            "%?"
            :target (file+head
             "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
-            "#+title: ${note-title}.\n#+created: %U\n#+last_modified: %U\n\n* ${note-title}\n")
+            "#+title: ${note-title}.\n#+created: %U\n \n* ${note-title}\n")
            :unnarrowed t)
           )
         ;; Use human readable dates for dailies titles
@@ -391,7 +391,7 @@
         org-appear-autoentities t
         org-appear-autokeywords t))
 
-(defun my-export-org-to-latex-body-only ()
+(defun my/export-org-to-latex-body-only ()
   "Export current Org file to a LaTeX file with body only."
   (interactive)
   (org-latex-export-to-latex nil nil nil t nil))
@@ -508,7 +508,7 @@ compile it, then switch back to the Org file."
 (use-package! tab-bar
   :config
   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
-  (setq tab-bar-new-tab-choice "*scratch*"
+  (setq tab-bar-new-tab-choice t
         tab-bar-tab-name-truncated-max 20
         tab-bar-tab-hints t)
   (map! :n "]T" 'tab-bar-switch-to-next-tab)
@@ -536,7 +536,7 @@ compile it, then switch back to the Org file."
 (map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
 
 
-(defun copy-image-to-clipboard ()
+(defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
 Handles Org mode, Dired mode, and image buffers."
   (interactive)
@@ -599,3 +599,5 @@ Handles Org mode, Dired mode, and image buffers."
 (eval-after-load 'citar-file
   '(progn
      (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))))
+
+(setq! dired-mouse-drag-files 'move)
