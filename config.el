@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'nil
+(setq doom-theme 'modus-operandi
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -79,7 +79,9 @@
 
 ;; do not highlight the current line
 ;; (setq global-hl-line-mode nil)
-(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+;; (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+;; (custom-set-faces!
+;;   '(hl-line :background "#dad8d8"))
 
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
@@ -141,8 +143,6 @@
 
 (use-package! org-roam-ui
   :after org-roam ;; or :after org
-  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-  ;;         a hookable mode anymore, you're advised to pick something yourself
   ;;         if you don't care about startup time, use
   ;;  :hook (after-init . org-roam-ui-mode)
   :config
@@ -152,15 +152,14 @@
         org-roam-ui-open-on-start t))
 
 
-(defun my/display-ansi-colors ()
-  (ansi-color-apply-on-region (point-min) (point-max)))
- (add-hook 'org-babel-after-execute-hook #'display-ansi-colors)
-
 (after! org
-  ;; (setq org-download-annotate-function (lambda (link) ""))
-  ;; (setq org-download-heading-lvl nil)
-  ;; (setq org-download-image-dir "images")
-  ;; (setq org-startup-indented nil)
+  (setq org-startup-indented nil)
+  ;; start hl-todo-mode
+  ;; disable org indent mode
+  (setq org-download-annotate-function (lambda (link) ""))
+  (setq org-download-heading-lvl nil)
+  (setq org-download-image-dir "images")
+  (add-to-list 'completion-at-point-functions #'cape-file)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
     :after 'org-setup-filling
@@ -172,8 +171,8 @@
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (org-link-set-parameters "skim"
                            :follow (lambda (url arg) (browse-url (format "skim:%s" url) arg)))
-  ;; (map! :map org-mode-map
-  ;;       "C-M-y" #'zz/org-download-paste-clipboard)
+  (map! :map org-mode-map
+        "C-M-y" #'zz/org-download-paste-clipboard)
   )
 
 
@@ -288,7 +287,7 @@
       (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
              (pdf-view-previous-line-or-previous-page 5))  ; If true, go to the next page in the PDF
             ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
-             (image-next-file 1))  ; If true, go to the next image file
+             (image-previous-file 1))  ; If true, go to the next image file
             (t
              (scroll-down-command))))))  ; For all other modes, perform a normal scroll up
 
@@ -323,9 +322,7 @@
 (add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
 (add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
 
-
 (setq projectile-indexing-method 'native)
-
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
@@ -402,23 +399,6 @@
   (copilot-mode . (lambda ()
                     (setq-local copilot--indent-warning-printed-p t))))
 
-(defun org-export-latex-body-only ()
-  "Export current Org file to a LaTeX file with body only, open and compile it."
-  (interactive)
-  (org-latex-export-to-latex nil nil nil t nil)) ;; Run the compile command
-;; map to space l b
-(map! :leader :desc "export latex body only" "l b" #'org-export-latex-body-only)
-
-(defun org-compile-latex ()
-  "Export current Org file to a LaTeX file with body only,
-compile it, then switch back to the Org file."
-  (interactive)
-  (let ((original-buffer (current-buffer)) ; Store the current buffer (Org file)
-        (output-file (org-latex-export-to-latex nil nil nil t nil))) ; Export and get the output file name
-    (find-file output-file) ; Open the LaTeX file
-    (call-interactively '+latex/compile) ; Run the compile command
-    (switch-to-buffer original-buffer)
-    ))
 
 ;; map compile latex to space l c
 (map! :leader :desc "compile latex" "l c" #'org-compile-latex)
@@ -438,46 +418,6 @@ compile it, then switch back to the Org file."
 
 ;; map to space tab ,
 (map! :leader :desc "switch to workspace in new frame" "TAB ," #'my/switch-to-workspace-in-new-frame)
-
-
-;;;;;;;;;;;;;;;;;;;;;;; hack to make org table work perfectly ;;;;;;;;;;;;;;;;;;;;;;
-(defun org-export-cmidrule-filter-latex (row backend info)
-  "Replace <startcidend> with \\cmidrule{start-end} in LaTeX export."
-  (while (string-match "\\(<\\([0-9]+\\)cid\\([0-9]+\\)?>[[:blank:]]*\\)" row)
-    (let ((start (string-to-number (match-string 2 row)))
-          (end (string-to-number (match-string 3 row))))
-      (setq row (replace-match (format "\\\\\\cmidrule(lr){%d-%d}" start end) t t row)))
-    ;; Clean up unnecessary spaces and & that might be left over around the cmidrule
-    (setq row (replace-regexp-in-string "\\(&\\s-*\\|\\s-*\\\\\\\\\\)" "" row))
-    (setq row (replace-regexp-in-string "\\[0pt\\]" "" row)))
-  row)
-
-(defun my-org-export-remove-amps (row backend info)
-  "Filter function to remove a number of '&' signs as specified in <rm[0-9]> pattern."
-  (when (eq backend 'latex)  ; Only apply this for LaTeX export, adjust as necessary
-    (let ((new-row row)
-          match number)
-      ;; Find the pattern and extract the number
-      (when (string-match "<rm\\([0-9]+\\)>" row)
-        (setq number (string-to-number (match-string 1 row)))  ; Get the number following 'rm'
-        ;; Remove the pattern itself from the row
-        (setq new-row (replace-regexp-in-string "<rm[0-9]+>" "" row))
-        ;; Remove the specified number of '&' signs after the pattern
-        (with-temp-buffer
-          (insert new-row)
-          (goto-char (point-min))
-          (cl-loop repeat number
-                   when (search-forward "&" nil t)  ; Search for '&'
-                   do (replace-match "" nil t))  ; Replace '&' with nothing
-          (setq new-row (buffer-string))))
-      new-row)))
-
-;; Add the function to the org export filter for table rows
-(with-eval-after-load 'ox-latex
-  (add-to-list 'org-export-filter-table-row-functions
-               'org-export-cmidrule-filter-latex)
-  (add-to-list 'org-export-filter-table-row-functions
-               'my-org-export-remove-amps))
 
 (setq org-hide-macro-markers t)
 
@@ -528,13 +468,10 @@ compile it, then switch back to the Org file."
         "9" #'(lambda () (interactive) (tab-bar-select-tab))
 )))
 
-
 (setq! dired-kill-when-opening-new-dired-buffer t)
-
 
 ;; map space y to yank from kill ring
 (map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
-
 
 (defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
@@ -571,33 +508,66 @@ Handles Org mode, Dired mode, and image buffers."
    (t (message "Not in an Org, Dired, or Image buffer!"))))
 
 ;; map space y p
-(map! :leader :desc "copy image file at point to clipboard" "y p" #'copy-image-to-clipboard)
+(map! :leader :desc "copy image file at point to clipboard" "y p" #'my/copy-image-to-clipboard)
 
 (setq! ess-startup-directory 'default-directory)
 
-(use-package! org-modern-indent
-  :after org
-  :config ; add late to hook
-  (add-hook 'org-mode-hook #'org-modern-indent-mode 90)
-  ;; https://github.com/jdtsmith/org-modern-indent/issues/10#issuecomment-1671726529
-  (add-hook 'org-mode-hook (lambda() (aset org-indent--text-line-prefixes 0 (propertize " " 'face 'org-indent)))))
-
 (defun my/move-buffer-to-new-frame ()
-  "Move the current buffer to a new frame."
+  "Move the current buffer to a new frame and delete it from the current frame."
   (interactive)
   (let ((buffer (current-buffer))) ; Store the current buffer
-    (unless (one-window-p t)
-      (delete-window)) ; If there's more than one window, delete the current one
-    (display-buffer-pop-up-frame buffer nil))) ; Display the buffer in a new frame
-(map! :leader
-      :desc "Move buffer to new frame"
-      "w F" #'my/move-buffer-to-new-frame)
+    ;; Check if there's more than one window
+    (when (not (one-window-p t))
+      (delete-window)) ; Delete the current window if there are multiple windows
+    (display-buffer-pop-up-frame buffer nil) ; Display the buffer in a new frame
+    ;; Switch to another buffer in the original window, if it still exists
+    (when (not (one-window-p t))
+      (switch-to-buffer (other-buffer buffer)))))
+
+(map! :leader :desc "Move buffer to new frame" "w F" #'my/move-buffer-to-new-frame)
 
 (after! pdf-tools
   (setq-default pdf-view-display-size 'fit-width))
 
+;; open a file using zotero
 (eval-after-load 'citar-file
   '(progn
      (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))))
 
 (setq! dired-mouse-drag-files 'move)
+
+(setq doom-modeline-modal nil)
+
+;; map citar open files to space o C
+(map! :leader :desc "citar open files" "o C" #'citar-open-files)
+
+
+(use-package! org
+  :hook (org-mode . org-modern-mode)
+  )
+
+(set-face-background 'fringe (face-attribute 'default :background))
+
+(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+
+;; set treemacs position to right
+
+(after! treemacs
+  (setq treemacs-position 'right)
+  )
+
+;; load after org
+(after! org
+  (load (expand-file-name "skim.el" "~/.doom.d/lisp/")))
+
+;; load mytex.el after org
+(after! org
+  (load (expand-file-name "mytex.el" "~/.doom.d/lisp/")))
+
+(map! :n "s-;" #'skim-next-page)
+(map! :n "s-'" #'skim-prev-page)
+(setq org-image-actual-width nil)
+
+(setq imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
+
+(setq-hook! LaTeX-mode TeX-command-default "LaTeXMk")

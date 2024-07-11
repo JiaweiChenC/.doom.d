@@ -53,8 +53,8 @@
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
        ;; (vc-gutter         ; vcs diff in the fringe
-       ;;  +pretty
-       ;;  +diff-hl)
+        ;; +pretty
+        ;; +diff-hl)
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
@@ -64,7 +64,9 @@
        (evil +everywhere); come to the dark side, we have cookies
        file-templates    ; auto-snippets for empty files
        fold              ; (nigh) universal code folding
-       ;;(format +onsave)  ; automated prettiness
+       ;; (format
+       ;; +lsp
+       ;; +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
        ;;lispy             ; vim for lisp, for people who don't like vim
        multiple-cursors  ; editing in many places at once
@@ -107,9 +109,8 @@
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (lookup +docsets +dictionary)              ; navigate your code and its documentation
-       (lsp +eglot
-            +peek)                     ; M-x vscode
-       ;; lsp
+       (lsp
+        +eglot)
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -160,10 +161,9 @@
        ;;julia             ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
        (latex             ; writing papers in Emacs has never been so fun
-        +latexmk
         +cdlatex
         +fold
-        +lsp)
+        )
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be
        ;;lua               ; one-based indices? one-based indices
@@ -176,7 +176,7 @@
         +pretty
         +roam2
         +journal
-        +dragndrop
+        ;; +dragndrop
         ;; +jupyter
         ;; +present
         )
