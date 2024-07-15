@@ -102,23 +102,6 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
         (cl-decf columns))))
   row)
 
-;; (defun org-export-multicolumn-filter-latex (row backend info)
-;;   (while (string-match
-;;           "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\([^&]+\\)\\)" row)
-;;     (let ((columns (string-to-number (match-string 2 row)))
-;;           (start (match-end 0))
-;;           (contents (replace-regexp-in-string
-;;                      "\\\\" "\\\\\\\\"
-;;                      (replace-regexp-in-string "[[:blank:]]*$" ""
-;;                                                (match-string 4 row))))
-;;           (algn (or (match-string 3 row) "l")))
-;;       (setq row (replace-match
-;;                  (format "\\\\multicolumn{%d}{%s}{%s}" columns algn contents)
-;;                  nil nil row 1))
-;;       (while (and (> columns 1) (string-match "&" row start))
-;;         (setq row (replace-match "" nil nil row))
-;;         (cl-decf columns))))
-;;   row)
 
 (defun org-export-multicolumn-filter-latex (row backend info)
   (while (string-match
@@ -138,23 +121,21 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
         (cl-decf columns))))
   row)
 
-;; (defun org-export-multicolumn-last-filter-latex (row backend info)
-;;   (while (string-match
-;;           "\\(<\\([0-9]+\\)colz\\([lrc]\\)?>[[:blank:]]*\\(.*?\\)\\)\\\\\\\\" row)
-;;     (let ((columns (string-to-number (match-string 2 row)))
-;;           (start (match-end 0))
-;;           (contents (replace-regexp-in-string
-;;                      "\\\\" "\\\\\\\\"
-;;                      (replace-regexp-in-string "[[:blank:]]*$" ""
-;;                                                (match-string 4 row))))
-;;           (algn (or (match-string 3 row) "l")))
-;;       (setq row (replace-match
-;;                  (format "\\\\multicolumn{%d}{%s}{%s}" columns algn contents)
-;;                  nil nil row 1))
-;;       (while (and (> columns 1) (string-match "&" row start))
-;;         (setq row (replace-match "" nil nil row))
-;;         (cl-decf columns))))
-;;   row)
+(defun org-export-multirow-filter-latex (row backend info)
+  (while (string-match
+          "\\(<\\([0-9]+\\)row\\([lrc\\*]\\)?>[[:blank:]]*\\(.*?\\)\\)\\(?:&\\|\\\\\\\\\\)" row)
+    (let ((columns (string-to-number (match-string 2 row)))
+          (start (match-end 0))
+          (contents (replace-regexp-in-string
+                     "\\\\" "\\\\\\\\"
+                     (replace-regexp-in-string "[[:blank:]]*$" ""
+                                               (match-string 4 row))))
+          (algn (or (match-string 3 row) "l")))
+      (setq row (replace-match
+                 (format "\\\\multirow{%d}{%s}{%s}" columns algn contents)
+                 nil nil row 1))
+      ))
+  row)
 
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-export-filter-table-row-functions
@@ -163,5 +144,7 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                'my-org-export-remove-amps)
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumn-filter-latex)
+  (add-to-list 'org-export-filter-table-row-functions
+               'org-export-multirow-filter-latex)
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumnv-filter-latex))
