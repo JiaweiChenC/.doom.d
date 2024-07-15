@@ -89,7 +89,7 @@
         (org-filename (concat (file-name-directory (directory-file-name (file-name-directory tex-filename)))
                         (file-name-base tex-filename)
                         ".org")))
-        (kill-buffer (current-buffer))
+        ;; (kill-buffer (current-buffer))
         ;; (let ((processed-line (replace-cite-with-brackets line)))
         ;; (message "Line: %s" line)
         (let ((processed-line (replace-all-cites-with-brackets (replace-ref-with-brackets line))))

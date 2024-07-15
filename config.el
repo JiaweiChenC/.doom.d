@@ -401,15 +401,15 @@
 
 (setq font-latex-fontify-script nil)
 
-(defun my/org-tab-conditional ()
-  (interactive)
-  (if (yas-active-snippets)
-      (yas-next-field-or-maybe-expand)
-    (org-cycle)))
+;; (defun my/org-tab-conditional ()
+;;   (interactive)
+;;   (if (yas-active-snippets)
+;;       (yas-next-field-or-maybe-expand)
+;;     (org-cycle)))
 
-(map! :after evil-org
-      :map evil-org-mode-map
-      :i "<tab>" #'my/org-tab-conditional)
+;; (map! :after evil-org
+;;       :map evil-org-mode-map
+;;       :i "<tab>" #'my/org-tab-conditional)
 
 (defun my/citar-open-pdf ()
   "Open all PDF files associated with selected references on macOS using the default system application."
@@ -581,4 +581,4 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq tex-fontify-script 'nil)
 
-;; (setq org-latex-caption-above '(table src-block special-block math))
+(setq org-latex-caption-above '(table src-block special-block math))

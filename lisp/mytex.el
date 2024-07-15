@@ -50,7 +50,7 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                  (switch-to-buffer original-buffer))))))))))
 
 ;; map compile latex to space l c
-(map! :leader :desc "compile latex" "l c" #'org-compile-latex-and-close)
+(map! :leader :desc "compile latex" "l c" #'org-compile-latex)
 
 ;;;;;;;;;;;;;;;;;;;;;;; hack to make org table work perfectly ;;;;;;;;;;;;;;;;;;;;;;
 (defun org-export-cmidrule-filter-latex (row backend info)
@@ -84,6 +84,24 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
           (setq new-row (buffer-string))))
       new-row)))
 
+(defun org-export-multicolumnv-filter-latex (row backend info)
+  (while (string-match
+          "\\(<\\([0-9]+\\)colv\\([lrc]\\)?>[[:blank:]]*\\([^&]+\\)\\)" row)
+    (let ((columns (string-to-number (match-string 2 row)))
+          (start (match-end 0))
+          (contents (replace-regexp-in-string
+                     "\\\\" "\\\\\\\\"
+                     (replace-regexp-in-string "[[:blank:]]*$" ""
+                                               (match-string 4 row))))
+          (algn (or (match-string 3 row) "l")))
+      (setq row (replace-match
+                 (format "\\\\multicolumn{%d}{%s|}{%s}" columns algn contents)
+                 nil nil row 1))
+      (while (and (> columns 1) (string-match "&" row start))
+        (setq row (replace-match "" nil nil row))
+        (cl-decf columns))))
+  row)
+
 ;; (defun org-export-multicolumn-filter-latex (row backend info)
 ;;   (while (string-match
 ;;           "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\([^&]+\\)\\)" row)
@@ -104,7 +122,7 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
 
 (defun org-export-multicolumn-filter-latex (row backend info)
   (while (string-match
-          "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\([^&\\\\]+\\)\\)" row)
+          "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\(.*?\\)\\)\\(?:&\\|\\\\\\\\\\)" row)
     (let ((columns (string-to-number (match-string 2 row)))
           (start (match-end 0))
           (contents (replace-regexp-in-string
@@ -120,7 +138,24 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
         (cl-decf columns))))
   row)
 
-;; Add the function to the org export filter for table rows
+;; (defun org-export-multicolumn-last-filter-latex (row backend info)
+;;   (while (string-match
+;;           "\\(<\\([0-9]+\\)colz\\([lrc]\\)?>[[:blank:]]*\\(.*?\\)\\)\\\\\\\\" row)
+;;     (let ((columns (string-to-number (match-string 2 row)))
+;;           (start (match-end 0))
+;;           (contents (replace-regexp-in-string
+;;                      "\\\\" "\\\\\\\\"
+;;                      (replace-regexp-in-string "[[:blank:]]*$" ""
+;;                                                (match-string 4 row))))
+;;           (algn (or (match-string 3 row) "l")))
+;;       (setq row (replace-match
+;;                  (format "\\\\multicolumn{%d}{%s}{%s}" columns algn contents)
+;;                  nil nil row 1))
+;;       (while (and (> columns 1) (string-match "&" row start))
+;;         (setq row (replace-match "" nil nil row))
+;;         (cl-decf columns))))
+;;   row)
+
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-cmidrule-filter-latex)
