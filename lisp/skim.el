@@ -15,11 +15,57 @@
   (hl-line-highlight)
   )
 
-(defun replace-cite-with-brackets (line)
-  "Replace all occurrences of \\cite{...} in LINE with [cite:@...]."
-  (let ((pattern "\\\\cite{\\([^}]+\\)}")
-        (replacement "[cite:@\\1]"))
+(defun replace-ref-with-brackets (line)
+  "Replace all occurrences of \\ref{...} in LINE with [[...]]."
+  (let ((pattern "\\\\ref{\\([^}]+\\)}")
+        (replacement "[[\\1]]"))
     (replace-regexp-in-string pattern replacement line)))
+
+(defun extract-cite-targets (line)
+  "Extract targets from the first occurrence of \\cite{target1, target2} in LINE."
+  (when (string-match "\\\\cite{\\([^}]+\\)}" line)
+    (split-string (match-string 1 line) ", *" t)))
+
+(defun replace-first-cite-with-brackets (line)
+  "Replace the first occurrence of \\cite{...} in LINE with [cite:@...]."
+  (if (string-match "\\\\cite{\\([^}]+\\)}" line)
+      (let* ((begin (match-beginning 0))
+             (end (match-end 0))
+             (targets (split-string (match-string 1 line) ", *" t))
+             (formatted-citation (format-citation-targets targets)))
+        (concat (substring line 0 begin)
+                formatted-citation
+                (substring line end)))
+    line))
+
+(defun format-citation-targets (targets)
+  "Formats a list of citation TARGETS into a string formatted as [cite:@target1;@target2;@target3]."
+  (concat "[cite:"
+          (mapconcat (lambda (target) (concat "@" target)) targets ";")
+          "]"))
+
+(defun replace-all-cites-with-brackets (line)
+  "Replace all occurrences of \\cite{...} in LINE with [cite:@...], using iterative single replacements."
+  (while (string-match "\\\\cite{\\([^}]+\\)}" line)
+    (setq line (replace-first-cite-with-brackets line)))
+  line)
+
+;; (defun replace-cite-with-brackets (line)
+;;   "Replace all occurrences of \\cite{...} in LINE with [cite:@...]."
+;;   (let ((pattern "\\\\cite{\\([^}]+\\)}")
+;;         (replacement "[cite:@\\1]"))
+;;     (replace-regexp-in-string pattern replacement line)))
+
+;; (defun replace-refs-and-cites-with-brackets (line)
+;;   "Replace all occurrences of \\ref{...} with [[...]] and \\cite{...} with [cite:@...] in LINE."
+;;   (let* ((ref-pattern "\\\\ref{\\([^}]+\\)}")
+;;          (ref-replacement "[[\\1]]")
+;;          (cite-pattern "\\\\cite{\\([^}]+\\)}")
+;;          (cite-replacement "[cite:@\\1]"))
+;;     (replace-regexp-in-string
+;;      cite-pattern
+;;      cite-replacement
+;;      (replace-regexp-in-string ref-pattern ref-replacement line))))
 
 (defun heading-text-latex (origin-text)
   "return heading text from a string ORIGIN-TEXT containing {heading}"
@@ -44,7 +90,10 @@
                         (file-name-base tex-filename)
                         ".org")))
         (kill-buffer (current-buffer))
-        (let ((processed-line (replace-cite-with-brackets line)))
+        ;; (let ((processed-line (replace-cite-with-brackets line)))
+        ;; (message "Line: %s" line)
+        (let ((processed-line (replace-all-cites-with-brackets (replace-ref-with-brackets line))))
+          ;; (message "Processed Line: %s" processed-line)
         (if (s-contains? "section{" processed-line t)
         (search-in-file (concat "* " (heading-text-latex processed-line)) org-filename) ;; it is a heading, find the text in the {}, and search for "* heading" in the corresponding org-file
         (if (s-contains? "includegraphics" processed-line t)
@@ -99,8 +148,8 @@ a" offset)))
   (let ((content (and (string-match "{\\(.*?\\)}" input-line)
                       (match-string 1 input-line))))
     (if content
-        (progn
-          (message "Content: %s" content)
-          content)
+        (let ((formatted-content (file-name-nondirectory content)))
+          (message "Formatted Content: %s" formatted-content)
+          formatted-content)
       (message "No content found between braces.")
       nil)))

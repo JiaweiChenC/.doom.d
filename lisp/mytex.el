@@ -19,7 +19,7 @@ compile it, then switch back to the Org file and kill the LaTeX buffer."
 
 (defun org-compile-latex-and-close ()
   "Export current Org file to a LaTeX file with body only, compile it,
-and then kill the LaTeX buffer after compilation."
+and then kill the LaTeX buffer after compilation, preserving any existing sentinel behavior."
   (interactive)
   (let ((original-buffer (current-buffer)))  ; Store the current Org file buffer
     ;; Export and get the LaTeX output file name
@@ -29,12 +29,23 @@ and then kill the LaTeX buffer after compilation."
         (with-current-buffer latex-buffer
           ;; Call the compile command interactively in the LaTeX buffer
           (call-interactively '+latex/compile)
-          ;; Set a process sentinel to close the buffer once the process completes
-          (set-process-sentinel
-           (get-buffer-process (current-buffer))
-           (lambda (proc _)
-             (when (memq (process-status proc) '(exit signal))
-               (kill-buffer latex-buffer)  ; Kill the LaTeX buffer
+          ;; Capture any existing sentinel attached to the compile process
+          (let ((existing-sentinel (process-sentinel (get-buffer-process (current-buffer)))))
+            ;; Set a new process sentinel that incorporates the old one
+            (set-process-sentinel
+             (get-buffer-process (current-buffer))
+             (lambda (proc event)
+               ;; Call the existing sentinel, if there was one
+               (when existing-sentinel
+                 (funcall existing-sentinel proc event))
+               ;; New behavior based on the process event
+               (cond
+                ((string-match-p "finished" event)
+                 ;; (message "Compilation succeeded")
+                 (kill-buffer latex-buffer))
+                ((string-match-p "exited abnormally" event)
+                 ;; (message "Compilation failed with errors")
+                 ))
                (when (buffer-live-p original-buffer)
                  (switch-to-buffer original-buffer))))))))))
 
@@ -73,9 +84,49 @@ and then kill the LaTeX buffer after compilation."
           (setq new-row (buffer-string))))
       new-row)))
 
+;; (defun org-export-multicolumn-filter-latex (row backend info)
+;;   (while (string-match
+;;           "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\([^&]+\\)\\)" row)
+;;     (let ((columns (string-to-number (match-string 2 row)))
+;;           (start (match-end 0))
+;;           (contents (replace-regexp-in-string
+;;                      "\\\\" "\\\\\\\\"
+;;                      (replace-regexp-in-string "[[:blank:]]*$" ""
+;;                                                (match-string 4 row))))
+;;           (algn (or (match-string 3 row) "l")))
+;;       (setq row (replace-match
+;;                  (format "\\\\multicolumn{%d}{%s}{%s}" columns algn contents)
+;;                  nil nil row 1))
+;;       (while (and (> columns 1) (string-match "&" row start))
+;;         (setq row (replace-match "" nil nil row))
+;;         (cl-decf columns))))
+;;   row)
+
+(defun org-export-multicolumn-filter-latex (row backend info)
+  (while (string-match
+          "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\([^&\\\\]+\\)\\)" row)
+    (let ((columns (string-to-number (match-string 2 row)))
+          (start (match-end 0))
+          (contents (replace-regexp-in-string
+                     "\\\\" "\\\\\\\\"
+                     (replace-regexp-in-string "[[:blank:]]*$" ""
+                                               (match-string 4 row))))
+          (algn (or (match-string 3 row) "l")))
+      (setq row (replace-match
+                 (format "\\\\multicolumn{%d}{%s}{%s}" columns algn contents)
+                 nil nil row 1))
+      (while (and (> columns 1) (string-match "&" row start))
+        (setq row (replace-match "" nil nil row))
+        (cl-decf columns))))
+  row)
+
 ;; Add the function to the org export filter for table rows
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-cmidrule-filter-latex)
   (add-to-list 'org-export-filter-table-row-functions
-               'my-org-export-remove-amps))
+               'my-org-export-remove-amps)
+  (add-to-list 'org-export-filter-table-row-functions
+               'org-export-multicolumn-filter-latex)
+  (add-to-list 'org-export-filter-table-row-functions
+               'org-export-multicolumnv-filter-latex))

@@ -123,8 +123,8 @@
   ("C-x m" . mathpix-screenshot))
 (setq mathpix-screenshot-method "screencapture -i %s")
 
-(use-package! websocket
-  :after org-roam)
+;; (use-package! websocket
+;;   :after org-roam)
 
 (use-package super-save
   :config
@@ -141,16 +141,6 @@
   (setq vertico-resize 'grow-only)
   )
 
-(use-package! org-roam-ui
-  :after org-roam ;; or :after org
-  ;;         if you don't care about startup time, use
-  ;;  :hook (after-init . org-roam-ui-mode)
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
-
 
 (after! org
   (setq org-startup-indented nil)
@@ -159,7 +149,7 @@
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
   (setq org-download-image-dir "images")
-  (add-to-list 'completion-at-point-functions #'cape-file)
+  ;; (add-to-list 'completion-at-point-functions #'cape-file)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
     :after 'org-setup-filling
@@ -174,7 +164,6 @@
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard)
   )
-
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
@@ -377,17 +366,6 @@
 ;; map open file with mac default to space m m
 (map! :leader :desc "find file with mac default" "m m" #'+macos/find-file-with-default-program)
 
-;; use org-appear package
-(use-package! org-appear
-  :hook (org-mode . org-appear-mode)
-  :config
-  (setq org-appear-autoemphasis t
-        org-appear-autosubmarkers t
-        org-appear-autolinks t
-        org-appear-autosubmarkers t
-        org-appear-autoentities t
-        org-appear-autokeywords t))
-
 (defun my/export-org-to-latex-body-only ()
   "Export current Org file to a LaTeX file with body only."
   (interactive)
@@ -433,9 +411,25 @@
       :map evil-org-mode-map
       :i "<tab>" #'my/org-tab-conditional)
 
+(defun my/citar-open-pdf ()
+  "Open all PDF files associated with selected references on macOS using the default system application."
+  (interactive)
+  (let* ((refs (citar-select-refs))  ; User selects references
+         (keys (if (listp refs) refs (list refs))))  ; Ensure keys are in a list
+    (let ((files-hash (citar-get-files keys)))  ; Get files for the keys
+      (maphash (lambda (key file-list)
+                 (dolist (file file-list)
+                   (when (string-suffix-p ".pdf" file)  ; Check if the file is a PDF
+                     (if (string-prefix-p "http" file)  ; Check if it is an online PDF link
+                         (browse-url file)              ; Open in a web browser
+                       (start-process "open-pdf" nil "open" file)))))  ; Open locally with system default
+               files-hash))))
 
 ;; map space o c to citar create note
-(map! :leader :desc "citar create note" "o c" #'citar-create-note)
+(map! :leader :desc "citar create note" "o C" #'citar-open-files)
+
+;; map citar open files to space o C
+(map! :leader :desc "citar open files" "o c" #'my/citar-open-pdf)
 
 (after! corfu
   (setq corfu-max-width 60)
@@ -471,7 +465,7 @@
 (setq! dired-kill-when-opening-new-dired-buffer t)
 
 ;; map space y to yank from kill ring
-(map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
+;; (map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
 
 (defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
@@ -538,20 +532,15 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq doom-modeline-modal nil)
 
-;; map citar open files to space o C
-(map! :leader :desc "citar open files" "o C" #'citar-open-files)
-
-
 (use-package! org
   :hook (org-mode . org-modern-mode)
   )
 
-(set-face-background 'fringe (face-attribute 'default :background))
-
-(setq warning-suppress-types (append warning-suppress-types '((org-element-cache))))
+(add-hook 'doom-load-theme-hook
+          (lambda ()
+            (set-face-background 'fringe (face-attribute 'default :background))))
 
 ;; set treemacs position to right
-
 (after! treemacs
   (setq treemacs-position 'right)
   )
@@ -562,7 +551,9 @@ Handles Org mode, Dired mode, and image buffers."
 
 ;; load mytex.el after org
 (after! org
-  (load (expand-file-name "mytex.el" "~/.doom.d/lisp/")))
+  (add-to-list 'org-file-apps '("\\.svg\\'" . default))
+  (load (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
+  )
 
 (map! :n "s-;" #'skim-next-page)
 (map! :n "s-'" #'skim-prev-page)
@@ -571,3 +562,23 @@ Handles Org mode, Dired mode, and image buffers."
 (setq imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
 
 (setq-hook! LaTeX-mode TeX-command-default "LaTeXMk")
+
+(setq! org-highlight-latex-and-related '(native latex script entities))
+
+(defun desktop-mode ()
+  "Activate desktop mode with larger font size."
+  (interactive)
+  ;; Set the primary font with specified size and family
+  (setq doom-font (font-spec :family "JetBrains Mono" :size 13))
+  ;; Reload the font settings to apply changes
+  (doom/reload-font)
+  (message "Desktop mode activated: font size set to 13."))
+
+
+(setq! citar-open-entry-function 'citar-open-entry-in-zotero)
+
+(add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
+
+(setq tex-fontify-script 'nil)
+
+;; (setq org-latex-caption-above '(table src-block special-block math))
