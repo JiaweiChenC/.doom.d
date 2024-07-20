@@ -1,5 +1,5 @@
 ;;; init.el -*- lexical-binding: t; -*-
-;;;
+;;
 
 ;; This file controls what Doom modules are enabled and what order they load
 ;; in. Remember to run 'doom sync' after modifying it!
@@ -52,9 +52,9 @@
        ;;tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       ;; (vc-gutter         ; vcs diff in the fringe
+       (vc-gutter         ; vcs diff in the fringe
         ;; +pretty
-        ;; +diff-hl)
+        +diff-hl)
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces

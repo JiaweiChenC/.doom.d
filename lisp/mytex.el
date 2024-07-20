@@ -64,25 +64,25 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
     (setq row (replace-regexp-in-string "\\[0pt\\]" "" row)))
   row)
 
-(defun my-org-export-remove-amps (row backend info)
-  "Filter function to remove a number of '&' signs as specified in <rm[0-9]> pattern."
-  (when (eq backend 'latex)  ; Only apply this for LaTeX export, adjust as necessary
-    (let ((new-row row)
-          match number)
-      ;; Find the pattern and extract the number
-      (when (string-match "<rm\\([0-9]+\\)>" row)
-        (setq number (string-to-number (match-string 1 row)))  ; Get the number following 'rm'
-        ;; Remove the pattern itself from the row
-        (setq new-row (replace-regexp-in-string "<rm[0-9]+>" "" row))
-        ;; Remove the specified number of '&' signs after the pattern
-        (with-temp-buffer
-          (insert new-row)
-          (goto-char (point-min))
-          (cl-loop repeat number
-                   when (search-forward "&" nil t)  ; Search for '&'
-                   do (replace-match "" nil t))  ; Replace '&' with nothing
-          (setq new-row (buffer-string))))
-      new-row)))
+;; (defun my-org-export-remove-amps (row backend info)
+;;   "Filter function to remove a number of '&' signs as specified in <rm[0-9]> pattern."
+;;   (when (eq backend 'latex)  ; Only apply this for LaTeX export, adjust as necessary
+;;     (let ((new-row row)
+;;           match number)
+;;       ;; Find the pattern and extract the number
+;;       (when (string-match "<rm\\([0-9]+\\)>" row)
+;;         (setq number (string-to-number (match-string 1 row)))  ; Get the number following 'rm'
+;;         ;; Remove the pattern itself from the row
+;;         (setq new-row (replace-regexp-in-string "<rm[0-9]+>" "" row))
+;;         ;; Remove the specified number of '&' signs after the pattern
+;;         (with-temp-buffer
+;;           (insert new-row)
+;;           (goto-char (point-min))
+;;           (cl-loop repeat number
+;;                    when (search-forward "&" nil t)  ; Search for '&'
+;;                    do (replace-match "" nil t))  ; Replace '&' with nothing
+;;           (setq new-row (buffer-string))))
+;;       new-row)))
 
 (defun org-export-multicolumnv-filter-latex (row backend info)
   (while (string-match
@@ -140,8 +140,6 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
 (with-eval-after-load 'ox-latex
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-cmidrule-filter-latex)
-  (add-to-list 'org-export-filter-table-row-functions
-               'my-org-export-remove-amps)
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumn-filter-latex)
   (add-to-list 'org-export-filter-table-row-functions

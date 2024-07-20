@@ -64,6 +64,8 @@
   (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
   )
 
+(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+
 (setq org-latex-src-block-backend "listings")
 
 (setq org-roam-directory "~/Documents/roam/")
@@ -101,7 +103,12 @@
 (map! :n "gk" 'evil-previous-visual-line)
 (map! (:after evil-org
        :map evil-org-mode-map
-       )
+       :n "gk" (cmds! (org-on-heading-p)
+                      #'org-backward-element
+                      #'evil-previous-visual-line)
+       :n "gj" (cmds! (org-on-heading-p)
+                      #'org-forward-element
+                      #'evil-next-visual-line))
       :o "o" #'evil-inner-symbol
       :leader
       (:prefix "f"
@@ -320,17 +327,6 @@
 
 (setq! quickrun-timeout-seconds 10000)
 
-(defun +macos/open-link-in-default-program ()
-  "Open the file under the cursor with the system's default application."
-  (interactive)
-  (let* ((file-path (thing-at-point 'filename))
-         (clean-path (replace-regexp-in-string "^[^:]+:" "" file-path))
-         (expanded-path (expand-file-name clean-path))) ; expand ~ to the user's home directory
-    (if (and expanded-path (file-exists-p expanded-path))
-        (shell-command (concat "open " (shell-quote-argument expanded-path)))
-      (message "No file under cursor found."))))
-(map! :leader :desc "macos open link with default programe" "o [" #'+macos/open-link-in-default-program)
-
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
   (interactive "P")
@@ -364,7 +360,7 @@
     (call-process-shell-command (concat "open " file-name))))
 
 ;; map open file with mac default to space m m
-(map! :leader :desc "find file with mac default" "m m" #'+macos/find-file-with-default-program)
+(map! :leader :desc "find file with mac default" "e f" #'+macos/find-file-with-default-program)
 
 (defun my/export-org-to-latex-body-only ()
   "Export current Org file to a LaTeX file with body only."
@@ -464,9 +460,6 @@
 
 (setq! dired-kill-when-opening-new-dired-buffer t)
 
-;; map space y to yank from kill ring
-;; (map! :leader :desc "yank from kill ring" "y y" #'yank-from-kill-ring)
-
 (defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
 Handles Org mode, Dired mode, and image buffers."
@@ -565,16 +558,6 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
-(defun desktop-mode ()
-  "Activate desktop mode with larger font size."
-  (interactive)
-  ;; Set the primary font with specified size and family
-  (setq doom-font (font-spec :family "JetBrains Mono" :size 13))
-  ;; Reload the font settings to apply changes
-  (doom/reload-font)
-  (message "Desktop mode activated: font size set to 13."))
-
-
 (setq! citar-open-entry-function 'citar-open-entry-in-zotero)
 
 (add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
@@ -582,3 +565,17 @@ Handles Org mode, Dired mode, and image buffers."
 (setq tex-fontify-script 'nil)
 
 (setq org-latex-caption-above '(table src-block special-block math))
+
+;; bind space b return to embard open bookmark external
+(map! :leader :desc "open bookmark external" "e b" #'embark-bookmark-open-externally)
+
+(use-package! diff-hl
+  :config
+  (remove-hook 'find-file-hook #'diff-hl-mode)
+  ;; (remove-hook 'vc-dir-mode-hook #'diff-hl-dir-mode)
+  ;; (remove-hook 'dired-mode-hook #'diff-hl-dired-mode)
+  ;; (remove-hook 'diff-hl-mode-hook #'diff-hl-flydiff-mode)
+  )
+
+(use-package! embark)
+

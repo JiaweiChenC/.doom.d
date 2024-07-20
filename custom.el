@@ -13,6 +13,14 @@
  '(package-selected-packages '(image+))
  '(safe-local-variable-values
    '((eval progn
+      (diff-hl-mode 1)
+      (diff-hl-show-hunk-mouse-mode 1))
+     (eval progn
+      (add-hook 'find-file-hook #'diff-hl-mode)
+      (add-hook 'vc-dir-mode-hook #'diff-hl-dir-mode)
+      (add-hook 'dired-mode-hook #'diff-hl-dired-mode)
+      (add-hook 'diff-hl-mode-hook #'diff-hl-flydiff-mode))
+     (eval progn
       (defun file-compilation-buffer-name
           (compilation-mode)
         (concat "*"

@@ -48,17 +48,14 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-roam doom-modeline)
+(unpin! org-roam doom-modeline yasnippet)
 (unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
-;; (package! org-roam-ui)
-;; (package! color-theme-sanityinc-tomorrow)
 (package! olivetti)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
 (package! ox-hugo)
-;; (package! cdlatex)
 (package! super-save)
 (package! matlab-mode)
 (package! mathpix.el
@@ -72,5 +69,5 @@
 (package! org-download)
 (package! org-modern
   :recipe (:host github :repo "minad/org-modern"))
-;; (package! org-bullets)
-;; (package! latex-table-wizard)
+(package! org-appear
+  :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
