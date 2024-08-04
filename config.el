@@ -584,7 +584,6 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq eglot-send-changes-idle-time 0.1)
 
-
 (use-package! citar)
 
 ;; (use-package! awesome-tray
@@ -611,7 +610,26 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! TeX-command-extra-options "-shell-escape")
 
-(setq! doom-modeline-height 10)
+(setq! doom-modeline-height 1)
 
 (setq! org-export-expand-links 'nil)
 
+(use-package! spacious-padding
+  :config
+  (setq spacious-padding-widths
+      '( :internal-border-width 0
+         :header-line-width 4
+         :mode-line-width 1
+         :tab-width 4
+         :right-divider-width 10
+         :scroll-bar-width 8
+         :fringe-width 8))
+
+;; Read the doc string of `spacious-padding-subtle-mode-line' as it
+;; is very flexible and provides several examples.
+(setq spacious-padding-subtle-mode-line
+      `( :mode-line-active 'default
+         :mode-line-inactive vertical-border))
+
+(spacious-padding-mode 1)
+)

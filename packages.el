@@ -76,3 +76,5 @@
 ;; (package! atomic-chrome)
 ;; (package! awesome-tray
 ;;   :recipe (:host github :repo "manateelazycat/awesome-tray"))
+;; (package! activities)
+(package! spacious-padding)
