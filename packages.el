@@ -48,7 +48,7 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-roam doom-modeline yasnippet)
+(unpin! doom-modeline)
 (unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
 (package! olivetti)
@@ -57,6 +57,8 @@
 (package! impatient-mode)
 (package! ox-hugo)
 (package! super-save)
+(package! eglot-booster
+  :recipe (:host github :repo "jdtsmith/eglot-booster"))
 (package! matlab-mode)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
@@ -64,10 +66,13 @@
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 ;; (package! diredfl :disable t)
 (package! code-cells)
-;; (package! org-modern-indent
-;;   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 (package! org-download)
 (package! org-modern
   :recipe (:host github :repo "minad/org-modern"))
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
+(package! gptel)
+(package! modus-themes)
+;; (package! atomic-chrome)
+;; (package! awesome-tray
+;;   :recipe (:host github :repo "manateelazycat/awesome-tray"))
