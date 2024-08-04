@@ -6,6 +6,23 @@
 ;; map to space l b
 (map! :leader :desc "export latex body only" "l b" #'org-export-latex-body-only)
 
+
+;; (defun compile-main-tex-with-latexmk ()
+;;   "Compile the main.tex file using latexmk."
+;;   (interactive)
+;;   (let ((command "latexmk -pdf -pdflatex='pdflatex -interaction=nonstopmode' -use-make main.tex"))
+;;     (shell-command command)
+;;     (message "Compilation with latexmk finished!")))
+
+;; (defun compile-main-tex-with-latexmk-no-popup ()
+;;   "Compile the main.tex file using latexmk without popping up the shell window."
+;;   (interactive)
+;;   (let ((process (start-process "latexmk" "*latexmk-output*" "latexmk" "-pdf" "-pdflatex=pdflatex -interaction=nonstopmode" "-use-make" "main.tex")))
+;;     (set-process-sentinel process
+;;                           (lambda (proc event)
+;;                             (when (string= event "finished\n")
+;;                               (message "Compilation with latexmk finished!"))))))
+
 (defun org-compile-latex ()
   "Export current Org file to a LaTeX file with body only,
 compile it, then switch back to the Org file and kill the LaTeX buffer."
@@ -146,3 +163,34 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                'org-export-multirow-filter-latex)
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumnv-filter-latex))
+
+
+
+(defun org-attach-expand-new (file)
+  "Return a simple concatenation of the attachment directory and FILE."
+  (let ((attach-dir (org-attach-dir)))
+    (if attach-dir
+        (concat (file-name-as-directory attach-dir) file)
+      (error "No attachment directory exists"))))
+
+(defun org-attach-expand-links (_)
+  "Expand links in current buffer.
+It is meant to be added to `org-export-before-parsing-hook'."
+  (save-excursion
+    (while (re-search-forward "attachment:" nil t)
+      (let ((link (org-element-context)))
+	(when (and (org-element-type-p link 'link)
+		   (string-equal "attachment"
+				 (org-element-property :type link)))
+	  (let* ((description (and (org-element-contents-begin link)
+				   (buffer-substring-no-properties
+				    (org-element-contents-begin link)
+				    (org-element-contents-end link))))
+		 (file (org-element-property :path link))
+		 (new-link (org-link-make-string
+			    (concat "file:" (org-attach-expand-new file))
+			    description)))
+	    (goto-char (org-element-end link))
+	    (skip-chars-backward " \t")
+	    (delete-region (org-element-begin link) (point))
+	    (insert new-link)))))))
