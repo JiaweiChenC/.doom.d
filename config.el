@@ -79,12 +79,6 @@
 ;; do not highlight the current line
 (setq org-fontify-done-headline t)
 
-;; do not highlight the current line
-;; (setq global-hl-line-mode nil)
-;; (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
-;; (custom-set-faces!
-;;   '(hl-line :background "#dad8d8"))
-
 (setq evil-split-window-below t
       evil-vsplit-window-right t)
 
@@ -96,6 +90,7 @@
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
+;; (global-hide-mode-line-mode)
 
 (setq doom-modeline-major-mode-icon t)
 
@@ -150,6 +145,7 @@
 
 
 (after! org
+
   (setq org-startup-indented nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
@@ -402,13 +398,13 @@
 ;;   (if (yas-active-snippets)
 ;;       (yas-next-field-or-maybe-expand)
 ;;     (org-cycle)))
-
 ;; (map! :after evil-org
 ;;       :map evil-org-mode-map
 ;;       :i "<tab>" #'my/org-tab-conditional)
 
 (defun my/citar-open-pdf ()
-  "Open all PDF files associated with selected references on macOS using the default system application."
+  "Open all PDF files associated with selected references
+ on macOS using the default system application."
   (interactive)
   (let* ((refs (citar-select-refs))  ; User selects references
          (keys (if (listp refs) refs (list refs))))  ; Ensure keys are in a list
@@ -458,7 +454,7 @@
         "9" #'(lambda () (interactive) (tab-bar-select-tab))
 )))
 
-(setq! dired-kill-when-opening-new-dired-buffer t)
+;; (setq! dired-kill-when-opening-new-dired-buffer t)
 
 (defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
@@ -552,7 +548,7 @@ Handles Org mode, Dired mode, and image buffers."
 (map! :n "s-'" #'skim-prev-page)
 (setq org-image-actual-width nil)
 
-(setq imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
+(setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
 
 (setq-hook! LaTeX-mode TeX-command-default "LaTeXMk")
 
@@ -560,22 +556,62 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! citar-open-entry-function 'citar-open-entry-in-zotero)
 
-(add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
+;; (add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
 
 (setq tex-fontify-script 'nil)
 
 (setq org-latex-caption-above '(table src-block special-block math))
 
 ;; bind space b return to embard open bookmark external
-(map! :leader :desc "open bookmark external" "e b" #'embark-bookmark-open-externally)
-
-(use-package! diff-hl
-  :config
-  (remove-hook 'find-file-hook #'diff-hl-mode)
-  ;; (remove-hook 'vc-dir-mode-hook #'diff-hl-dir-mode)
-  ;; (remove-hook 'dired-mode-hook #'diff-hl-dired-mode)
-  ;; (remove-hook 'diff-hl-mode-hook #'diff-hl-flydiff-mode)
-  )
+(map! :leader :desc "open bookmark external" "e m" #'embark-bookmark-open-externally)
 
 (use-package! embark)
+
+(setq! org-modern-table nil)
+
+(use-package! org-appear
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq! org-appear-autolinks t)
+  )
+
+;; map spat t m to toggle global modeline mode
+(map! :leader :desc "toggle global modeline mode" "t m" #'global-hide-mode-line-mode)
+
+(use-package! eglot-booster
+  :after eglot
+  :config (eglot-booster-mode))
+
+(setq eglot-send-changes-idle-time 0.1)
+
+
+(use-package! citar)
+
+;; (use-package! awesome-tray
+;;   :config
+;;   ;; (add-to-list 'awesome-tray-active-modules '"buffer-name")
+;;   ;; ;; remove battery from the list
+;;   ;; (setq awesome-tray-active-modules (remove 'buffer-name (remove 'date awesome-tray-active-modules)))
+;;   ;; (setq! awesome-tray-hide-mode-line nil)
+;;   (setq! awesome-tray-update-interval 0.1)
+;;   ;; (setq! persp-lighter 'nil)
+;;   ;; (setq! flycheck-mode-line 'nil)
+;;   (setq! awesome-tray-belong-update-duration 1)
+;;   ;; (setq! eglot--mode-line-format 'nil)
+;;   (setq! awesome-tray-buffer-name-max-length 100)
+;;   (setq! awesome-tray-buffer-name-buffer-changed 't)
+;;   (setq! awesome-tray-active-modules '("buffer-name" "belong" "mode-name" "file-path")
+;;          )
+;; )
+
+
+(setq! org-latex-src-block-backend 'listings)
+
+(setq! org-image-actual-width nil)
+
+(setq! TeX-command-extra-options "-shell-escape")
+
+(setq! doom-modeline-height 10)
+
+(setq! org-export-expand-links 'nil)
 
