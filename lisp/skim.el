@@ -11,6 +11,7 @@
   (hl-line-highlight)
   (beginning-of-line)
   (evil-scroll-line-to-center nil)
+  ;; find the line at the point if it is on a heading, open the heading
   )
 
 (defun replace-ref-with-brackets (line)
@@ -18,6 +19,20 @@
   (let ((pattern "\\\\ref{\\([^}]+\\)}")
         (replacement "[[\\1]]"))
     (replace-regexp-in-string pattern replacement line)))
+
+(defun remove-labels (text)
+  "Remove all occurrences of LaTeX \\label{...} from TEXT."
+  (replace-regexp-in-string "\\\\label{[^}]*}" "" text))
+
+(defun extract-caption-content (line)
+  "Extracts the text inside the \\caption{} from the given LINE."
+  (when (string-match "\\\\caption{\\(.*?\\)}" line)
+    (match-string 1 line)))
+
+;; Example usage with your string
+(defun extract-caption (line)
+  (extract-caption-content (remove-labels line))
+  )
 
 (defun extract-cite-targets (line)
   "Extract targets from the first occurrence of \\cite{target1, target2} in LINE."
@@ -70,25 +85,50 @@ formatted as [cite:@target1;@target2;@target3]."
       (match-string 1 str)
     str))
 
+;; (defun hermanhelf-latex-jump-to-org ()
+;;   (interactive)
+;;   ;; write me a elisp snippet that gets the start and end position of the current line at point
+;;   (let* ((line (thing-at-point 'line t))
+;;         (tex-filename (buffer-file-name))
+;;         (org-filename (concat (file-name-directory (directory-file-name (file-name-directory tex-filename)))
+;;                         (file-name-base tex-filename)
+;;                         ".org")))
+;;         ;; (kill-buffer (current-buffer))
+;;         ;; (let ((processed-line (replace-cite-with-brackets line)))
+;;         (let ((processed-line (remove-trailing-whitespace
+;;                         (replace-all-cites-with-brackets
+;;                                 (replace-ref-with-brackets line)))))
+;;         (if (s-contains? "section{" processed-line t)
+;;         (search-in-file (concat "* " (heading-text-latex processed-line)) org-filename) ;; it is a heading, find the text in the {}, and search for "* heading" in the corresponding org-file
+;;         (if (s-contains? "includesvg" processed-line t)
+;;         (search-in-file (extract-graphics-path processed-line) org-filename)
+;;         (if (s-contains? "\\caption{" processed-line t)
+;;         (search-in-file (extract-caption processed-line) org-filename)
+;;          (search-in-file processed-line org-filename)))))))
+
 (defun hermanhelf-latex-jump-to-org ()
   (interactive)
-  ;; write me a elisp snippet that gets the start and end position of the current line at point
+  ;; Get the start and end position of the current line at point
   (let* ((line (thing-at-point 'line t))
-        (tex-filename (buffer-file-name))
-        (org-filename (concat (file-name-directory (directory-file-name (file-name-directory tex-filename)))
-                        (file-name-base tex-filename)
-                        ".org")))
-        ;; (kill-buffer (current-buffer))
-        ;; (let ((processed-line (replace-cite-with-brackets line)))
+         (tex-filename (buffer-file-name))
+         (org-filename (concat (file-name-directory (directory-file-name (file-name-directory tex-filename)))
+                               (file-name-base tex-filename)
+                               ".org")))
+    ;; Check if the Org file exists
+    (if (file-exists-p org-filename)
         (let ((processed-line (remove-trailing-whitespace
-                        (replace-all-cites-with-brackets
+                               (replace-all-cites-with-brackets
                                 (replace-ref-with-brackets line)))))
-        (if (s-contains? "section{" processed-line t)
-        (search-in-file (concat "* " (heading-text-latex processed-line)) org-filename) ;; it is a heading, find the text in the {}, and search for "* heading" in the corresponding org-file
-        (if (s-contains? "includegraphics" processed-line t)
-        (search-in-file (extract-graphics-path processed-line) org-filename)
-        (search-in-file processed-line org-filename)))) ;; default action if none of the above conditions are met
-        ))
+          (cond
+           ((s-contains? "section{" processed-line t)
+            (search-in-file (concat "* " (heading-text-latex processed-line)) org-filename))
+           ((s-contains? "includesvg" processed-line t)
+            (search-in-file (extract-graphics-path processed-line) org-filename))
+           ((s-contains? "\\caption{" processed-line t)
+            (search-in-file (extract-caption processed-line) org-filename))
+           (t
+            (search-in-file processed-line org-filename))))
+      (message "Associated Org file does not exist: %s" org-filename))))
 
 (defun hermanhelf-org-jump-to-latex ()
   (let* ((line (string-trim (thing-at-point 'line t)))
@@ -118,7 +158,7 @@ formatted as [cite:@target1;@target2;@target3]."
     (if content
         (let ((formatted-content (file-name-nondirectory content)))
           (message "Formatted Content: %s" formatted-content)
-          formatted-content)
+          (concat "#+NAME: fig:" formatted-content))
       (message "No content found between braces.")
       nil)))
 
