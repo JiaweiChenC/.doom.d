@@ -52,9 +52,9 @@
        ;;tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       (vc-gutter         ; vcs diff in the fringe
+       ;; (vc-gutter         ; vcs diff in the fringe
         ;; +pretty
-        +diff-hl)
+        ;; +diff-hl)
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
@@ -64,7 +64,7 @@
        (evil +everywhere); come to the dark side, we have cookies
        file-templates    ; auto-snippets for empty files
        fold              ; (nigh) universal code folding
-       ;; (format
+       ;; format
        ;; +lsp
        ;; +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
@@ -108,7 +108,9 @@
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
-       (lookup +docsets +dictionary)              ; navigate your code and its documentation
+       (lookup
+        ;; +docsets
+        +dictionary)              ; navigate your code and its documentation
        (lsp
         +eglot)
        magit             ; a git porcelain for Emacs
@@ -216,7 +218,7 @@
        :app
        calendar
        ;;emms
-       ;;everywhere        ; *leave* Emacs!? You must be joking
+       ;; everywhere        ; *leave* Emacs!? You must be joking
        ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
