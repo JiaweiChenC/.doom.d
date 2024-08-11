@@ -31,7 +31,9 @@
        ;; helm              ; the *other* search engine for love and life
        ;; ido               ; the other *other* search engine...
        ;; ivy               ; a search engine for love and life
-       (vertico +icons)           ; the search engine of the future
+       (vertico
+        +icons
+        )           ; the search engine of the future
 
        :ui
        ;; deft              ; notational velocity for Emacs
@@ -47,7 +49,7 @@
        modeline          ; snazzy, Atom-inspired modeline, plus API
        ;; nav-flash         ; blink cursor line after big motions
        ;; neotree           ; a project drawer, like NERDTree for vim
-       ;; ophints           ; highlight the region an operation acts on
+       ophints           ; highlight the region an operation acts on
        (popup +defaults)   ; tame sudden yet inevitable temporary windows
        ;;tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
@@ -94,7 +96,7 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
-       (spell +flyspell) ; tasing you for misspelling mispelling
+       spell ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools

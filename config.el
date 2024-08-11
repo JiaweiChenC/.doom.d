@@ -534,14 +534,13 @@ Handles Org mode, Dired mode, and image buffers."
   (setq treemacs-position 'right)
   )
 
-;; load after org
-(after! org
-  (load (expand-file-name "skim.el" "~/.doom.d/lisp/")))
-
 ;; load mytex.el after org
 (after! org
   (add-to-list 'org-file-apps '("\\.svg\\'" . default))
-  (load (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   )
 
 (map! :n "s-;" #'skim-next-page)
@@ -602,7 +601,7 @@ Handles Org mode, Dired mode, and image buffers."
 ;;   (setq! awesome-tray-active-modules '("buffer-name" "belong" "mode-name" "file-path")
 ;;          )
 ;; )
-
+(setq! doom-modeline-hud t)
 
 (setq! org-latex-src-block-backend 'listings)
 
@@ -629,7 +628,35 @@ Handles Org mode, Dired mode, and image buffers."
 ;; is very flexible and provides several examples.
 (setq spacious-padding-subtle-mode-line
       `( :mode-line-active 'default
-         :mode-line-inactive vertical-border))
+         :mode-line-inactive shadow))
 
 (spacious-padding-mode 1)
 )
+(use-package! bookmark-in-project
+  :commands (bookmark-in-project-jump
+             bookmark-in-project-jump-next
+             bookmark-in-project-jump-previous
+             bookmark-in-project-delete-all)
+
+  ;; Example key bindings.
+  ;; map bookmark in project to space p m
+        :config
+        (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
+        (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump))
+  ;; :bind (("M-n" . bookmark-in-project-jump-next)
+  ;;        ("M-p" . bookmark-in-project-jump-previous)
+  ;;        ("M-*" . bookmark-in-project-toggle)
+  ;;        ("M-o" . bookmark-in-project-jump)))
+
+
+(use-package! gptel
+  :config
+  (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
+  (setq! gptel-model "gpt-4")
+  )
+
+;; map space e g to gptel
+(map! :leader :desc "gptel" "e g" #'gptel)
+
+;; (setq! corfu-popupinfo-max-height 1)
+(setq! vterm-timer-delay 0.01)
