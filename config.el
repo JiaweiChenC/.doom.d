@@ -1,4 +1,4 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
@@ -92,7 +92,7 @@
 
 ;; (global-hide-mode-line-mode)
 
-(setq doom-modeline-major-mode-icon t)
+;; (setq doom-modeline-major-mode-icon t)
 
 (map! :n "gj" 'evil-next-visual-line)
 (map! :n "gk" 'evil-previous-visual-line)
@@ -431,28 +431,28 @@
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
-(use-package! tab-bar
-  :config
-  (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
-  (setq tab-bar-new-tab-choice t
-        tab-bar-tab-name-truncated-max 20
-        tab-bar-tab-hints t)
-  (map! :n "]T" 'tab-bar-switch-to-next-tab)
-  (map! :n "[T" 'tab-bar-switch-to-prev-tab)
+;; (use-package! tab-bar
+;;   :config
+;;   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
+;;   (setq tab-bar-new-tab-choice t
+;;         tab-bar-tab-name-truncated-max 20
+;;         tab-bar-tab-hints t)
+;;   (map! :n "]T" 'tab-bar-switch-to-next-tab)
+;;   (map! :n "[T" 'tab-bar-switch-to-prev-tab)
 
-   (map! :leader
-        (:prefix ("t" . "tab")
-        :desc "Switch to tab number"
-        "1" #'(lambda () (interactive) (tab-bar-select-tab))
-        "2" #'(lambda () (interactive) (tab-bar-select-tab))
-        "3" #'(lambda () (interactive) (tab-bar-select-tab))
-        "4" #'(lambda () (interactive) (tab-bar-select-tab))
-        "5" #'(lambda () (interactive) (tab-bar-select-tab))
-        "6" #'(lambda () (interactive) (tab-bar-select-tab))
-        "7" #'(lambda () (interactive) (tab-bar-select-tab))
-        "8" #'(lambda () (interactive) (tab-bar-select-tab))
-        "9" #'(lambda () (interactive) (tab-bar-select-tab))
-)))
+;;    (map! :leader
+;;         (:prefix ("t" . "tab")
+;;         :desc "Switch to tab number"
+;;         "1" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "2" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "3" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "4" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "5" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "6" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "7" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "8" #'(lambda () (interactive) (tab-bar-select-tab))
+;;         "9" #'(lambda () (interactive) (tab-bar-select-tab))
+;; )))
 
 ;; (setq! dired-kill-when-opening-new-dired-buffer t)
 
@@ -519,7 +519,7 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! dired-mouse-drag-files 'move)
 
-(setq doom-modeline-modal nil)
+;; (setq doom-modeline-modal nil)
 
 (use-package! org
   :hook (org-mode . org-modern-mode)
@@ -601,7 +601,7 @@ Handles Org mode, Dired mode, and image buffers."
 ;;   (setq! awesome-tray-active-modules '("buffer-name" "belong" "mode-name" "file-path")
 ;;          )
 ;; )
-(setq! doom-modeline-hud t)
+;; (setq! doom-modeline-hud t)
 
 (setq! org-latex-src-block-backend 'listings)
 
@@ -609,29 +609,29 @@ Handles Org mode, Dired mode, and image buffers."
 
 (setq! TeX-command-extra-options "-shell-escape")
 
-(setq! doom-modeline-height 1)
+;; (setq! doom-modeline-height 1)
 
 (setq! org-export-expand-links 'nil)
 
-(use-package! spacious-padding
-  :config
-  (setq spacious-padding-widths
-      '( :internal-border-width 0
-         :header-line-width 4
-         :mode-line-width 1
-         :tab-width 4
-         :right-divider-width 10
-         :scroll-bar-width 8
-         :fringe-width 8))
+;; (use-package! spacious-padding
+;;   :config
+;;   ;; (setq spacious-padding-widths
+;;   ;;     '( :internal-border-width 0
+;;   ;;        :header-line-width 4
+;;   ;;        :mode-line-width 1
+;;   ;;        :tab-width 4
+;;   ;;        :right-divider-width 10
+;;   ;;        :scroll-bar-width 8
+;;   ;;        :fringe-width 8))
 
-;; Read the doc string of `spacious-padding-subtle-mode-line' as it
-;; is very flexible and provides several examples.
-(setq spacious-padding-subtle-mode-line
-      `( :mode-line-active 'default
-         :mode-line-inactive shadow))
+;; ;; Read the doc string of `spacious-padding-subtle-mode-line' as it
+;; ;; is very flexible and provides several examples.
+;; ;; (setq spacious-padding-subtle-mode-line
+;; ;;       `( :mode-line-active 'default
+;; ;;          :mode-line-inactive shadow))
 
-(spacious-padding-mode 1)
-)
+;; (spacious-padding-mode 1)
+;; )
 (use-package! bookmark-in-project
   :commands (bookmark-in-project-jump
              bookmark-in-project-jump-next
@@ -651,7 +651,6 @@ Handles Org mode, Dired mode, and image buffers."
 
 (use-package! gptel
   :config
-  (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
   (setq! gptel-model "gpt-4")
   )
 
@@ -659,4 +658,22 @@ Handles Org mode, Dired mode, and image buffers."
 (map! :leader :desc "gptel" "e g" #'gptel)
 
 ;; (setq! corfu-popupinfo-max-height 1)
+
 (setq! vterm-timer-delay 0.01)
+
+(use-package! writeroom-mode
+  :config
+  (setq! writeroom-fullscreen-effect 'nil)
+  (setq! writeroom-width 120)
+  (setq! writeroom-extra-line-spacing 0.5))
+
+;; global writeroom mode to space t W
+(map! :leader :desc "writeroom mode" "t W" #'writeroom-mode)
+;; (setq-default header-line-format (doom-modeline-set-main-modeline))
+(setq org-highlight-latex-and-related nil)
+
+(use-package! mini-echo
+  :config (mini-echo-mode)
+;; (setq hl-line-sticky-flag nil)
+;; (setq global-hl-line-sticky-flag nil)
+  )
