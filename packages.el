@@ -51,7 +51,7 @@
 (unpin! doom-modeline)
 (unpin! pdf-tools evil evil-collection org-journal)
 (unpin! citar-org-roam citar citar-embark)
-(package! olivetti)
+(package! writeroom-mode)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -64,7 +64,7 @@
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
-;; (package! diredfl :disable t)
+(package! diredfl :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-modern
@@ -79,3 +79,5 @@
 ;; (package! activities)
 (package! spacious-padding)
 (package! bookmark-in-project)
+(package! nano-modeline)
+(package! mini-echo)
