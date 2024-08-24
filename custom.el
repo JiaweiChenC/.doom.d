@@ -10,7 +10,8 @@
  '(org-agenda-files '("/Users/jiawei/org/journal/20240801"))
  '(package-selected-packages '(zmq image+))
  '(safe-local-variable-values
-   '((org-export-expand-links)
+   '((TeX-master . "./main.tex")
+     (org-export-expand-links)
      (eval progn
       (defun file-compilation-buffer-name
           (compilation-mode)

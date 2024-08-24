@@ -261,30 +261,6 @@
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
 
-(defun send-scroll-up-to-other-frame ()
-  (interactive)
-  (let ((other-frame (next-frame)))  ; Get the next frame
-    (with-selected-frame other-frame  ; Work within the context of the other frame
-      (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
-             (pdf-view-next-line-or-next-page 5))  ; If true, go to the next page in the PDF
-            ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
-             (image-next-file 1))  ; If true, go to the next image file
-            (t
-             (scroll-up-command))))))  ; For all other modes, perform a normal scroll up
-
-(defun send-scroll-down-to-other-frame ()
-  (interactive)
-  (let ((other-frame (next-frame)))  ; Get the next frame
-    (with-selected-frame other-frame  ; Work within the context of the other frame
-      (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
-             (pdf-view-previous-line-or-previous-page 5))  ; If true, go to the next page in the PDF
-            ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
-             (image-previous-file 1))  ; If true, go to the next image file
-            (t
-             (scroll-down-command))))))  ; For all other modes, perform a normal scroll up
-
-(map! :n "C-;" #'send-scroll-up-to-other-frame)
-(map! :n "C-'" #'send-scroll-down-to-other-frame)
 
 ;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
@@ -294,9 +270,9 @@
 ;; bind quickrun kill process to space r k
 (map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
-(use-package! dired
-  :config
-  (set-popup-rule! "^\\*image-dired" :ignore t))
+;; (use-package! dired
+;;   :config
+;;   (set-popup-rule! "^\\*image-dired" :ignore t))
 
 ;; set org journal to weekly
 (setq org-journal-file-type 'monthly)
@@ -391,7 +367,7 @@
 
 (setq org-hide-macro-markers t)
 
-(setq font-latex-fontify-script nil)
+;; (setq font-latex-fontify-script nil)
 
 ;; (defun my/org-tab-conditional ()
 ;;   (interactive)
@@ -431,67 +407,29 @@
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
-;; (use-package! tab-bar
-;;   :config
-;;   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
-;;   (setq tab-bar-new-tab-choice t
-;;         tab-bar-tab-name-truncated-max 20
-;;         tab-bar-tab-hints t)
-;;   (map! :n "]T" 'tab-bar-switch-to-next-tab)
-;;   (map! :n "[T" 'tab-bar-switch-to-prev-tab)
+(use-package! tab-bar
+  :config
+  (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
+  (setq tab-bar-new-tab-choice t
+        tab-bar-tab-name-truncated-max 20
+        tab-bar-tab-hints t)
+  (map! :n "]T" 'tab-bar-switch-to-next-tab)
+  (map! :n "[T" 'tab-bar-switch-to-prev-tab)
 
-;;    (map! :leader
-;;         (:prefix ("t" . "tab")
-;;         :desc "Switch to tab number"
-;;         "1" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "2" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "3" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "4" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "5" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "6" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "7" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "8" #'(lambda () (interactive) (tab-bar-select-tab))
-;;         "9" #'(lambda () (interactive) (tab-bar-select-tab))
-;; )))
+   (map! :leader
+        (:prefix ("t" . "tab")
+        :desc "Switch to tab number"
+        "1" #'(lambda () (interactive) (tab-bar-select-tab))
+        "2" #'(lambda () (interactive) (tab-bar-select-tab))
+        "3" #'(lambda () (interactive) (tab-bar-select-tab))
+        "4" #'(lambda () (interactive) (tab-bar-select-tab))
+        "5" #'(lambda () (interactive) (tab-bar-select-tab))
+        "6" #'(lambda () (interactive) (tab-bar-select-tab))
+        "7" #'(lambda () (interactive) (tab-bar-select-tab))
+        "8" #'(lambda () (interactive) (tab-bar-select-tab))
+        "9" #'(lambda () (interactive) (tab-bar-select-tab))
+)))
 
-;; (setq! dired-kill-when-opening-new-dired-buffer t)
-
-(defun my/copy-image-to-clipboard ()
-  "Copy the image at point or current image buffer to the clipboard in macOS.
-Handles Org mode, Dired mode, and image buffers."
-  (interactive)
-  (cond
-   ;; In Org mode, try to get the path and copy file
-   ((derived-mode-p 'org-mode)
-    (if-let ((image-path (org-element-property :path (org-element-context))))
-        (let ((full-path (expand-file-name image-path)))
-          (if (file-exists-p full-path)
-              (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                     full-path
-                                     "\") as JPEG picture)'"))
-            (message "File does not exist: %s" full-path)))
-      (message "No image file at point!")))
-   ;; In Dired mode, copy the file at point
-   ((derived-mode-p 'dired-mode)
-    (let ((file-path (dired-get-file-for-visit)))
-      (if (file-exists-p file-path)
-          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                 file-path
-                                 "\") as JPEG picture)'"))
-        (message "Selected file does not exist!"))))
-   ;; In image mode, copy the image data directly
-   ((eq major-mode 'image-mode)
-    (let ((image-file (buffer-file-name)))
-      (if image-file
-          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                 image-file
-                                 "\") as JPEG picture)'"))
-        (message "No file associated with this buffer!"))))
-   ;; Default message when not in applicable mode
-   (t (message "Not in an Org, Dired, or Image buffer!"))))
-
-;; map space y p
-(map! :leader :desc "copy image file at point to clipboard" "y p" #'my/copy-image-to-clipboard)
 
 (setq! ess-startup-directory 'default-directory)
 
@@ -541,6 +479,7 @@ Handles Org mode, Dired mode, and image buffers."
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
 
 (map! :n "s-;" #'skim-next-page)
@@ -574,8 +513,6 @@ Handles Org mode, Dired mode, and image buffers."
   (setq! org-appear-autolinks t)
   )
 
-;; map spat t m to toggle global modeline mode
-(map! :leader :desc "toggle global modeline mode" "t m" #'global-hide-mode-line-mode)
 
 (use-package! eglot-booster
   :after eglot
@@ -585,53 +522,14 @@ Handles Org mode, Dired mode, and image buffers."
 
 (use-package! citar)
 
-;; (use-package! awesome-tray
-;;   :config
-;;   ;; (add-to-list 'awesome-tray-active-modules '"buffer-name")
-;;   ;; ;; remove battery from the list
-;;   ;; (setq awesome-tray-active-modules (remove 'buffer-name (remove 'date awesome-tray-active-modules)))
-;;   ;; (setq! awesome-tray-hide-mode-line nil)
-;;   (setq! awesome-tray-update-interval 0.1)
-;;   ;; (setq! persp-lighter 'nil)
-;;   ;; (setq! flycheck-mode-line 'nil)
-;;   (setq! awesome-tray-belong-update-duration 1)
-;;   ;; (setq! eglot--mode-line-format 'nil)
-;;   (setq! awesome-tray-buffer-name-max-length 100)
-;;   (setq! awesome-tray-buffer-name-buffer-changed 't)
-;;   (setq! awesome-tray-active-modules '("buffer-name" "belong" "mode-name" "file-path")
-;;          )
-;; )
-;; (setq! doom-modeline-hud t)
-
 (setq! org-latex-src-block-backend 'listings)
 
 (setq! org-image-actual-width nil)
 
 (setq! TeX-command-extra-options "-shell-escape")
 
-;; (setq! doom-modeline-height 1)
-
 (setq! org-export-expand-links 'nil)
 
-;; (use-package! spacious-padding
-;;   :config
-;;   ;; (setq spacious-padding-widths
-;;   ;;     '( :internal-border-width 0
-;;   ;;        :header-line-width 4
-;;   ;;        :mode-line-width 1
-;;   ;;        :tab-width 4
-;;   ;;        :right-divider-width 10
-;;   ;;        :scroll-bar-width 8
-;;   ;;        :fringe-width 8))
-
-;; ;; Read the doc string of `spacious-padding-subtle-mode-line' as it
-;; ;; is very flexible and provides several examples.
-;; ;; (setq spacious-padding-subtle-mode-line
-;; ;;       `( :mode-line-active 'default
-;; ;;          :mode-line-inactive shadow))
-
-;; (spacious-padding-mode 1)
-;; )
 (use-package! bookmark-in-project
   :commands (bookmark-in-project-jump
              bookmark-in-project-jump-next
@@ -651,6 +549,7 @@ Handles Org mode, Dired mode, and image buffers."
 
 (use-package! gptel
   :config
+  (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
   (setq! gptel-model "gpt-4")
   )
 
@@ -674,6 +573,49 @@ Handles Org mode, Dired mode, and image buffers."
 
 (use-package! mini-echo
   :config (mini-echo-mode)
-;; (setq hl-line-sticky-flag nil)
-;; (setq global-hl-line-sticky-flag nil)
+  (setq! hide-mode-line-excluded-modes nil)
   )
+
+;; disable org block highlight
+(after! org
+  (set-face-attribute 'org-block nil :foreground nil :background nil)
+
+  (set-face-attribute 'org-block-begin-line nil :foreground nil :background nil)
+  (set-face-attribute 'org-block-end-line nil :foreground nil :background nil)
+  )
+
+
+(use-package! spacious-padding
+  :config
+  (setq spacious-padding-widths
+      '( :internal-border-width 0
+         :header-line-width 4
+         :mode-line-width 1
+         :tab-width 4
+         :right-divider-width 10
+         :scroll-bar-width 8
+         :fringe-width 8))
+
+;; Read the doc string of `spacious-padding-subtle-mode-line' as it
+;; is very flexible and provides several examples.
+(setq spacious-padding-subtle-mode-line
+      `( :mode-line-active 'default
+         :mode-line-inactive vertical-border))
+
+(spacious-padding-mode 1)
+)
+
+(setq! doom-modeline-height 8)
+
+(defun my-toggle-mini-echo-mode-if-single-window ()
+  "Toggle `mini-echo-mode` if there is only one window."
+  ;; if doom modeline is not active active it
+(unless (featurep 'doom-modeline) ; Check if `doom-modeline` feature is loaded
+    (doom-modeline-mode 1))
+  (if (eq (length (window-list)) 1) ; Checks if there's only one window
+      (mini-echo-mode 1)
+    (mini-echo-mode 0)))    ; Toggles `mini-echo-mode`
+
+(add-hook 'window-configuration-change-hook 'my-toggle-mini-echo-mode-if-single-window)
+;; (map! :leader :desc "toggle global modeline mode" "t m" #'global-hide-mode-line-mode)
+(setq doom-modeline-modal nil)
