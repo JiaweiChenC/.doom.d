@@ -14,14 +14,14 @@
 ;;     (shell-command command)
 ;;     (message "Compilation with latexmk finished!")))
 
-;; (defun compile-main-tex-with-latexmk-no-popup ()
-;;   "Compile the main.tex file using latexmk without popping up the shell window."
-;;   (interactive)
-;;   (let ((process (start-process "latexmk" "*latexmk-output*" "latexmk" "-pdf" "-pdflatex=pdflatex -interaction=nonstopmode" "-use-make" "main.tex")))
-;;     (set-process-sentinel process
-;;                           (lambda (proc event)
-;;                             (when (string= event "finished\n")
-;;                               (message "Compilation with latexmk finished!"))))))
+(defun compile-main-tex-with-latexmk-no-popup ()
+  "Compile the main.tex file using latexmk without popping up the shell window."
+  (interactive)
+  (let ((process (start-process "latexmk" "*latexmk-output*" "latexmk" "-pdf" "-pdflatex=pdflatex -interaction=nonstopmode" "-use-make" "main.tex")))
+    (set-process-sentinel process
+                          (lambda (proc event)
+                            (when (string= event "finished\n")
+                              (message "Compilation with latexmk finished!"))))))
 
 (defun org-compile-latex ()
   "Export current Org file to a LaTeX file with body only,
@@ -30,7 +30,7 @@ compile it, then switch back to the Org file and kill the LaTeX buffer."
   (let ((original-buffer (current-buffer)) ; Store the current buffer (Org file)
         (output-file (org-latex-export-to-latex nil nil nil t nil))) ; Export and get the output file name
     (find-file output-file) ; Open the LaTeX file
-    (call-interactively '+latex/compile) ; Run the compile command
+    (call-interactively 'compile-main-tex-with-latexmk-no-popup) ; Run the compile command
     (switch-to-buffer original-buffer) ; Switch back to the Org file
     ))
 
@@ -163,7 +163,6 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                'org-export-multirow-filter-latex)
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumnv-filter-latex))
-
 
 
 (defun org-attach-expand-new (file)

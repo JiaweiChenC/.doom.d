@@ -48,7 +48,7 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! evil evil-collection org-journal)
+(unpin! evil evil-collection org-journal hide-mode-line)
 (unpin! citar-org-roam citar citar-embark)
 (package! writeroom-mode)
 (package! htmlize)
@@ -56,8 +56,8 @@
 (package! impatient-mode)
 (package! ox-hugo)
 (package! super-save)
-(package! eglot-booster
-  :recipe (:host github :repo "jdtsmith/eglot-booster"))
+;; (package! eglot-booster
+;;   :recipe (:host github :repo "jdtsmith/eglot-booster"))
 (package! matlab-mode)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
@@ -70,13 +70,14 @@
   :recipe (:host github :repo "minad/org-modern"))
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
-(package! gptel)
+;; (package! gptel)
 (package! modus-themes)
-;; (package! atomic-chrome)
-;; (package! awesome-tray
-;;   :recipe (:host github :repo "manateelazycat/awesome-tray"))
 ;; (package! activities)
-(package! spacious-padding)
+;; (package! spacious-padding)
 (package! bookmark-in-project)
 (package! nano-modeline)
 (package! mini-echo)
+;; (package! doom-nano-modeline
+;;   :recipe (:host github
+;;   :repo "ronisbr/doom-nano-modeline"))
+;; (package! codeium :recipe (:host github :repo "Exafunction/codeium.el"))

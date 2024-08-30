@@ -12,7 +12,7 @@
 ;;
 ;; + `doom-font'
 ;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;; + `doom-bg-font' -- used for `doom-big-font-mode'; use this for
 ;;   presentations or streaming.
                                         ;
                                         ;
@@ -75,6 +75,8 @@
 (setq org-agenda-files '("~/org/journal/"))
 (setq org-journal-enable-agenda-integration t)
 ;; add all the todo.org file to the agenda
+
+;; (global-hide-mode-line-mode)
 
 ;; do not highlight the current line
 (setq org-fontify-done-headline t)
@@ -243,16 +245,16 @@
 (setq! citar-org-roam-subdir "paper/")
 (setq citar-org-roam-note-title-template "${title}")
 
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :config
-  ;; set delay to 0.5s
-  (setq copilot-idle-delay 0.5)
-  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
-         ("M-<tab>" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
+;; (use-package! copilot
+;;   :hook (prog-mode . copilot-mode)
+;;   :config
+;;   ;; set delay to 0.5s
+;;   (setq copilot-idle-delay 0.5)
+;;   :bind (("M-TAB" . 'copilot-accept-completion-by-word)
+;;          ("M-<tab>" . 'copilot-accept-completion-by-word)
+;;          :map copilot-completion-map
+;;          ("<tab>" . 'copilot-accept-completion)
+;;          ("TAB" . 'copilot-accept-completion)))
 
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
@@ -339,11 +341,11 @@
   (interactive)
   (org-latex-export-to-latex nil nil nil t nil))
 
-(use-package copilot
-  :hook
-  (prog-mode . copilot-mode)
-  (copilot-mode . (lambda ()
-                    (setq-local copilot--indent-warning-printed-p t))))
+;; (use-package copilot
+;;   :hook
+;;   (prog-mode . copilot-mode)
+;;   (copilot-mode . (lambda ()
+;;                     (setq-local copilot--indent-warning-printed-p t))))
 
 
 ;; map compile latex to space l c
@@ -478,7 +480,7 @@
   (load! (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
-  (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
+  ;; (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
 
@@ -514,10 +516,6 @@
   )
 
 
-(use-package! eglot-booster
-  :after eglot
-  :config (eglot-booster-mode))
-
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! citar)
@@ -547,14 +545,14 @@
   ;;        ("M-o" . bookmark-in-project-jump)))
 
 
-(use-package! gptel
-  :config
-  (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
-  (setq! gptel-model "gpt-4")
-  )
+;; (use-package! gptel
+;;   :config
+;;   (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
+;;   (setq! gptel-model "gpt-4")
+;;   )
 
-;; map space e g to gptel
-(map! :leader :desc "gptel" "e g" #'gptel)
+;; ;; map space e g to gptel
+;; (map! :leader :desc "gptel" "e g" #'gptel)
 
 ;; (setq! corfu-popupinfo-max-height 1)
 
@@ -569,12 +567,15 @@
 ;; global writeroom mode to space t W
 (map! :leader :desc "writeroom mode" "t W" #'writeroom-mode)
 ;; (setq-default header-line-format (doom-modeline-set-main-modeline))
-(setq org-highlight-latex-and-related nil)
 
-(use-package! mini-echo
-  :config (mini-echo-mode)
-  (setq! hide-mode-line-excluded-modes nil)
-  )
+;; (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
+
+;; (use-package! mini-echo
+;;   :config
+;;   (global-hide-mode-line-mode)
+;;   (mini-echo-mode)
+;;   (global-hide-mode-line-mode)
+;;   )
 
 ;; disable org block highlight
 (after! org
@@ -585,37 +586,68 @@
   )
 
 
-(use-package! spacious-padding
-  :config
-  (setq spacious-padding-widths
-      '( :internal-border-width 0
-         :header-line-width 4
-         :mode-line-width 1
-         :tab-width 4
-         :right-divider-width 10
-         :scroll-bar-width 8
-         :fringe-width 8))
+;; (use-package! spacious-padding
+;;   :config
+;;   (setq spacious-padding-widths
+;;       '( :internal-border-width 0
+;;          :header-line-width 4
+;;          :mode-line-width 1
+;;          :tab-width 4
+;;          :right-divider-width 10
+;;          :scroll-bar-width 8
+;;          :fringe-width 8))
 
-;; Read the doc string of `spacious-padding-subtle-mode-line' as it
-;; is very flexible and provides several examples.
-(setq spacious-padding-subtle-mode-line
-      `( :mode-line-active 'default
-         :mode-line-inactive vertical-border))
+;; ;; Read the doc string of `spacious-padding-subtle-mode-line' as it
+;; ;; is very flexible and provides several examples.
+;; (setq spacious-padding-subtle-mode-line
+;;       `( :mode-line-active 'default
+;;          :mode-line-inactive vertical-border))
 
-(spacious-padding-mode 1)
-)
+;; (spacious-padding-mode 1)
+;; )
 
-(setq! doom-modeline-height 8)
 
-(defun my-toggle-mini-echo-mode-if-single-window ()
-  "Toggle `mini-echo-mode` if there is only one window."
-  ;; if doom modeline is not active active it
-(unless (featurep 'doom-modeline) ; Check if `doom-modeline` feature is loaded
-    (doom-modeline-mode 1))
-  (if (eq (length (window-list)) 1) ; Checks if there's only one window
-      (mini-echo-mode 1)
-    (mini-echo-mode 0)))    ; Toggles `mini-echo-mode`
-
-(add-hook 'window-configuration-change-hook 'my-toggle-mini-echo-mode-if-single-window)
+;; (defun activate-mini-echo-if-single-main-window ()
+;;   "Activate mini-echo-mode if there is only one window."
+;; (unless (featurep 'doom-modeline) ; Check if `doom-modeline` feature is loaded
+;;     (doom-modeline-mode 1))
+;;   "Activate mini-echo-mode if there is only one main window and it's not a popup."
+;;   (let ((real-windows (length (doom-visible-windows))))
+;;     (if (eq real-windows 1)
+;;         ((mini-echo-mode 1)
+;;          (message doom-visible-windows)
+;;          )
+;;       (mini-echo-mode -1))))
+;; ;; )
+;; (add-hook 'doom-switch-window-hook 'activate-mini-echo-if-single-main-window)
+;; (add-hook 'doom-switch-buffer-hook 'activate-mini-echo-if-single-main-window)
+;; (add-hook 'doom-switch-window-hook 'activate-mini-echo-if-single-main-window)
+;; (add-hook 'window-configuration-change-hook 'activate-mini-echo-if-single-main-window)
+;; (add-hook 'window-configuration-change-hook 'my-toggle-mini-echo-mode-if-single-window)
 ;; (map! :leader :desc "toggle global modeline mode" "t m" #'global-hide-mode-line-mode)
-(setq doom-modeline-modal nil)
+;; (setq doom-modeline-modal nil)
+
+;; after image[png] mode active hide-mode-line-mode
+;; (defun hide-mode-line()
+;;   (hide-mode-line-mode 1))
+
+;; (add-hook! image-minor-mode-hook #'hide-mode-line)
+
+;; (setq! doom-modeline-height 8)
+;; space t e to mini-echo-mode
+(map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
+
+(after! popup
+  (set-popup-rule! "^\\*doom:scratch\\*" :size 0.3 :quit t :select t :ttl 5))
+
+;; (add-hook! doom-scratch-buffer-hook #'hide-mode-line-mode)
+
+;; (setq! hide-mode-line-excluded-modes nil)
+
+(add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
+
+(use-package! mini-echo
+  :config
+  (mini-echo-mode)
+  )
+
