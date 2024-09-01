@@ -6,7 +6,9 @@
  '(LaTeX-top-caption-list '("table"))
  '(codeium/metadata/api_key "1678bb01-6663-4c05-a2c9-27ed39c052f0")
  '(custom-safe-themes
-   '("b0cbcb2fa0c69ab36f4505fec9967969b73327f1b8564f9afface8afd216bc93"
+   '("9e296dbc86374778cca0f22cfd7cd44d35e7c2e678085417be97251ce7c75dcc"
+     "f5f80dd6588e59cfc3ce2f11568ff8296717a938edd448a947f9823a4e282b66"
+     "b0cbcb2fa0c69ab36f4505fec9967969b73327f1b8564f9afface8afd216bc93"
      "81f53ee9ddd3f8559f94c127c9327d578e264c574cda7c6d9daddaec226f87bb"
      "48042425e84cd92184837e01d0b4fe9f912d875c43021c3bcb7eeb51f1be5710"
      "da75eceab6bea9298e04ce5b4b07349f8c02da305734f7c0c8c6af7b5eaa9738"
@@ -27,7 +29,7 @@
      "7e377879cbd60c66b88e51fad480b3ab18d60847f31c435f15f5df18bdb18184" default))
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(org-agenda-files '("/Users/jiawei/org/journal/20240801"))
- '(package-selected-packages '(zmq image+))
+ '(package-selected-packages '(image+ kanagawa-theme zmq))
  '(safe-local-variable-values
    '((TeX-master . "./main.tex") (org-export-expand-links)
      (eval progn

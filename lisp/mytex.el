@@ -17,7 +17,11 @@
 (defun compile-main-tex-with-latexmk-no-popup ()
   "Compile the main.tex file using latexmk without popping up the shell window."
   (interactive)
-  (let ((process (start-process "latexmk" "*latexmk-output*" "latexmk" "-pdf" "-pdflatex=pdflatex -interaction=nonstopmode" "-use-make" "main.tex")))
+(let ((process (start-process "latexmk" "*latexmk-output*" "latexmk"
+                              "-pdf"
+                              "-pdflatex=pdflatex -interaction=nonstopmode -synctex=1"
+                              "-use-make"
+                              "main.tex")))
     (set-process-sentinel process
                           (lambda (proc event)
                             (when (string= event "finished\n")

@@ -63,7 +63,6 @@
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
-(package! diredfl :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-modern

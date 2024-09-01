@@ -245,16 +245,16 @@
 (setq! citar-org-roam-subdir "paper/")
 (setq citar-org-roam-note-title-template "${title}")
 
-;; (use-package! copilot
-;;   :hook (prog-mode . copilot-mode)
-;;   :config
-;;   ;; set delay to 0.5s
-;;   (setq copilot-idle-delay 0.5)
-;;   :bind (("M-TAB" . 'copilot-accept-completion-by-word)
-;;          ("M-<tab>" . 'copilot-accept-completion-by-word)
-;;          :map copilot-completion-map
-;;          ("<tab>" . 'copilot-accept-completion)
-;;          ("TAB" . 'copilot-accept-completion)))
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :config
+  ;; set delay to 0.5s
+  (setq copilot-idle-delay 0.5)
+  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
+         ("M-<tab>" . 'copilot-accept-completion-by-word)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion)))
 
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
@@ -296,8 +296,6 @@
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
-
-(setq! warning-suppress-types (append warning-suppress-types '((org-element-cache))))
 
 (setq! quickrun-timeout-seconds 10000)
 
@@ -341,13 +339,6 @@
   (interactive)
   (org-latex-export-to-latex nil nil nil t nil))
 
-;; (use-package copilot
-;;   :hook
-;;   (prog-mode . copilot-mode)
-;;   (copilot-mode . (lambda ()
-;;                     (setq-local copilot--indent-warning-printed-p t))))
-
-
 ;; map compile latex to space l c
 (map! :leader :desc "compile latex" "l c" #'org-compile-latex)
 
@@ -368,17 +359,6 @@
 (map! :leader :desc "switch to workspace in new frame" "TAB ," #'my/switch-to-workspace-in-new-frame)
 
 (setq org-hide-macro-markers t)
-
-;; (setq font-latex-fontify-script nil)
-
-;; (defun my/org-tab-conditional ()
-;;   (interactive)
-;;   (if (yas-active-snippets)
-;;       (yas-next-field-or-maybe-expand)
-;;     (org-cycle)))
-;; (map! :after evil-org
-;;       :map evil-org-mode-map
-;;       :i "<tab>" #'my/org-tab-conditional)
 
 (defun my/citar-open-pdf ()
   "Open all PDF files associated with selected references
@@ -515,7 +495,6 @@
   (setq! org-appear-autolinks t)
   )
 
-
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! citar)
@@ -539,10 +518,6 @@
         :config
         (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
         (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump))
-  ;; :bind (("M-n" . bookmark-in-project-jump-next)
-  ;;        ("M-p" . bookmark-in-project-jump-previous)
-  ;;        ("M-*" . bookmark-in-project-toggle)
-  ;;        ("M-o" . bookmark-in-project-jump)))
 
 
 ;; (use-package! gptel
@@ -566,16 +541,6 @@
 
 ;; global writeroom mode to space t W
 (map! :leader :desc "writeroom mode" "t W" #'writeroom-mode)
-;; (setq-default header-line-format (doom-modeline-set-main-modeline))
-
-;; (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
-
-;; (use-package! mini-echo
-;;   :config
-;;   (global-hide-mode-line-mode)
-;;   (mini-echo-mode)
-;;   (global-hide-mode-line-mode)
-;;   )
 
 ;; disable org block highlight
 (after! org
@@ -585,62 +550,11 @@
   (set-face-attribute 'org-block-end-line nil :foreground nil :background nil)
   )
 
-
-;; (use-package! spacious-padding
-;;   :config
-;;   (setq spacious-padding-widths
-;;       '( :internal-border-width 0
-;;          :header-line-width 4
-;;          :mode-line-width 1
-;;          :tab-width 4
-;;          :right-divider-width 10
-;;          :scroll-bar-width 8
-;;          :fringe-width 8))
-
-;; ;; Read the doc string of `spacious-padding-subtle-mode-line' as it
-;; ;; is very flexible and provides several examples.
-;; (setq spacious-padding-subtle-mode-line
-;;       `( :mode-line-active 'default
-;;          :mode-line-inactive vertical-border))
-
-;; (spacious-padding-mode 1)
-;; )
-
-
-;; (defun activate-mini-echo-if-single-main-window ()
-;;   "Activate mini-echo-mode if there is only one window."
-;; (unless (featurep 'doom-modeline) ; Check if `doom-modeline` feature is loaded
-;;     (doom-modeline-mode 1))
-;;   "Activate mini-echo-mode if there is only one main window and it's not a popup."
-;;   (let ((real-windows (length (doom-visible-windows))))
-;;     (if (eq real-windows 1)
-;;         ((mini-echo-mode 1)
-;;          (message doom-visible-windows)
-;;          )
-;;       (mini-echo-mode -1))))
-;; ;; )
-;; (add-hook 'doom-switch-window-hook 'activate-mini-echo-if-single-main-window)
-;; (add-hook 'doom-switch-buffer-hook 'activate-mini-echo-if-single-main-window)
-;; (add-hook 'doom-switch-window-hook 'activate-mini-echo-if-single-main-window)
-;; (add-hook 'window-configuration-change-hook 'activate-mini-echo-if-single-main-window)
-;; (add-hook 'window-configuration-change-hook 'my-toggle-mini-echo-mode-if-single-window)
-;; (map! :leader :desc "toggle global modeline mode" "t m" #'global-hide-mode-line-mode)
-;; (setq doom-modeline-modal nil)
-
-;; after image[png] mode active hide-mode-line-mode
-;; (defun hide-mode-line()
-;;   (hide-mode-line-mode 1))
-
-;; (add-hook! image-minor-mode-hook #'hide-mode-line)
-
-;; (setq! doom-modeline-height 8)
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
 
 (after! popup
   (set-popup-rule! "^\\*doom:scratch\\*" :size 0.3 :quit t :select t :ttl 5))
-
-;; (add-hook! doom-scratch-buffer-hook #'hide-mode-line-mode)
 
 ;; (setq! hide-mode-line-excluded-modes nil)
 
@@ -651,3 +565,4 @@
   (mini-echo-mode)
   )
 
+(setq! dired-kill-when-opening-new-dired-buffer t)
