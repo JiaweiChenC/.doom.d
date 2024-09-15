@@ -63,6 +63,7 @@
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+;; (package! dirvish :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-modern
@@ -75,7 +76,10 @@
 ;; (package! spacious-padding)
 (package! bookmark-in-project)
 (package! nano-modeline)
-(package! mini-echo)
+;; pin to a version
+(package! mini-echo
+  :pin "c1714d1a56b3f9c2470b4b9e993bf38346e4dfa3"
+  )
 ;; (package! doom-nano-modeline
 ;;   :recipe (:host github
 ;;   :repo "ronisbr/doom-nano-modeline"))

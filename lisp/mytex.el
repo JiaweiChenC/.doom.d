@@ -34,7 +34,7 @@ compile it, then switch back to the Org file and kill the LaTeX buffer."
   (let ((original-buffer (current-buffer)) ; Store the current buffer (Org file)
         (output-file (org-latex-export-to-latex nil nil nil t nil))) ; Export and get the output file name
     (find-file output-file) ; Open the LaTeX file
-    (call-interactively 'compile-main-tex-with-latexmk-no-popup) ; Run the compile command
+    (call-interactively '+latex/compile) ; Run the compile command
     (switch-to-buffer original-buffer) ; Switch back to the Org file
     ))
 

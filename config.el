@@ -130,7 +130,7 @@
 ;; (use-package! websocket
 ;;   :after org-roam)
 
-(use-package super-save
+(use-package! super-save
   :config
   (super-save-mode +1))
 
@@ -520,12 +520,6 @@
         (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump))
 
 
-;; (use-package! gptel
-;;   :config
-;;   (setq! gptel-api-key "sk-rDatdSnICnsKsB6HgtN36i0oNOculx4wETQBjjJ3gnT3BlbkFJ2kLrHg44_rFrcwC_L4BAPkaXUHD8jlAg4Yaa5dZtIA")
-;;   (setq! gptel-model "gpt-4")
-;;   )
-
 ;; ;; map space e g to gptel
 ;; (map! :leader :desc "gptel" "e g" #'gptel)
 
@@ -553,8 +547,8 @@
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
 
-(after! popup
-  (set-popup-rule! "^\\*doom:scratch\\*" :size 0.3 :quit t :select t :ttl 5))
+;;(after! popup
+;;  (set-popup-rule! "^\\*doom:scratch\\*" :size 0.3 :quit t :select t :ttl 5))
 
 ;; (setq! hide-mode-line-excluded-modes nil)
 
@@ -565,4 +559,19 @@
   (mini-echo-mode)
   )
 
-(setq! dired-kill-when-opening-new-dired-buffer t)
+(after! flycheck
+  (setq flycheck-indication-mode 'right-fringe)
+  ;; Apply the same bitmap to all levels using a loop
+  (dolist (level '(error warning info))
+    (flycheck-define-error-level level
+      :overlay-category (intern (format "flycheck-%s-overlay" level))
+      :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
+      :fringe-face (intern (format "flycheck-fringe-%s" level)))))
+
+(setq-default bidi-display-reordering nil)
+(setq bidi-inhibit-bpa t
+      long-line-threshold 1000
+      large-hscroll-threshold 1000
+      syntax-wholeline-max 1000)
+
+(setq! org-modern-block-fringe nil)
