@@ -71,6 +71,7 @@
        ;;objed             ; text object editing for the innocent
        ;;parinfer          ; turn lisp into python, sort of
        rotate-text       ; cycle region at point between text candidates
+
        snippets          ; my elves. They type so I don't have to
        ;;word-wrap         ; soft wrapping with language-aware indent
 
@@ -177,7 +178,7 @@
         +roam2
         +journal
         ;; +dragndrop
-        ;; +jupyter
+        +jupyter
         ;; +present
         )
        ;;php               ; perl's insecure younger brother
