@@ -574,4 +574,58 @@
       large-hscroll-threshold 1000
       syntax-wholeline-max 1000)
 
-(setq! org-modern-block-fringe nil)
+(use-package! sideline
+  :init
+  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+        sideline-backends-right-skip-current-line t
+        ;; sideline-order-right 'up                     ; or 'down
+        ;; sideline-format-left "%s   "                 ; format for left aligment
+        ;; sideline-format-right "   %s"                ; format for right aligment
+        sideline-priority 100                        ; overlays' priority
+        sideline-display-backend-name t
+        ;; sideline-backends-left '(sideline-eglot)
+        sideline-backends-right '(sideline-flycheck)
+        )
+  :hook ((flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
+         (flymake-mode  . sideline-mode)
+         (eglot-mode . sideline-mode)       ; for `sideline-eglot`))
+         ))            ; display the backend name
+
+(use-package! sideline-flycheck
+  :hook (flycheck-mode . sideline-flycheck-setup))
+
+(with-eval-after-load 'ob-jupyter
+ (org-babel-jupyter-aliases-from-kernelspecs)
+ )
+
+(defun convert-zotero-links-in-buffer ()
+"Convert Zotero links to Org-mode links in the current buffer."
+(interactive)
+(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/[[\\2][\\1]]/g")
+(evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
+(evil-ex "%s/^\(“.+”\)\(.*\)/***\2\n\1/g/")
+)
+
+(defun modify-and-paste-clipboard-content-at-end ()
+  "Modify the clipboard's content to convert Zotero
+links to Org-mode links and paste it at the end of the buffer."
+  (interactive)
+  (let ((content (gui-get-selection 'CLIPBOARD)))
+    ;; Perform replacements to convert Zotero links to Org-mode format without changing the order
+    (setq content (replace-regexp-in-string
+                   "\\[\\([^]]+\\)\\](\\([^)]+\\))"
+                   "[[\\2][\\1]]"
+                   content))
+    ;; Go to the end of the buffer and insert the modified content
+    (with-current-buffer (current-buffer)  ; Ensure we're in the current buffer
+      (goto-char (point-max))
+      (newline)
+      (insert content)
+      (newline))
+  )
+)
+
+;; Map the function to the key sequence `SPC y z`
+(map! :leader
+      :desc "Modify clipboard and paste at end"
+      "y z" #'modify-and-paste-clipboard-content-at-end)

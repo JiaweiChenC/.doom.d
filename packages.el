@@ -63,7 +63,7 @@
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
-;; (package! dirvish :disable t)
+(package! flycheck-popup-tip :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-modern
@@ -77,10 +77,14 @@
 (package! bookmark-in-project)
 (package! nano-modeline)
 ;; pin to a version
-(package! mini-echo
-  :pin "c1714d1a56b3f9c2470b4b9e993bf38346e4dfa3"
-  )
+(package! mini-echo)
 ;; (package! doom-nano-modeline
 ;;   :recipe (:host github
 ;;   :repo "ronisbr/doom-nano-modeline"))
 ;; (package! codeium :recipe (:host github :repo "Exafunction/codeium.el"))
+(package! sideline)
+(package! sideline-flycheck)
+;; (package! sideline-eglot
+;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
+;;   )
+;; (package! sideline-eglot)
