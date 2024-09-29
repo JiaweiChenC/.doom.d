@@ -197,3 +197,105 @@ It is meant to be added to `org-export-before-parsing-hook'."
 	    (skip-chars-backward " \t")
 	    (delete-region (org-element-begin link) (point))
 	    (insert new-link)))))))
+
+;; (advice-add 'org-export-resolve-fuzzy-link :override #'my/org-export-resolve-fuzzy-link)
+;; (defun my/org-export-resolve-fuzzy-link (link info &rest pseudo-types)
+;;   "Return LINK destination.
+
+;; INFO is a plist holding contextual information.
+
+;; Return value can be an object or an element:
+
+;; - If LINK path matches a target object (i.e. <<path>>) return it.
+
+;; - If LINK path exactly matches the name or results affiliated keyword
+;;   (i.e. #+NAME: path or #+RESULTS: name) of an element, return that
+;;   element.
+
+;; - If LINK path exactly matches any headline name, return that
+;;   element.
+
+;; - Otherwise, throw an error.
+
+;; PSEUDO-TYPES are pseudo-elements types, i.e., elements defined
+;; specifically in an export backend, that could have a name
+;; affiliated keyword.
+
+;; Assume LINK type is \"fuzzy\".  White spaces are not
+;; significant."
+;;   (let* ((search-cells (org-export-string-to-search-cell
+;; 			(org-element-property :path link)))
+;; 	 (link-cache (or (plist-get info :resolve-fuzzy-link-cache)
+;; 			 (let ((table (make-hash-table :test #'equal)))
+;;                            ;; Cache all the element search cells.
+;;                            (org-element-map (plist-get info :parse-tree)
+;; 		               (append pseudo-types '(target) org-element-all-elements)
+;; 	                     (lambda (datum)
+;; 		               (dolist (cell (org-export-search-cells datum))
+;; 		                 (if (gethash cell table)
+;;                                      (push datum (gethash cell table))
+;;                                    (puthash cell (list datum) table)))))
+;; 			   (plist-put info :resolve-fuzzy-link-cache table)
+;; 			   table)))
+;; 	 (cached (gethash search-cells link-cache 'not-found)))
+;;     (if (not (eq cached 'not-found)) cached
+;;       (let ((matches
+;;              (let (result)
+;;                (dolist (search-cell search-cells)
+;;                  (setq result
+;;                        (nconc
+;;                         result
+;; 	                (gethash search-cell link-cache))))
+;;                (delq nil result))))
+;; 	(if (null matches)
+;; 	  ;; (signal 'org-link-broken (list (org-element-property :path link)))
+;;     nil
+;;   (puthash
+;;     search-cells
+;;     ;; There can be multiple matches for un-typed searches, i.e.,
+;;     ;; for searches not starting with # or *.  In this case,
+;;     ;; prioritize targets and names over headline titles.
+;;     ;; Matching both a name and a target is not valid, and
+;;     ;; therefore undefined.
+;;     (or (cl-some (lambda (datum)
+;;         (and (not (org-element-type-p datum 'headline))
+;;             datum))
+;;             matches)
+;;         (car matches))
+;;     link-cache)
+;;     )
+;; 	))))
+
+;; (setq org-latex-link-with-unknown-path-format "\\ref{%s}")
+
+(defun convert-zotero-links-in-buffer ()
+"Convert Zotero links to Org-mode links in the current buffer."
+(interactive)
+(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/[[\\2][\\1]]/g")
+(evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
+(evil-ex "%s/^\(“.+”\)\(.*\)/***\2\n\1/g/")
+)
+
+(defun modify-and-paste-clipboard-content-at-end ()
+  "Modify the clipboard's content to convert Zotero
+links to Org-mode links and paste it at the end of the buffer."
+  (interactive)
+  (let ((content (gui-get-selection 'CLIPBOARD)))
+    ;; Perform replacements to convert Zotero links to Org-mode format without changing the order
+    (setq content (replace-regexp-in-string
+                   "\\[\\([^]]+\\)\\](\\([^)]+\\))"
+                   "[[\\2][\\1]]"
+                   content))
+    ;; Go to the end of the buffer and insert the modified content
+    (with-current-buffer (current-buffer)  ; Ensure we're in the current buffer
+      (goto-char (point-max))
+      (newline)
+      (insert content)
+      (newline))
+  )
+)
+
+;; Map the function to the key sequence `SPC y z`
+(map! :leader
+      :desc "Modify clipboard and paste at end"
+      "y z" #'modify-and-paste-clipboard-content-at-end)
