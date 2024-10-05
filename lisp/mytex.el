@@ -71,7 +71,7 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                  (switch-to-buffer original-buffer))))))))))
 
 ;; map compile latex to space l c
-(map! :leader :desc "compile latex" "l c" #'org-compile-latex)
+(map! :leader :desc "compile latex" "l c" #'org-compile-latex-and-close)
 
 ;;;;;;;;;;;;;;;;;;;;;;; hack to make org table work perfectly ;;;;;;;;;;;;;;;;;;;;;;
 (defun org-export-cmidrule-filter-latex (row backend info)

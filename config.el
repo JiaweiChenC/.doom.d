@@ -147,7 +147,6 @@
 
 
 (after! org
-
   (setq org-startup-indented nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
@@ -449,10 +448,6 @@
           (lambda ()
             (set-face-background 'fringe (face-attribute 'default :background))))
 
-;; set treemacs position to right
-(after! treemacs
-  (setq treemacs-position 'right)
-  )
 
 ;; load mytex.el after org
 (after! org
@@ -539,7 +534,6 @@
 ;; disable org block highlight
 (after! org
   (set-face-attribute 'org-block nil :foreground nil :background nil)
-
   (set-face-attribute 'org-block-begin-line nil :foreground nil :background nil)
   (set-face-attribute 'org-block-end-line nil :foreground nil :background nil)
   )
@@ -598,34 +592,11 @@
  (org-babel-jupyter-aliases-from-kernelspecs)
  )
 
-(defun convert-zotero-links-in-buffer ()
-"Convert Zotero links to Org-mode links in the current buffer."
-(interactive)
-(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/[[\\2][\\1]]/g")
-(evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
-(evil-ex "%s/^\(“.+”\)\(.*\)/***\2\n\1/g/")
-)
+(setq! org-preview-html-viewer 'xwidget)
 
-(defun modify-and-paste-clipboard-content-at-end ()
-  "Modify the clipboard's content to convert Zotero
-links to Org-mode links and paste it at the end of the buffer."
-  (interactive)
-  (let ((content (gui-get-selection 'CLIPBOARD)))
-    ;; Perform replacements to convert Zotero links to Org-mode format without changing the order
-    (setq content (replace-regexp-in-string
-                   "\\[\\([^]]+\\)\\](\\([^)]+\\))"
-                   "[[\\2][\\1]]"
-                   content))
-    ;; Go to the end of the buffer and insert the modified content
-    (with-current-buffer (current-buffer)  ; Ensure we're in the current buffer
-      (goto-char (point-max))
-      (newline)
-      (insert content)
-      (newline))
-  )
-)
+(setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
+(setq TeX-view-program-list
+      '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b %n %o %b")))
 
-;; Map the function to the key sequence `SPC y z`
-(map! :leader
-      :desc "Modify clipboard and paste at end"
-      "y z" #'modify-and-paste-clipboard-content-at-end)
+(after! org
+  (define-key org-mode-map (kbd "S-s-<mouse-1>") 'hermanhelf-org-jump-to-pdf))

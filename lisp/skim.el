@@ -118,7 +118,8 @@ formatted as [cite:@target1;@target2;@target3]."
     (if (file-exists-p org-filename)
         (let ((processed-line (remove-trailing-whitespace
                                (replace-all-cites-with-brackets
-                                (replace-ref-with-brackets line)))))
+                                (replace-ref-with-brackets line))))
+              (tex-buffer (current-buffer)))  ; Save the current buffer to close later
           (cond
            ((s-contains? "section{" processed-line t)
             (search-in-file (concat "* " (heading-text-latex processed-line)) org-filename))
@@ -127,7 +128,9 @@ formatted as [cite:@target1;@target2;@target3]."
            ((s-contains? "\\caption{" processed-line t)
             (search-in-file (extract-caption processed-line) org-filename))
            (t
-            (search-in-file processed-line org-filename))))
+            (search-in-file processed-line org-filename)))
+          ;; Kill the TeX buffer after performing the search
+          (kill-buffer tex-buffer))
       (message "Associated Org file does not exist: %s" org-filename))))
 
 (defun hermanhelf-org-jump-to-latex ()
@@ -142,7 +145,8 @@ formatted as [cite:@target1;@target2;@target3]."
 (defun hermanhelf-org-jump-to-pdf ()
   (interactive)
   (ignore-errors(hermanhelf-org-jump-to-latex))
-  (pdf-sync-forward-search)
+  ;; (pdf-sync-forward-search)
+  (TeX-view)
   (previous-buffer)
   )
 
@@ -150,6 +154,7 @@ formatted as [cite:@target1;@target2;@target3]."
   "Open FILE, jump to LINE, and call `hermanhelf-latex-jump-to-org`."
   (find-file file)
   (goto-line line)
+  ;; close the current buffer
   (hermanhelf-latex-jump-to-org))
 
 (defun extract-graphics-path (input-line)
