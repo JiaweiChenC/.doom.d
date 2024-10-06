@@ -48,8 +48,8 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! evil evil-collection org-journal hide-mode-line)
-(unpin! citar-org-roam citar citar-embark)
+(unpin! evil evil-collection org-journal hide-mode-line
+        citar-org-roam citar citar-embark jupyter)
 (package! writeroom-mode)
 (package! htmlize)
 (package! impatient-showdown)
@@ -88,3 +88,6 @@
 ;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
 ;;   )
 ;; (package! sideline-eglot)
+(package! org-preview-html)
+;; (package! org-modern-indent
+  ;; :recipe (:host github :repo "jdtsmith/org-modern-indent"))
