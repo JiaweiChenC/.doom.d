@@ -28,18 +28,8 @@
      "bfccfb247a960bf15b95cd3dccc41ff87caaba93f064fcc724b646867f2f4766"
      "7e377879cbd60c66b88e51fad480b3ab18d60847f31c435f15f5df18bdb18184" default))
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
- '(org-agenda-files '("/Users/jiawei/org/journal/20240901"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20241001"))
  '(package-selected-packages '(image+ kanagawa-theme zmq))
- '(safe-local-variable-values
-   '((TeX-master . "./main.tex") (org-export-expand-links)
-     (eval progn
-      (defun file-compilation-buffer-name (compilation-mode)
-        (concat "*" (downcase compilation-mode) "*"
-                (if (buffer-file-name)
-                    (concat "<" (file-name-nondirectory (buffer-file-name)) ">")
-                  "")))
-      (setq compilation-buffer-name-function 'file-compilation-buffer-name))
-     (org-attach-directory . "./images/")))
  '(warning-suppress-log-types
    '((copilot copilot-no-mode-indent) (org-element org-element-parser))))
 ;; (custom-set-faces
