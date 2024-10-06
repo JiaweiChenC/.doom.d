@@ -135,19 +135,41 @@ formatted as [cite:@target1;@target2;@target3]."
 
 (defun hermanhelf-org-jump-to-latex ()
   (let* ((line (string-trim (thing-at-point 'line t)))
-        (org-filename (buffer-file-name))
-        (tex-filename (concat (file-name-directory org-filename) "latex/" (file-name-base org-filename) ".tex")))
-        (if (s-contains? "* " line t)
-            (search-in-file (concat "{" (heading-text-org line) "}") tex-filename) ;; it is a heading, find the text in the {}, and search for "* heading" in the corresponding tex-file
-          (search-in-file line tex-filename);;  it is no a heading, search for the line in the tex-file
-            )))
+         (org-filename (buffer-file-name))
+         (tex-filename (concat (file-name-directory org-filename) "latex/" (file-name-base org-filename) ".tex")))
+    (cond
+     ((s-contains? "cite:@" line t)  ;; Handles citations
+      (let ((modified-line (replace-citations line)))
+        (message "Modified line: %s" modified-line)
+        (search-in-file modified-line tex-filename)))
+     ((s-contains? "* " line t)  ;; Handles headings
+      (search-in-file (concat "{" (heading-text-org line) "}") tex-filename))
+     ((s-contains? "[[fig:" line t)  ;; Handles citations
+      (let ((modified-line (replace-fig-ref line)))
+        (message "Modified line: %s" modified-line)
+        (search-in-file modified-line tex-filename)))
+     ((s-contains? "[[tbl:" line t)  ;; Handles citations
+      (let ((modified-line (replace-tbl-ref line)))
+        (message "Modified line: %s" modified-line)
+        (search-in-file modified-line tex-filename)))
+     ((s-contains? "attachment:" line t)  ;; Handles attachments
+      (let ((attachment-name (replace-regexp-in-string "\\[\\[attachment:\\([^]]+\\)\\]\\]" "\\1" line)))
+        (setq attachment-name (replace-regexp-in-string "\\.[^.]+\\'" "" attachment-name))  ;; Remove the file extension
+        (search-in-file attachment-name tex-filename)))
+     ((s-contains? "#+caption:" line t)  ;; Handles captions
+      (let ((caption-text (replace-regexp-in-string "^#\\+caption: " "" line)))
+        (message "Caption text: %s" caption-text)
+        (search-in-file caption-text tex-filename)))
+     (t  ;; Handles generic lines
+      (search-in-file line tex-filename)))))
 
 (defun hermanhelf-org-jump-to-pdf ()
   (interactive)
   (ignore-errors(hermanhelf-org-jump-to-latex))
   ;; (pdf-sync-forward-search)
   (TeX-view)
-  (previous-buffer)
+  (kill-buffer (current-buffer))
+  ;; (previous-buffer)
   )
 
 (defun open-file-jump-to-line-and-call-function (file line)
@@ -171,4 +193,21 @@ formatted as [cite:@target1;@target2;@target3]."
       :localleader "j" #'hermanhelf-org-jump-to-pdf
       )
 
+(defun replace-fig-ref (input-string)
+  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
+  (with-temp-buffer
+    (insert input-string)
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[\\(fig:.*?\\)\\]\\]" nil t)
+      (replace-match "\\\\ref{\\1}"))
+    (buffer-string)))
 
+
+(defun replace-tbl-ref (input-string)
+  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
+  (with-temp-buffer
+    (insert input-string)
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[\\(tbl:.*?\\)\\]\\]" nil t)
+      (replace-match "\\\\ref{\\1}"))
+    (buffer-string)))

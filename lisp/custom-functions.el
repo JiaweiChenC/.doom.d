@@ -45,6 +45,8 @@ Handles Org mode, Dired mode, and image buffers."
              (pdf-view-next-line-or-next-page 5))  ; If true, go to the next page in the PDF
             ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
              (image-next-file 1))  ; If true, go to the next image file
+            ((derived-mode-p 'xwidget-webkit-mode)  ; Check if the frame is in xwidget-webkit-mode
+             (xwidget-webkit-scroll-up-line 5))  ; If true, scroll up a line in xwidget-webkit
             (t
              (scroll-up-command))))))  ; For all other modes, perform a normal scroll up
 
@@ -53,11 +55,13 @@ Handles Org mode, Dired mode, and image buffers."
   (let ((other-frame (next-frame)))  ; Get the next frame
     (with-selected-frame other-frame  ; Work within the context of the other frame
       (cond ((derived-mode-p 'pdf-view-mode)  ; Check if the frame is in pdf-view-mode
-             (pdf-view-previous-line-or-previous-page 5))  ; If true, go to the next page in the PDF
+             (pdf-view-previous-line-or-previous-page 5))  ; If true, go to the previous page in the PDF
             ((derived-mode-p 'image-mode)  ; Check if the frame is in image-mode
-             (image-previous-file 1))  ; If true, go to the next image file
+             (image-previous-file 1))  ; If true, go to the previous image file
+            ((derived-mode-p 'xwidget-webkit-mode)  ; Check if the frame is in xwidget-webkit-mode
+             (xwidget-webkit-scroll-down-line 5))  ; If true, scroll down a line in xwidget-webkit
             (t
-             (scroll-down-command))))))  ; For all other modes, perform a normal scroll up
+             (scroll-down-command))))))  ; For all other modes, perform a normal scroll down
 
 (defun send-scroll-up-to-other-window ()
   (interactive)
@@ -82,5 +86,5 @@ Handles Org mode, Dired mode, and image buffers."
              (scroll-down-command))))))  ; For all other modes, perform a normal scroll down
 
 ;; Keybindings remain the same, assuming Doom Emacs keybinding syntax
-(map! :n "C-;" #'send-scroll-up-to-other-window)
-(map! :n "C-'" #'send-scroll-down-to-other-window)
+(map! :n "C-;" #'send-scroll-up-to-other-frame)
+(map! :n "C-'" #'send-scroll-down-to-other-frame)
