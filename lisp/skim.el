@@ -3,6 +3,25 @@
 (require 's)
 (require 'pdf-sync)
 
+(defun replace-fig-ref (input-string)
+  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
+  (with-temp-buffer
+    (insert input-string)
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[\\(fig:.*?\\)\\]\\]" nil t)
+      (replace-match "\\\\ref{\\1}"))
+    (buffer-string)))
+
+
+(defun replace-tbl-ref (input-string)
+  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
+  (with-temp-buffer
+    (insert input-string)
+    (goto-char (point-min))
+    (while (re-search-forward "\\[\\[\\(tbl:.*?\\)\\]\\]" nil t)
+      (replace-match "\\\\ref{\\1}"))
+    (buffer-string)))
+
 (defun search-in-file (needle filename)
   (select-frame-set-input-focus (selected-frame))
   (find-file filename)
@@ -193,21 +212,11 @@ formatted as [cite:@target1;@target2;@target3]."
       :localleader "j" #'hermanhelf-org-jump-to-pdf
       )
 
-(defun replace-fig-ref (input-string)
-  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
-  (with-temp-buffer
-    (insert input-string)
-    (goto-char (point-min))
-    (while (re-search-forward "\\[\\[\\(fig:.*?\\)\\]\\]" nil t)
-      (replace-match "\\\\ref{\\1}"))
-    (buffer-string)))
-
-
-(defun replace-tbl-ref (input-string)
-  "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
-  (with-temp-buffer
-    (insert input-string)
-    (goto-char (point-min))
-    (while (re-search-forward "\\[\\[\\(tbl:.*?\\)\\]\\]" nil t)
-      (replace-match "\\\\ref{\\1}"))
-    (buffer-string)))
+(defun replace-citations (input-string)
+  "Replace [cite:@...] with \\ref{...} in
+INPUT-STRING and then replace all ;@ with ,."
+  (let ((step-one (replace-regexp-in-string "\\[cite:@\\([^]]+\\)\\]"
+                                            "\\\\cite{\\1}"
+                                            input-string)))
+    (replace-regexp-in-string ";@" ","
+                              step-one)))

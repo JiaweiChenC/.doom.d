@@ -174,11 +174,11 @@
 
 ;; set org-image-actual-width to 700 after entering doom big font mode
 ;; and set it back to 400 after exiting doom big font mode
-(add-hook 'doom-big-font-mode-hook
-          (lambda ()
-            (if doom-big-font-mode
-                (setq org-image-actual-width 700)
-              (setq org-image-actual-width 400))))
+;; (add-hook 'doom-big-font-mode-hook
+;;           (lambda ()
+;;             (if doom-big-font-mode
+;;                 (setq org-image-actual-width 700)
+;;               (setq org-image-actual-width 400))))
 
 (after! org-roam
   (setq org-roam-capture-templates
@@ -483,6 +483,7 @@
 (use-package! embark)
 
 (setq! org-modern-table nil)
+(setq! org-modern-block-fringe nil)
 
 (use-package! org-appear
   :hook (org-mode . org-appear-mode)

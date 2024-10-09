@@ -38,6 +38,40 @@ compile it, then switch back to the Org file and kill the LaTeX buffer."
     (switch-to-buffer original-buffer) ; Switch back to the Org file
     ))
 
+;; (defun org-compile-latex-and-close ()
+;;   "Export current Org file to a LaTeX file with body only, compile it,
+;; and then kill the LaTeX buffer after compilation, preserving any existing sentinel behavior."
+;;   (interactive)
+;;   (let ((original-buffer (current-buffer)))  ; Store the current Org file buffer
+;;     ;; Export and get the LaTeX output file name
+;;     (when-let ((output-file (org-latex-export-to-latex nil nil nil t nil)))
+;;       ;; Open the LaTeX file in the background
+;;       (let ((latex-buffer (find-file-noselect output-file)))
+;;         (with-current-buffer latex-buffer
+;;           ;; Call the compile command interactively in the LaTeX buffer
+;;           (call-interactively '+latex/compile)
+;;           ;; Capture any existing sentinel attached to the compile process
+;;           (let ((existing-sentinel (process-sentinel (get-buffer-process (current-buffer)))))
+;;             ;; Set a new process sentinel that incorporates the old one
+;;             (set-process-sentinel
+;;              (get-buffer-process (current-buffer))
+;;              (lambda (proc event)
+;;                ;; Call the existing sentinel, if there was one
+;;                (when existing-sentinel
+;;                  (funcall existing-sentinel proc event))
+;;                ;; New behavior based on the process event
+;;                (cond
+;;                 ((string-match-p "finished" event)
+;;                  ;; (message "Compilation succeeded")
+;;                  (kill-buffer latex-buffer))
+;;                 ((string-match-p "exited abnormally" event)
+;;                  ;; (message "Compilation failed with errors")
+;;                  ))
+;;                (when (buffer-live-p original-buffer)
+;;                  (switch-to-buffer original-buffer)
+;;                  (hermanhelf-org-jump-to-pdf)
+;;                  )))))))))
+
 (defun org-compile-latex-and-close ()
   "Export current Org file to a LaTeX file with body only, compile it,
 and then kill the LaTeX buffer after compilation, preserving any existing sentinel behavior."
