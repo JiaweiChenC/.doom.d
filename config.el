@@ -465,6 +465,7 @@
   (load! (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
   ;; (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
@@ -479,7 +480,12 @@
 
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
-(setq! citar-open-entry-function 'citar-open-entry-in-zotero)
+;; (setq! citar-open-entry-function 'citar-open-entry-in-zotero)
+;; (setq! citar-at-point-function 'embark-act)
+;; (map! :map citar-embark-citation-map
+;;       :n
+;;       "<return>" nil
+;;       "<return>" #'zot-open-pdf)
 
 ;; (add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
 
@@ -710,3 +716,15 @@
 ;;   ;; Bind C-j to your new custom function in org-mode
 ;;   (map! :map org-mode-map
 ;;         "C-j" #'electric-newline-and-maybe-indent))
+
+;; (setq citar-file-open-functions '(("pdf" . zot-open-pdf)
+;;                                   ("html" . citar-file-open-external)
+;;                                   (t . find-file)))
+(setq citar-open-entry-function 'citar-open-entry-in-zotero)
+(setq citar-at-point-function 'embark-act)
+(map! :map citar-embark-citation-map
+      :n
+      "<return>" nil
+      "<return>" #'zot-open-pdf)
+
+(setq! evil-kill-on-visual-paste nil)

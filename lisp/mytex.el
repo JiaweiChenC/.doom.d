@@ -479,3 +479,5 @@ links to Org-mode links and paste it at the end of the buffer."
                          :follow #'my/org-delete-link-follow
                          :export #'my/org-delete-link-export
                          :face 'my/org-delete-link-face)
+
+
