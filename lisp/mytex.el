@@ -202,6 +202,15 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumnv-filter-latex))
 
+(defun org-attach-expand (file &optional convert-to-relative)
+"Return the full path to the current entry's attachment file FILE.
+Basically, this adds the path to the attachment directory. If optional
+argument `convert-to-relative' is non-nil, then return path relative to
+`default-directory'."
+(let ((filepath (expand-file-name file (org-attach-dir))))
+(if convert-to-relative
+        (dired-make-relative filepath)
+filepath)))
 
 (defun org-attach-expand-new (file)
   "Return a simple concatenation of the attachment directory and FILE."
@@ -210,27 +219,29 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
         (concat (file-name-as-directory attach-dir) file)
       (error "No attachment directory exists"))))
 
-(defun org-attach-expand-links (_)
-  "Expand links in current buffer.
-It is meant to be added to `org-export-before-parsing-hook'."
-  (save-excursion
-    (while (re-search-forward "attachment:" nil t)
-      (let ((link (org-element-context)))
-	(when (and (org-element-type-p link 'link)
-		   (string-equal "attachment"
-				 (org-element-property :type link)))
-	  (let* ((description (and (org-element-contents-begin link)
-				   (buffer-substring-no-properties
-				    (org-element-contents-begin link)
-				    (org-element-contents-end link))))
-		 (file (org-element-property :path link))
-		 (new-link (org-link-make-string
-			    (concat "file:" (org-attach-expand-new file))
-			    description)))
-	    (goto-char (org-element-end link))
-	    (skip-chars-backward " \t")
-	    (delete-region (org-element-begin link) (point))
-	    (insert new-link)))))))
+  (defun org-attach-expand-links (_)
+    "Expand links in current buffer.
+  It is meant to be added to `org-export-before-parsing-hook'."
+    (save-excursion
+      (while (re-search-forward "attachment:" nil t)
+        (let ((link (org-element-context)))
+    (when (and (org-element-type-p link 'link)
+           (string-equal "attachment"
+                 (org-element-property :type link)))
+      (let* ((description (and (org-element-contents-begin link)
+                   (buffer-substring-no-properties
+                    (org-element-contents-begin link)
+                    (org-element-contents-end link))))
+         (file (org-element-property :path link))
+         (new-link (org-link-make-string
+                ;; only difference is the following two lines
+                ;; (concat "file:" (org-attach-expand file))
+                (concat "file:" (org-attach-expand file 'convert-to-relative))
+                description)))
+        (goto-char (org-element-end link))
+        (skip-chars-backward " \t")
+        (delete-region (org-element-begin link) (point))
+        (insert new-link)))))))
 
 ;; (advice-add 'org-export-resolve-fuzzy-link :override #'my/org-export-resolve-fuzzy-link)
 ;; (defun my/org-export-resolve-fuzzy-link (link info &rest pseudo-types)
@@ -333,3 +344,138 @@ links to Org-mode links and paste it at the end of the buffer."
 (map! :leader
       :desc "Modify clipboard and paste at end"
       "y z" #'modify-and-paste-clipboard-content-at-end)
+
+;;; org-colored-text.el --- Colored text for org-mode  -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2016  John Kitchin
+
+;; Author: John Kitchin <jkitchin@andrew.cmu.edu>
+;; Keywords:
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;;
+
+;; Taken and adapted from org-colored-text
+;; (org-add-link-type
+;;  "color"
+;;  (lambda (path)
+;;    "No follow action.")
+;;  (lambda (color description backend)
+;;    (let ((description (replace-citations description))) ; Apply citation replacement to description
+;;      (cond
+;;       ((eq backend 'latex)
+;;        (format "{\\color{%s}%s}" color description))
+;;       ((eq backend 'html)
+;;        (let ((rgb (assoc color color-name-rgb-alist))
+;;              r g b)
+;;          (if rgb
+;;              (progn
+;;                (setq r (* 255 (/ (nth 1 rgb) 65535.0))
+;;                      g (* 255 (/ (nth 2 rgb) 65535.0))
+;;                      b (* 255 (/ (nth 3 rgb) 65535.0)))
+;;                (format "<span style=\"color: rgb(%s,%s,%s)\">%s</span>"
+;;                        (truncate r) (truncate g) (truncate b)
+;;                        description))
+;;            (format "No Color RGB for %s" color))))))))
+
+;; (defface my-red-link
+;;   '((t (:foreground "red" :underline t)))
+;;   "Custom face for red links.")
+
+;; (org-link-set-parameters "red"
+;;                          :face 'my-red-link)
+
+;; (defun next-color-link (limit)
+;;   (when (re-search-forward
+;; 	 "color:[a-zA-Z]\\{2,\\}" limit t)
+;;     (forward-char -2)
+;;     (let* ((next-link (org-element-context))
+;; 	   color beg end post-blanks)
+;;       (if next-link
+;; 	  (progn
+;; 	    (setq color (org-element-property :path next-link)
+;; 		  beg (org-element-property :begin next-link)
+;; 		  end (org-element-property :end next-link)
+;; 		  post-blanks (org-element-property :post-blank next-link))
+;; 	    (set-match-data
+;; 	     (list beg
+;; 		   (- end post-blanks)))
+;; 	    (ov-clear beg end 'color)
+;; 	    (ov beg
+;; 		(- end post-blanks)
+;; 	     'color t
+;; 	     'face
+;; 	     `((:foreground ,color)))
+;; 	    (goto-char end))
+;; 	(goto-char limit)
+;; 	nil))))
+
+
+;; (add-hook 'org-mode-hook
+;; 	  (lambda ()
+;; 	    (font-lock-add-keywords
+;; 	     nil
+;; 	     '((next-color-link (0 'org-link t)))
+;; 	     t)))
+
+
+(defun my/org-color-link-follow (path)
+  "A function that could be used to follow the color link, but is not used here."
+  (message "This link is for display only."))
+
+(defun my/org-color-link-export (path desc backend)
+  "Export the color link with PATH, DESC, and depending on BACKEND."
+  (cond ((eq backend 'html)
+         (format "<span style=\"color:%s;\">%s</span>" path desc))
+        ((eq backend 'latex)
+         ;; Apply citation replacement only for LaTeX exports
+         (let ((processed-desc (replace-citations desc)))
+           (format "\\textcolor{%s}{%s}" path processed-desc)))
+        (t desc)))
+
+(defun my/org-color-link-face (path)
+  "Return a face for the color link."
+  (list :foreground path))
+
+(org-link-set-parameters "color"
+                         :follow #'my/org-color-link-follow
+                         :export #'my/org-color-link-export
+                         :face 'my/org-color-link-face)
+
+(defun my/org-delete-link-follow (path)
+  "A function that could be used to follow the delete link, but is not used here."
+  (message "This link is for display only."))
+
+(defun my/org-delete-link-export (path desc backend)
+  "Export the delete link with PATH, DESC, and depending on BACKEND."
+  (let ((color (if (string-empty-p path) "red" path))) ; Default to red if no color specified
+    (cond ((eq backend 'html)
+           (format "<span style=\"color:%s; text-decoration: line-through;\">%s</span>" color desc))
+          ((eq backend 'latex)
+           (let ((processed-desc (replace-citations desc)))
+           (format "\\textcolor{%s}{\\sout{%s}}" color desc)))
+          (t desc))))
+
+(defun my/org-delete-link-face (path)
+  "Return a face for the delete link with specified PATH as color."
+  (let ((color (if (string-empty-p path) "red" path))) ; Default to red if no color specified
+    (list :foreground color :strike-through t)))
+
+(org-link-set-parameters "delete"
+                         :follow #'my/org-delete-link-follow
+                         :export #'my/org-delete-link-export
+                         :face 'my/org-delete-link-face)

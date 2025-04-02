@@ -27,7 +27,7 @@
   (find-file filename)
   (goto-char 0)
   (search-forward needle)
-  (hl-line-highlight)
+  ;; (hl-line-highlight)
   (beginning-of-line)
   (evil-scroll-line-to-center nil)
   ;; find the line at the point if it is on a heading, open the heading
@@ -146,6 +146,8 @@ formatted as [cite:@target1;@target2;@target3]."
             (search-in-file (extract-graphics-path processed-line) org-filename))
            ((s-contains? "\\caption{" processed-line t)
             (search-in-file (extract-caption processed-line) org-filename))
+           ((s-contains? "\\textcolor{" processed-line t)
+            (search-in-file (extract-color-text processed-line) org-filename))
            (t
             (search-in-file processed-line org-filename)))
           ;; Kill the TeX buffer after performing the search
@@ -184,12 +186,19 @@ formatted as [cite:@target1;@target2;@target3]."
 
 (defun hermanhelf-org-jump-to-pdf ()
   (interactive)
-  (ignore-errors(hermanhelf-org-jump-to-latex))
-  ;; (pdf-sync-forward-search)
-  (TeX-view)
-  (kill-buffer (current-buffer))
-  ;; (previous-buffer)
-  )
+  (let ((origin-buffer (current-buffer)))  ; Store the current buffer before opening PDF
+    (ignore-errors (hermanhelf-org-jump-to-latex))
+    (TeX-view)
+    ;; Optionally close the TeX buffer, if desired
+    (when (buffer-live-p (current-buffer))
+      (kill-buffer (current-buffer)))
+    (switch-to-buffer origin-buffer)  ; Switch back to the origin buffer
+    ;; Use AppleScript to switch focus back to Emacs after a delay
+    ;; (run-at-time "1 sec" nil #'hermanhelf-bring-emacs-to-front)
+    ))
+
+(defun hermanhelf-bring-emacs-to-front ()
+  (do-applescript "tell application \"Emacs\" to activate"))
 
 (defun open-file-jump-to-line-and-call-function (file line)
   "Open FILE, jump to LINE, and call `hermanhelf-latex-jump-to-org`."
@@ -203,7 +212,7 @@ formatted as [cite:@target1;@target2;@target3]."
                       (match-string 1 input-line))))
     (if content
         (let ((formatted-content (file-name-nondirectory content)))
-          (message "Formatted Content: %s" formatted-content)
+          ;; (message "Formatted Content: %s" formatted-content)
           (concat "#+NAME: fig:" formatted-content))
       (message "No content found between braces.")
       nil)))
@@ -220,3 +229,35 @@ INPUT-STRING and then replace all ;@ with ,."
                                             input-string)))
     (replace-regexp-in-string ";@" ","
                               step-one)))
+
+(defun extract-color-text (input)
+  "Extract content within the second set of matched braces in INPUT."
+  (let ((pos 0)
+        (level 0)
+        (start nil)
+        (end nil))
+    ;; First, find the position of the second opening brace
+    (while (and (setq pos (string-match "{" input pos))
+                (not (and (eq level 1) start)))
+      (if (eq level 0)
+          (setq level 1)
+        (when (eq level 1)
+          (setq start (1+ pos))))
+      (setq pos (1+ pos)))
+
+    ;; Reset pos to start, and find the matching closing brace
+    (setq pos start)
+    (while (and pos (< pos (length input)) (not end))
+      (cond
+       ((equal (substring input pos (1+ pos)) "{")
+        (setq level (1+ level)))
+       ((equal (substring input pos (1+ pos)) "}")
+        (setq level (1- level))
+        (when (eq level 0)
+          (setq end pos))))
+      (setq pos (1+ pos)))
+
+    ;; Extract the substring between start and end
+    (if (and start end)
+        (substring input start end)
+      (error "Matching brace not found"))))

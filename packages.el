@@ -48,8 +48,10 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! evil evil-collection org-journal hide-mode-line
-        citar-org-roam citar citar-embark jupyter)
+(unpin! org-journal hide-mode-line org
+        citar-org-roam citar citar-embark jupyter
+        yasnippet
+        )
 (package! writeroom-mode)
 (package! htmlize)
 (package! impatient-showdown)
@@ -75,7 +77,7 @@
 ;; (package! activities)
 ;; (package! spacious-padding)
 (package! bookmark-in-project)
-(package! nano-modeline)
+;; (package! nano-modeline)
 ;; pin to a version
 (package! mini-echo)
 ;; (package! doom-nano-modeline
@@ -91,3 +93,31 @@
 (package! org-preview-html)
 ;; (package! org-modern-indent
   ;; :recipe (:host github :repo "jdtsmith/org-modern-indent"))
+;; (package! holo-layer
+  ;; :recipe (:host github :repo "manateelazycat/holo-layer"))
+;; (package! iscroll)
+;; (package! nova
+;;   :recipe (:host github :repo "thisisran/nova"))
+(package! float-narrow-indirect
+  :recipe (:host github
+           :repo "yibie/float-narrow-indirect"))
+(package! eldoc :built-in t)
+;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
+(package! rainbow-csv
+  :recipe (:host github :repo "emacs-vs/rainbow-csv"))
+(package! breadcrumb
+  :recipe (:host github :repo "joaotavora/breadcrumb"))
+;; (package! cell-mode
+  ;; :recipe (:host gitlab :repo "dto/cell-mode"))
+
+(package! catppuccin-theme
+  :recipe (:host github :repo "catppuccin/emacs"
+           :files ("*.el" "data" "themes")))
+
+(package! solarized-theme
+  :recipe (:host github :repo "bbatsov/solarized-emacs"))
+
+;; (package! org-special-block-extras)
+;; (package! org-cite-csl-activate
+  ;; :recipe (:host github :repo "andras-simonyi/org-cite-csl-activate"))
+;; (package! org-cite-overlay)

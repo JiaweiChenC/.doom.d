@@ -88,3 +88,16 @@ Handles Org mode, Dired mode, and image buffers."
 ;; Keybindings remain the same, assuming Doom Emacs keybinding syntax
 (map! :n "C-;" #'send-scroll-up-to-other-frame)
 (map! :n "C-'" #'send-scroll-down-to-other-frame)
+
+(defun open-project-file-externally ()
+  "Find a file in the current project and open it externally on macOS."
+  (interactive)
+  (require 'projectile)
+  (projectile-ensure-project (projectile-project-root))
+  (let ((file (projectile-completing-read "Find file: " (projectile-current-project-files))))
+    (shell-command (concat "open " (shell-quote-argument (expand-file-name file (projectile-project-root)))))))
+
+(map! :leader
+      :desc "Open project file externally"
+      "p E" #'open-project-file-externally)
+

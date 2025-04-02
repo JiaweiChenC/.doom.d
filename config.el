@@ -30,6 +30,9 @@
 ;; (setq doom-theme 'modus-operandi
 ;;       doom-font (font-spec :family "JetBrains Mono" :size 15)
 ;;       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 16))
+
+
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
@@ -70,6 +73,7 @@
 
 (setq org-roam-directory "~/Documents/roam/")
 
+
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/org/journal/"))
@@ -96,16 +100,16 @@
 
 ;; (setq doom-modeline-major-mode-icon t)
 
-(map! :n "gj" 'evil-next-visual-line)
-(map! :n "gk" 'evil-previous-visual-line)
+(map! :n "j" 'evil-next-visual-line)
+(map! :n "k" 'evil-previous-visual-line)
 (map! (:after evil-org
        :map evil-org-mode-map
        :n "gk" (cmds! (org-on-heading-p)
                       #'org-backward-element
-                      #'evil-previous-visual-line)
+                      #'evil-previous-line)
        :n "gj" (cmds! (org-on-heading-p)
                       #'org-forward-element
-                      #'evil-next-visual-line))
+                      #'evil-next-line))
       :o "o" #'evil-inner-symbol
       :leader
       (:prefix "f"
@@ -245,15 +249,20 @@
 (setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :config
-  ;; set delay to 0.5s
-  (setq copilot-idle-delay 0.5)
-  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
-         ("M-<tab>" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion)))
+ :hook (prog-mode . copilot-mode)
+ :bind (("M-TAB" . 'copilot-accept-completion-by-word)
+        ("M-<tab>" . 'copilot-accept-completion-by-word)
+        :map copilot-completion-map
+        ("<tab>" . 'copilot-accept-completion)
+        ("TAB" . 'copilot-accept-completion))
+ :config
+ (add-to-list 'copilot-indentation-alist '(prog-mode 2))
+ (add-to-list 'copilot-indentation-alist '(org-mode 2))
+ (add-to-list 'copilot-indentation-alist '(text-mode 2))
+ (add-to-list 'copilot-indentation-alist '(closure-mode 2))
+ (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+ (setq copilot-idle-delay 0.5)
+ )
 
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
@@ -449,6 +458,7 @@
             (set-face-background 'fringe (face-attribute 'default :background))))
 
 
+;; (load! (expand-file-name "my-quickrun.el" "~/.doom.d/lisp/"))
 ;; load mytex.el after org
 (after! org
   (add-to-list 'org-file-apps '("\\.svg\\'" . default))
@@ -483,7 +493,7 @@
 (use-package! embark)
 
 (setq! org-modern-table nil)
-(setq! org-modern-block-fringe nil)
+;; (setq! org-modern-block-fringe nil)
 
 (use-package! org-appear
   :hook (org-mode . org-appear-mode)
@@ -534,10 +544,22 @@
 
 ;; disable org block highlight
 (after! org
-  (set-face-attribute 'org-block nil :foreground nil :background nil)
-  (set-face-attribute 'org-block-begin-line nil :foreground nil :background nil)
-  (set-face-attribute 'org-block-end-line nil :foreground nil :background nil)
+  ;; Function to apply custom face attributes for org blocks
+  (defun my-org-mode-frame-customizations ()
+    (set-face-attribute 'org-block nil :foreground "your_foreground_color" :background "your_background_color")
+    (set-face-attribute 'org-block-begin-line nil :foreground "your_begin_line_foreground" :background "your_begin_line_background")
+    (set-face-attribute 'org-block-end-line nil :foreground "your_end_line_foreground" :background "your_end_line_background")
   )
+
+  ;; Add this function to the hook that runs after making a new frame
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+              (with-selected-frame frame
+                (my-org-mode-frame-customizations))))
+
+  ;; Apply the customizations to the initial frame
+  (my-org-mode-frame-customizations)
+)
 
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
@@ -601,3 +623,90 @@
 
 (after! org
   (define-key org-mode-map (kbd "S-s-<mouse-1>") 'hermanhelf-org-jump-to-pdf))
+
+;; (set-frame-parameter nil 'alpha-background 0.7)
+
+;; map space l n to ni-narrow-to-region-floating
+(map! :leader :desc "narrow to region floating" "l n" #'ni-narrow-to-region-floating)
+
+;; map space l m  to ni-clear-aggregation
+(map! :leader :desc "clear aggregation" "l m" #'ni-clear-aggregation)
+
+(map! :leader :desc "float narrow t" "l t" #'ni-clear-aggregation)
+
+;; (use-package! float-narrow-indirect)
+(setq ni-floating-frame-border-color nil)
+
+;; (setq ni-floating-frame-transparency '(95 . 50))
+;; (after! float-narrow-indirect-mode
+;;   (setq fni-floating-frame-border-color nil))
+
+(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+
+(after! corfu
+  (setq corfu-auto nil))
+
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (face-remap-add-relative 'font-lock-comment-face :slant 'italic)))
+;; alpaa backround
+;; (set-frame-parameter nil 'alpha 90)
+
+(use-package! rainbow-csv
+  :hook (csv-mode . rainbow-csv-mode))
+
+;; map space t b to breadcrumb-mode
+(map! :leader :desc "breadcrumb mode" "t h" #'breadcrumb-mode)
+
+;; (setq! csv-align-max-width 10000)
+
+;; (use-package! cell-mode
+  ;; :config
+  ;; (setq! cell-cursor-blink-p 'nil)
+  ;; )
+;;
+;; (remove-hook 'find-file-hook #'diff-hl-mode)
+;; (remove-hook 'vc-dir-mode-hook #'diff-hl-mode)
+;; (remove-hook 'doom-first-file #'diff-hl-mode)
+(setq! catppuccin-flavor 'latte)
+
+(defun wrap-text-with-color ()
+  "Wrap the selected text with [[color:red][text]]."
+  (interactive)
+  (if (use-region-p)
+      (let ((selection (buffer-substring (region-beginning) (region-end))))
+        (delete-region (region-beginning) (region-end))
+        (insert (format "[[color:red][%s]]" selection)))
+    (message "No text selected!")))
+
+;; To bind this function to a key in Doom Emacs:
+(map! :leader
+      :desc "Wrap Text with Color"
+      "l r" #'wrap-text-with-color)
+
+;; (use-package! org-cite-overlay)
+
+
+(defun wrap-text-with-delete ()
+  "Wrap the selected text with [[delete:red][text]]."
+  (interactive)
+  (if (use-region-p)
+      (let ((selection (buffer-substring (region-beginning) (region-end))))
+        (delete-region (region-beginning) (region-end))
+        (insert (format "[[delete:][%s]]" selection)))
+    (message "No text selected!")))
+
+;; To bind this function to a key in Doom Emacs:
+(map! :leader
+      :desc "Wrap Text with Delete"
+      "l d" #'wrap-text-with-delete)
+
+;; map C-j to electric-newline-and-maybe-indent
+;; (after! org
+;;   ;; Unbind C-j from its current function in org-mode
+;;   (map! :map org-mode-map
+;;         "C-j" nil)
+
+;;   ;; Bind C-j to your new custom function in org-mode
+;;   (map! :map org-mode-map
+;;         "C-j" #'electric-newline-and-maybe-indent))
