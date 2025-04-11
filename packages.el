@@ -48,9 +48,9 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-journal hide-mode-line org
+(unpin! org-journal hide-mode-line
         citar-org-roam citar citar-embark jupyter
-        yasnippet
+        yasnippet nerd-icons
         )
 (package! writeroom-mode)
 (package! htmlize)
@@ -58,8 +58,6 @@
 (package! impatient-mode)
 (package! ox-hugo)
 (package! super-save)
-;; (package! eglot-booster
-;;   :recipe (:host github :repo "jdtsmith/eglot-booster"))
 (package! matlab-mode)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
@@ -68,8 +66,8 @@
 (package! flycheck-popup-tip :disable t)
 (package! code-cells)
 (package! org-download)
-(package! org-modern
-  :recipe (:host github :repo "minad/org-modern"))
+;; (package! org-modern
+;;   :recipe (:host github :repo "minad/org-modern"))
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
 ;; (package! gptel)
@@ -92,7 +90,7 @@
 ;; (package! sideline-eglot)
 (package! org-preview-html)
 ;; (package! org-modern-indent
-  ;; :recipe (:host github :repo "jdtsmith/org-modern-indent"))
+;;   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! holo-layer
   ;; :recipe (:host github :repo "manateelazycat/holo-layer"))
 ;; (package! iscroll)
@@ -116,8 +114,20 @@
 
 (package! solarized-theme
   :recipe (:host github :repo "bbatsov/solarized-emacs"))
+(package! zoom)
+(package! pet)
+(package! gruvbox-theme)
+(package! envrc)
+;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
+(package! org-src-context
+  :recipe (:host github :repo "karthink/org-src-context"))
 
-;; (package! org-special-block-extras)
+;; (package! exec-path-from-shell)
+;; (package! savefold
+;;   :recipe (:host github :repo "jcfk/savefold.el"))
 ;; (package! org-cite-csl-activate
   ;; :recipe (:host github :repo "andras-simonyi/org-cite-csl-activate"))
 ;; (package! org-cite-overlay)
+;; (package! org-supertag
+  ;; :recipe (:host github :repo "yibie/org-supertag"))
+;; (package! treesit-auto)

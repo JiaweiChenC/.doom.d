@@ -316,7 +316,7 @@ filepath)))
 (defun convert-zotero-links-in-buffer ()
 "Convert Zotero links to Org-mode links in the current buffer."
 (interactive)
-(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/[[\\2][\\1]]/g")
+(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/\([[\\2][\\1]]\)/g")
 (evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
 (evil-ex "%s/^\(“.+”\)\(.*\)/***\2\n\1/g/")
 )
@@ -333,10 +333,8 @@ links to Org-mode links and paste it at the end of the buffer."
                    content))
     ;; Go to the end of the buffer and insert the modified content
     (with-current-buffer (current-buffer)  ; Ensure we're in the current buffer
-      (goto-char (point-max))
-      (newline)
       (insert content)
-      (newline))
+      )
   )
 )
 

@@ -96,9 +96,9 @@
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
-;; (global-hide-mode-line-mode)
+(global-hide-mode-line-mode)
 
-;; (setq doom-modeline-major-mode-icon t)
+(setq doom-modeline-major-mode-icon t)
 
 (map! :n "j" 'evil-next-visual-line)
 (map! :n "k" 'evil-previous-visual-line)
@@ -151,7 +151,10 @@
 
 
 (after! org
-  (setq org-startup-indented nil)
+  ;; (setq! org-src-context-mode 1)
+  (setq! org-pretty-entities nil)
+  ;; (setq org-indent-mode nil)
+  (setq! org-startup-indented nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
   (setq org-download-annotate-function (lambda (link) ""))
@@ -449,9 +452,9 @@
 
 ;; (setq doom-modeline-modal nil)
 
-(use-package! org
-  :hook (org-mode . org-modern-mode)
-  )
+;; (use-package! org
+;;   :hook (org-mode . org-modern-mode)
+;;   )
 
 (add-hook 'doom-load-theme-hook
           (lambda ()
@@ -550,22 +553,22 @@
 
 ;; disable org block highlight
 (after! org
-  ;; Function to apply custom face attributes for org blocks
-  (defun my-org-mode-frame-customizations ()
-    (set-face-attribute 'org-block nil :foreground "your_foreground_color" :background "your_background_color")
-    (set-face-attribute 'org-block-begin-line nil :foreground "your_begin_line_foreground" :background "your_begin_line_background")
-    (set-face-attribute 'org-block-end-line nil :foreground "your_end_line_foreground" :background "your_end_line_background")
-  )
-
-  ;; Add this function to the hook that runs after making a new frame
-  (add-hook 'after-make-frame-functions
-            (lambda (frame)
-              (with-selected-frame frame
-                (my-org-mode-frame-customizations))))
-
-  ;; Apply the customizations to the initial frame
-  (my-org-mode-frame-customizations)
+;;   ;; Function to apply custom face attributes for org blocks
+;;   (defun my-org-mode-frame-customizations ()
+(set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
+(set-face-attribute 'org-block-begin-line nil :foreground 'unspecified :background 'unspecified)
+(set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
 )
+
+;;   ;; Add this function to the hook that runs after making a new frame
+;;   (add-hook 'after-make-frame-functions
+;;             (lambda (frame)
+;;               (with-selected-frame frame
+;;                 (my-org-mode-frame-customizations))))
+
+;;   ;; Apply the customizations to the initial frame
+;;   (my-org-mode-frame-customizations)
+;; )
 
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
@@ -592,6 +595,7 @@
       :fringe-face (intern (format "flycheck-fringe-%s" level)))))
 
 (setq-default bidi-display-reordering nil)
+
 (setq bidi-inhibit-bpa t
       long-line-threshold 1000
       large-hscroll-threshold 1000
@@ -720,11 +724,49 @@
 ;; (setq citar-file-open-functions '(("pdf" . zot-open-pdf)
 ;;                                   ("html" . citar-file-open-external)
 ;;                                   (t . find-file)))
-(setq citar-open-entry-function 'citar-open-entry-in-zotero)
-(setq citar-at-point-function 'embark-act)
+;; (setq citar-open-entry-function 'citar-open-entry-in-zotero)
+;; (setq citar-at-point-function 'embark-act)
 (map! :map citar-embark-citation-map
       :n
       "<return>" nil
       "<return>" #'zot-open-pdf)
 
 (setq! evil-kill-on-visual-paste nil)
+
+(use-package! zoom)
+
+(custom-set-variables
+ '(zoom-size '(0.8 . 0.8)))
+
+;; (use-package pet
+;;   :config
+;;   (add-hook 'python-base-mode-hook 'pet-mode))
+
+;; (use-package! window-stool
+  ;; :hook (prog-mode . window-stool-mode))
+
+(use-package! envrc
+  :hook (after-init . envrc-global-mode))
+
+(use-package! eglot
+  ;; :ensure t
+  :config
+  (setq eglot-events-buffer-size 0
+        eglot-report-progress nil)
+  (setq eglot-extend-to-xref t)
+  (add-to-list 'eglot-server-programs
+               '(beancount-mode . ("beancount-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode)
+                 "pyright-langserver" "--stdio"))
+  ;; (setq-default
+  ;;  eglot-workspace-configuration
+  ;;  '(:basedpyright (:typeCheckingMode "recommended")
+  ;;    :basedpyright.analysis
+  ;;    (:diagnosticSeverityOverrides
+  ;;     (:reportUnusedCallResult "none")
+  ;;     :inlayHints (:callArgumentNames :json-false))))
+  )
+
+(after! org
+  (org-src-context-mode))

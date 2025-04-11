@@ -151,7 +151,8 @@ formatted as [cite:@target1;@target2;@target3]."
            (t
             (search-in-file processed-line org-filename)))
           ;; Kill the TeX buffer after performing the search
-          (kill-buffer tex-buffer))
+          ;; (kill-buffer tex-buffer)
+          )
       (message "Associated Org file does not exist: %s" org-filename))))
 
 (defun hermanhelf-org-jump-to-latex ()

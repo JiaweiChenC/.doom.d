@@ -101,3 +101,27 @@ Handles Org mode, Dired mode, and image buffers."
       :desc "Open project file externally"
       "p E" #'open-project-file-externally)
 
+
+
+;; (defun update-breadcrumb-mode-based-on-window-count ()
+;;   "Toggle breadcrumb-mode based on the number of visible windows."
+;;   (let ((more-than-one-window (> (length (window-list)) 1)))
+;;     (unless (eq more-than-one-window breadcrumb-mode)
+;;       (if more-than-one-window
+;;           (breadcrumb-mode 1)
+;;         (breadcrumb-mode -1)))))
+
+;; (add-hook 'window-configuration-change-hook 'update-breadcrumb-mode-based-on-window-count)
+
+(defun citar-org-roam-ref-add ()
+  "Add a roam_ref to the node at point, and ensure the node has an Org ID.
+
+This is just a wrapper for `org-roam-ref-add', with added functionality to ensure
+the node has an Org ID."
+  (interactive)
+  (let ((ref (citar-select-ref)))
+    ;; Ensure the current node has an Org ID
+    (unless (org-id-get)
+      (org-id-get-create))
+    ;; Add the reference
+    (org-roam-ref-add (concat "@" ref))))

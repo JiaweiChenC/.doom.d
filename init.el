@@ -36,7 +36,8 @@
        :ui
        ;; deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
-       smooth-scroll
+       (smooth-scroll
+        +interpolate)
        doom-dashboard    ; a nifty splash screen for Emacs
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
        ;;(emoji +unicode)  ; 🙂
@@ -97,7 +98,7 @@
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
-       ;; tree-sitter
+       tree-sitter
        ;;ansible
        biblio            ; Writes a PhD for you (citation needed)
        debugger ; FIXME stepping through code, to help you add bugs
@@ -175,7 +176,7 @@
        ;;ocaml             ; an objective camel
        (org               ; organize your plain life in plain text
         ;; +noter
-        ;; +pretty
+        +pretty
         +roam2
         +journal
         ;; +dragndrop
@@ -186,10 +187,11 @@
        plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        (python            ; beautiful is better than ugly
+        ;; +conda
         +lsp
-        +pyright
+        ;; +pyright
         ;; +pyenv
-        ;; +tree-sitter
+        +tree-sitter
         )
        ;;qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
