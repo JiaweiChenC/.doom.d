@@ -131,3 +131,6 @@
 ;; (package! org-supertag
   ;; :recipe (:host github :repo "yibie/org-supertag"))
 ;; (package! treesit-auto)
+(package! phscroll
+  :recipe (:host github :repo "misohena/phscroll"))
+(package! olivetti)

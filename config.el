@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi
+(setq doom-theme 'doom-gruvbox
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -768,6 +768,9 @@
   ;;     :inlayHints (:callArgumentNames :json-false))))
   )
 
+;; This is because org-src-mode-hook runs before the temporary buffer created by org-edit-special
+;;is fully initialized, which can lead to issues when starting Eglot.
+
 (after! org
   (org-src-context-mode))
 
@@ -776,5 +779,32 @@
   (when (and (derived-mode-p 'prog-mode)
              (not (eglot-current-server)))
     (run-at-time 0 nil #'eglot-ensure)))
-
 (add-hook 'org-src-mode-hook #'my/org-src-activate-eglot-if-needed)
+
+;; (defun my/org-disable-visual-line-in-tables ()
+;;   "Disable `visual-line-mode` in Org tables when point is in a table."
+;;   (when (and (derived-mode-p 'org-mode)
+;;              visual-fill-column-mode)
+;;     (if (org-at-table-p)
+;;         (visual-line-mode -1)
+;;       (visual-line-mode 1))))
+
+;; (add-hook 'post-command-hook #'my/org-disable-visual-line-in-tables)
+;;
+;; (setq! org-startup-truncated nil)
+;; (use-package! phscroll)
+(setq! visual-fill-column-width 100)
+
+;;; Define a flag variable for the startup option (buffer-local by Org parsing)
+(defvar org-visual-fill-startup nil
+  "Non-nil if this Org buffer should enable visual-fill-column-mode on startup.")
+
+;;; Add a custom startup keyword "visual-fill" that sets the flag to t
+(with-eval-after-load 'org   ; ensure Org is loaded before modifying org-startup-options
+  (add-to-list 'org-startup-options '("visual-fill" org-visual-fill-startup t)))
+
+;;; Hook to turn on visual-fill-column-mode when the flag is set by #+STARTUP
+(add-hook 'org-mode-hook
+          (lambda ()
+            (when org-visual-fill-startup
+              (visual-fill-column-mode 1))))
