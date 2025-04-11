@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name:dm
+# key: dmm
+# condition: t
+# --
+
+\\[
+$0
+\\]
