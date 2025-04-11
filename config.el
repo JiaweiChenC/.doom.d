@@ -770,3 +770,11 @@
 
 (after! org
   (org-src-context-mode))
+
+(defun my/org-src-activate-eglot-if-needed ()
+  "Activate Eglot in org-src-edit buffer if it's not already active."
+  (when (and (derived-mode-p 'prog-mode)
+             (not (eglot-current-server)))
+    (run-at-time 0 nil #'eglot-ensure)))
+
+(add-hook 'org-src-mode-hook #'my/org-src-activate-eglot-if-needed)
