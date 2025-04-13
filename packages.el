@@ -48,11 +48,11 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-journal hide-mode-line
+(unpin! org-journal hide-mode-line org
         citar-org-roam citar citar-embark jupyter
-        yasnippet nerd-icons
+        yasnippet nerd-icons jupyter
         )
-(package! writeroom-mode)
+;; (package! writeroom-mode)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -84,6 +84,7 @@
 ;; (package! codeium :recipe (:host github :repo "Exafunction/codeium.el"))
 (package! sideline)
 (package! sideline-flycheck)
+(package! color-theme-sanityinc-tomorrow)
 ;; (package! sideline-eglot
 ;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
 ;;   )
@@ -133,4 +134,5 @@
 ;; (package! treesit-auto)
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
-(package! olivetti)
+;; (package! olivetti)
+;; (package! eat)

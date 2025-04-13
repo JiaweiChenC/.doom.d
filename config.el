@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-gruvbox
+(setq doom-theme 'my-default
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -228,6 +228,7 @@
           ("s" "secret" plain "#+title: ${title}\n\n"
            :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
            :unnarrowed t)
+
           ("z" "literature note" plain
            "%?"
            :target (file+head
@@ -553,9 +554,9 @@
 
 ;; disable org block highlight
 (after! org
-;;   ;; Function to apply custom face attributes for org blocks
-;;   (defun my-org-mode-frame-customizations ()
-(set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
+;; ;;   ;; Function to apply custom face attributes for org blocks
+;; ;;   (defun my-org-mode-frame-customizations ()
+;; (set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
 (set-face-attribute 'org-block-begin-line nil :foreground 'unspecified :background 'unspecified)
 (set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
 )
@@ -678,7 +679,7 @@
 ;; (remove-hook 'find-file-hook #'diff-hl-mode)
 ;; (remove-hook 'vc-dir-mode-hook #'diff-hl-mode)
 ;; (remove-hook 'doom-first-file #'diff-hl-mode)
-(setq! catppuccin-flavor 'latte)
+;; (setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
   "Wrap the selected text with [[color:red][text]]."
@@ -751,14 +752,20 @@
 (use-package! eglot
   ;; :ensure t
   :config
-  (setq eglot-events-buffer-size 0
+  (setq eglot-events-buffer-config 0
         eglot-report-progress nil)
   (setq eglot-extend-to-xref t)
   (add-to-list 'eglot-server-programs
-               '(beancount-mode . ("beancount-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
-                 "pyright-langserver" "--stdio"))
+                 "basedpyright-langserver" "--stdio"))
+  (setq-default
+   eglot-workspace-configuration
+   '(:basedpyright (:typeCheckingMode "basic")
+     :basedpyright.analysis
+     (:diagnosticSeverityOverrides
+      (:reportUnusedCallResult "none"
+       :reportArgumentType "none")
+      :inlayHints (:callArgumentNames :json-false)))))
   ;; (setq-default
   ;;  eglot-workspace-configuration
   ;;  '(:basedpyright (:typeCheckingMode "recommended")
@@ -766,20 +773,20 @@
   ;;    (:diagnosticSeverityOverrides
   ;;     (:reportUnusedCallResult "none")
   ;;     :inlayHints (:callArgumentNames :json-false))))
-  )
+  ;; )
 
 ;; This is because org-src-mode-hook runs before the temporary buffer created by org-edit-special
 ;;is fully initialized, which can lead to issues when starting Eglot.
 
-(after! org
-  (org-src-context-mode))
+;; (after! org
+;;   (org-src-context-mode))
 
-(defun my/org-src-activate-eglot-if-needed ()
-  "Activate Eglot in org-src-edit buffer if it's not already active."
-  (when (and (derived-mode-p 'prog-mode)
-             (not (eglot-current-server)))
-    (run-at-time 0 nil #'eglot-ensure)))
-(add-hook 'org-src-mode-hook #'my/org-src-activate-eglot-if-needed)
+;; (defun my/org-src-activate-eglot-if-needed ()
+;;   "Activate Eglot in org-src-edit buffer if it's not already active."
+;;   (when (and (derived-mode-p 'org-src-mode)
+;;              (not (eglot-current-server)))
+;;     (run-at-time 0 nil #'eglot-ensure)))
+;; (add-hook 'org-src-mode-hook #'my/org-src-activate-eglot-if-needed)
 
 ;; (defun my/org-disable-visual-line-in-tables ()
 ;;   "Disable `visual-line-mode` in Org tables when point is in a table."
@@ -792,7 +799,9 @@
 ;; (add-hook 'post-command-hook #'my/org-disable-visual-line-in-tables)
 ;;
 ;; (setq! org-startup-truncated nil)
-;; (use-package! phscroll)
+(use-package! phscroll
+  :hook (org-mode . org-phscroll-mode))
+
 (setq! visual-fill-column-width 100)
 
 ;;; Define a flag variable for the startup option (buffer-local by Org parsing)
@@ -808,3 +817,4 @@
           (lambda ()
             (when org-visual-fill-startup
               (visual-fill-column-mode 1))))
+
