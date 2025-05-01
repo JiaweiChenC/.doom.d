@@ -27,7 +27,7 @@
   (find-file filename)
   (goto-char 0)
   (search-forward needle)
-  ;; (hl-line-highlight)
+  (hl-line-highlight)
   (beginning-of-line)
   (evil-scroll-line-to-center nil)
   ;; find the line at the point if it is on a heading, open the heading
@@ -151,7 +151,8 @@ formatted as [cite:@target1;@target2;@target3]."
            (t
             (search-in-file processed-line org-filename)))
           ;; Kill the TeX buffer after performing the search
-          ;; (kill-buffer tex-buffer)
+          (bury-buffer tex-buffer)
+          (hl-line-make-overlay)
           )
       (message "Associated Org file does not exist: %s" org-filename))))
 

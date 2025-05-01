@@ -97,7 +97,7 @@ and then kill the LaTeX buffer after compilation, preserving any existing sentin
                (cond
                 ((string-match-p "finished" event)
                  ;; (message "Compilation succeeded")
-                 (kill-buffer latex-buffer))
+                 (bury-buffer latex-buffer))
                 ((string-match-p "exited abnormally" event)
                  ;; (message "Compilation failed with errors")
                  ))

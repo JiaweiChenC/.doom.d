@@ -86,8 +86,8 @@ Handles Org mode, Dired mode, and image buffers."
              (scroll-down-command))))))  ; For all other modes, perform a normal scroll down
 
 ;; Keybindings remain the same, assuming Doom Emacs keybinding syntax
-(map! :n "C-;" #'send-scroll-up-to-other-frame)
-(map! :n "C-'" #'send-scroll-down-to-other-frame)
+;; (map! :n "C-;" #'send-scroll-up-to-other-frame)
+;; (map! :n "C-'" #'send-scroll-down-to-other-frame)
 
 (defun open-project-file-externally ()
   "Find a file in the current project and open it externally on macOS."
@@ -125,3 +125,162 @@ the node has an Org ID."
       (org-id-get-create))
     ;; Add the reference
     (org-roam-ref-add (concat "@" ref))))
+
+
+
+
+(setq org-babel-default-header-args:jupyter-python
+      '((:results . "both")
+	;; This seems to lead to buffer specific sessions!
+        (:session . (lambda () (file-name-nondirectory (buffer-file-name))))
+	(:kernel . "python3")
+	(:pandoc . "t")
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")
+	(:eval . "never-export")))
+
+(defun scimax-jupyter-jump-to-error ()
+  "In a src block, jump to the line indicated as an error in the results.
+In a SyntaxError, there is not a traceback with a line number, so
+we handle it separately. It doesn't seem like it should be that
+way, but it is."
+  (interactive)
+  (let* ((cp (point))
+	 (location (org-babel-where-is-src-block-result))
+	 (case-fold-search t))
+
+    (when (and location
+	       (goto-char location)
+	       (looking-at org-babel-result-regexp))
+      (cond
+       ;; Check for SyntaxError
+       ((string-match "SyntaxError:" (buffer-substring location (org-babel-result-end)))
+	(re-search-forward (rx (zero-or-more " ") "^") nil (org-babel-result-end))
+	(previous-line)
+	(let ((pattern (string-trim-left
+			(buffer-substring-no-properties
+			 (line-beginning-position) (line-end-position)))))
+	  (goto-char cp)
+	  (goto-char (org-element-property :begin (org-element-context)))
+	  (unless
+	      (search-forward pattern (org-element-property :end (org-element-context)) t)
+	    (message "No SyntaxError found like %s" pattern))))
+
+       ;; search for something like --> 21
+       (t
+	(goto-char location)
+	(re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
+	(save-match-data
+	  (goto-char cp)
+	  (goto-char (org-element-property :begin (org-element-context))))
+	(forward-line (string-to-number (match-string-no-properties 1))))))))
+
+(setq org-babel-default-header-args:jupyter-R
+      '((:results . "value")
+	(:session . "jupyter-R")
+	(:kernel . "ir")
+	(:pandoc . "t")
+	(:exports . "both")
+	(:cache .   "no")
+	(:noweb . "no")
+	(:hlines . "no")
+	(:tangle . "no")
+	(:eval . "never-export")))
+
+(defun scimax-jupyter-ansi ()
+  "Replaces ansi-codes in exceptions with colored text.
+I thought emacs-jupyter did this automatically, but it may only
+happen in the REPL. Without this, the tracebacks are very long
+and basically unreadable.
+
+We also add some font properties to click on goto-error.
+
+This should only apply to jupyter-lang blocks."
+  (when (string-match "^jupyter" (car (or (org-babel-get-src-block-info t) '(""))))
+    (let* ((r (org-babel-where-is-src-block-result))
+	   (result (when r
+		     (save-excursion
+		       (goto-char r)
+		       (org-element-context)))))
+      (when result
+	(ansi-color-apply-on-region (org-element-property :begin result)
+				    (org-element-property :end result))
+
+	;; Let's fontify "# [goto error]" to it is clickable
+	(save-excursion
+	  (goto-char r)
+	  (when (search-forward "# [goto error]" (org-element-property :end result) t)
+	    (add-text-properties
+	     (match-beginning 0) (match-end 0)
+	     (list 'help-echo "Click to jump to error."
+		   'mouse-face 'highlight
+		   'local-map (let ((map (copy-keymap help-mode-map)))
+				(define-key map [mouse-1] (lambda ()
+							    (interactive)
+							    (search-backward "#+BEGIN_SRC")
+							    (scimax-jupyter-jump-to-error)))
+				map))))))
+
+      t)))
+
+
+(add-to-list 'org-babel-after-execute-hook 'scimax-jupyter-ansi t)
+
+
+;; attachment customization
+(setq org-attach-store-link-p 'attached)
+
+;; map org attach attach to spc m a A
+;; (map! :leader :desc "org attach attach" "m a A" #'org-attach-attach)
+
+(defun scimax-org-attach-attach-advice (&rest file)
+  "Add link to attached file in the property"
+  (let ((attach (pop org-stored-links)))
+    (org-entry-put (point) "ATTACHMENTS"
+		   (concat
+		    (org-entry-get (point) "ATTACHMENTS")
+		    (format " [[%s][%s]]" (car attach) (cadr attach))))))
+
+(advice-add 'org-attach-attach :after 'scimax-org-attach-attach-advice)
+
+(defun my/org-open-attachment-from-property ()
+  "Prompt to select a file from the ATTACHMENTS property and open it."
+  (interactive)
+  (require 'org)
+  (let* ((attachments (org-entry-get (point) "ATTACHMENTS"))
+         (links (when attachments
+                  (save-match-data
+                    (let (result)
+                      (with-temp-buffer
+                        (insert attachments)
+                        (goto-char (point-min))
+                        (while (re-search-forward "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]" nil t)
+                          (push (cons (match-string 3) (match-string 2)) result))
+                      (nreverse result))))))
+         (choice (when links
+                   (completing-read "Open attachment: " (mapcar #'car links) nil t))))
+    (when choice
+      (let ((filename (assoc choice links)))
+        (when filename
+          (find-file (expand-file-name (cdr filename) (org-attach-dir t))))))))
+
+;; map to spc m a h
+(map! :leader :desc "org open attachment from property" "m a h" #'my/org-open-attachment-from-property)
+
+(defun my/org-attach-new-add-link-to-attachments (file)
+  "After creating new FILE, add its link to the ATTACHMENTS property at the right Org entry."
+  (let ((filename (file-name-nondirectory file))
+        (origin-buffer (current-buffer))) ;; save the attachment buffer
+    (when (org-back-to-heading t) ;; move to org heading if possible
+      (let* ((link (format "[[attachment:%s][%s]]" filename filename))
+             (current (org-entry-get (point) "ATTACHMENTS")))
+        (org-entry-put (point) "ATTACHMENTS"
+                       (if (and current (not (string-blank-p current)))
+                           (concat current " " link)
+                         link))))
+    (switch-to-buffer origin-buffer))) ;; switch back to the attachment buffer
+
+(advice-add 'org-attach-new :before #'my/org-attach-new-add-link-to-attachments)

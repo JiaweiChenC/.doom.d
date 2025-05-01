@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'my-default
+(setq doom-theme 'modus-operandi-tinted
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -96,20 +96,21 @@
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
-(global-hide-mode-line-mode)
+;; highlight the current line
+;; (global-hide-mode-line-mode)
 
 (setq doom-modeline-major-mode-icon t)
 
-(map! :n "j" 'evil-next-visual-line)
-(map! :n "k" 'evil-previous-visual-line)
+;; (map! :n "j" 'evil-next-visual-line)
+;; (map! :n "k" 'evil-previous-visual-line)
 (map! (:after evil-org
        :map evil-org-mode-map
        :n "gk" (cmds! (org-on-heading-p)
                       #'org-backward-element
-                      #'evil-previous-line)
+                      #'evil-previous-visual-line)
        :n "gj" (cmds! (org-on-heading-p)
                       #'org-forward-element
-                      #'evil-next-line))
+                      #'evil-next-visual-line))
       :o "o" #'evil-inner-symbol
       :leader
       (:prefix "f"
@@ -124,11 +125,15 @@
                "r" #'org-roam-node-find
                "R" #'org-roam-capture))
 
+(when (file-exists-p "~/.emacs.d/.secret.el")
+  (load "~/.emacs.d/.secret.el"))
+
 (use-package! mathpix.el
-  :custom ((mathpix-app-id "chenjw12580_gmail_com_2ad82a_fb84ed")
-           (mathpix-app-key "a52385924df4b5a6c0ada7b0f127e5d721147387d2b7be5494919f957ae11565"))
+  :custom ((mathpix-app-id mathpix-app-id)
+           (mathpix-app-key mathpix-app-key))
   :bind
   ("C-x m" . mathpix-screenshot))
+
 (setq mathpix-screenshot-method "screencapture -i %s")
 
 ;; (use-package! websocket
@@ -154,7 +159,7 @@
   ;; (setq! org-src-context-mode 1)
   (setq! org-pretty-entities nil)
   ;; (setq org-indent-mode nil)
-  (setq! org-startup-indented nil)
+  ;; (setq! org-startup-indented nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
   (setq org-download-annotate-function (lambda (link) ""))
@@ -187,62 +192,63 @@
 ;;                 (setq org-image-actual-width 700)
 ;;               (setq org-image-actual-width 400))))
 
-(after! org-roam
-  (setq org-roam-capture-templates
-        `(("n" "note" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
-           :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("b" "booknotes" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
-           :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("c" "coding" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/coding.org]" org-roam-directory)
-           :target (file "coding/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("l" "lectures" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
-           :target (file "lectures/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("p" "project" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/project.org]" org-roam-directory)
-           :target (file "project/%<%Y%m%d>-${slug}.org")
-           :unnarrowed t)
-          ("r" "research" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/research.org]" org-roam-directory)
-           :target (file "research/%<%Y%m%d>-${slug}.org")
-           :unnarrowed t)
-          ("a" "paper" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/paper.org]" org-roam-directory)
-           :target (file "paper/%<%Y%m%d>-${slug}.org")
-           :unnarrowed t)
-          ("w" "works" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/works.org]" org-roam-directory)
-           :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("m" "math" plain
-           ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/math.org]" org-roam-directory)
-           :target (file "math/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
-          ("s" "secret" plain "#+title: ${title}\n\n"
-           :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
-           :unnarrowed t)
+;; (after! org-roam
+;;   (setq org-roam-capture-templates
+;;         `(("n" "note" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
+;;            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("b" "booknotes" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
+;;            :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("c" "coding" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/coding.org]" org-roam-directory)
+;;            :target (file "coding/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("l" "lectures" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
+;;            :target (file "lectures/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("p" "project" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/project.org]" org-roam-directory)
+;;            :target (file "project/%<%Y%m%d>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("r" "research" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/research.org]" org-roam-directory)
+;;            :target (file "research/%<%Y%m%d>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("a" "paper" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/paper.org]" org-roam-directory)
+;;            :target (file "paper/%<%Y%m%d>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("w" "works" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/works.org]" org-roam-directory)
+;;            :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("m" "math" plain
+;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/math.org]" org-roam-directory)
+;;            :target (file "math/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
+;;           ("s" "secret" plain "#+title: ${title}\n\n"
+;;            :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
+;;            :unnarrowed t)
 
-          ("z" "literature note" plain
-           "%?"
-           :target (file+head
-            "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
-            "#+title: ${note-title}.\n#+created: %U\n \n* ${note-title}\n")
-           :unnarrowed t)
-          )
-        ;; Use human readable dates for dailies titles
-        org-roam-dailies-capture-templates
-        '(("d" "default" entry "* %?"
-           :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
+;;           ("z" "literature note" plain
+;;            "%?"
+;;            :target (file+head
+;;             "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
+;;             "#+title: ${note-title}.\n#+created: %U\n \n* ${note-title}\n")
+;;            :unnarrowed t)
+;;           )
+;;         ;; Use human readable dates for dailies titles
+;;         org-roam-dailies-capture-templates
+;;         '(("d" "default" entry "* %?"
+;;            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 (setq citar-org-roam-capture-template-key "z")
+
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
@@ -284,9 +290,9 @@
 ;; bind quickrun kill process to space r k
 (map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
-;; (use-package! dired
-;;   :config
-;;   (set-popup-rule! "^\\*image-dired" :ignore t))
+(use-package! dired
+  :config
+  (set-popup-rule! "^\\*image-dired" :ignore t))
 
 ;; set org journal to weekly
 (setq org-journal-file-type 'monthly)
@@ -503,7 +509,7 @@
 (use-package! embark)
 
 (setq! org-modern-table nil)
-;; (setq! org-modern-block-fringe nil)
+(setq! org-modern-block-fringe nil)
 
 (use-package! org-appear
   :hook (org-mode . org-appear-mode)
@@ -523,17 +529,14 @@
 
 (setq! org-export-expand-links 'nil)
 
-(use-package! bookmark-in-project
-  :commands (bookmark-in-project-jump
-             bookmark-in-project-jump-next
-             bookmark-in-project-jump-previous
-             bookmark-in-project-delete-all)
-
-  ;; Example key bindings.
-  ;; map bookmark in project to space p m
-        :config
-        (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
-        (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump))
+;; (use-package! bookmark-in-project
+;;   :commands (bookmark-in-project-jump
+;;              bookmark-in-project-jump-next
+;;              bookmark-in-project-jump-previous
+;;              bookmark-in-project-delete-all)
+;;   :config
+(map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
+(map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
 
 ;; ;; map space e g to gptel
@@ -622,9 +625,6 @@
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
 
-(with-eval-after-load 'ob-jupyter
- (org-babel-jupyter-aliases-from-kernelspecs)
- )
 
 (setq! org-preview-html-viewer 'xwidget)
 
@@ -652,7 +652,8 @@
 ;; (after! float-narrow-indirect-mode
 ;;   (setq fni-floating-frame-border-color nil))
 
-(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+;; enable highlight line
+;; (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
 
 (after! corfu
   (setq corfu-auto nil))
@@ -679,7 +680,7 @@
 ;; (remove-hook 'find-file-hook #'diff-hl-mode)
 ;; (remove-hook 'vc-dir-mode-hook #'diff-hl-mode)
 ;; (remove-hook 'doom-first-file #'diff-hl-mode)
-;; (setq! catppuccin-flavor 'latte)
+(setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
   "Wrap the selected text with [[color:red][text]]."
@@ -746,15 +747,12 @@
 ;; (use-package! window-stool
   ;; :hook (prog-mode . window-stool-mode))
 
-(use-package! envrc
-  :hook (after-init . envrc-global-mode))
-
 (use-package! eglot
-  ;; :ensure t
   :config
   (setq eglot-events-buffer-config 0
-        eglot-report-progress nil)
-  (setq eglot-extend-to-xref t)
+        eglot-report-progress nil
+        eglot-extend-to-xref t
+        eglot-ignored-server-capabilities '(:inlayHintProvider)) ;; <--- Here
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
                  "basedpyright-langserver" "--stdio"))
@@ -764,40 +762,9 @@
      :basedpyright.analysis
      (:diagnosticSeverityOverrides
       (:reportUnusedCallResult "none"
-       :reportArgumentType "none")
-      :inlayHints (:callArgumentNames :json-false)))))
-  ;; (setq-default
-  ;;  eglot-workspace-configuration
-  ;;  '(:basedpyright (:typeCheckingMode "recommended")
-  ;;    :basedpyright.analysis
-  ;;    (:diagnosticSeverityOverrides
-  ;;     (:reportUnusedCallResult "none")
-  ;;     :inlayHints (:callArgumentNames :json-false))))
-  ;; )
+       :reportArgumentType "none")))))
 
-;; This is because org-src-mode-hook runs before the temporary buffer created by org-edit-special
-;;is fully initialized, which can lead to issues when starting Eglot.
 
-;; (after! org
-;;   (org-src-context-mode))
-
-;; (defun my/org-src-activate-eglot-if-needed ()
-;;   "Activate Eglot in org-src-edit buffer if it's not already active."
-;;   (when (and (derived-mode-p 'org-src-mode)
-;;              (not (eglot-current-server)))
-;;     (run-at-time 0 nil #'eglot-ensure)))
-;; (add-hook 'org-src-mode-hook #'my/org-src-activate-eglot-if-needed)
-
-;; (defun my/org-disable-visual-line-in-tables ()
-;;   "Disable `visual-line-mode` in Org tables when point is in a table."
-;;   (when (and (derived-mode-p 'org-mode)
-;;              visual-fill-column-mode)
-;;     (if (org-at-table-p)
-;;         (visual-line-mode -1)
-;;       (visual-line-mode 1))))
-
-;; (add-hook 'post-command-hook #'my/org-disable-visual-line-in-tables)
-;;
 ;; (setq! org-startup-truncated nil)
 (use-package! phscroll
   :hook (org-mode . org-phscroll-mode))
@@ -818,3 +785,77 @@
             (when org-visual-fill-startup
               (visual-fill-column-mode 1))))
 
+(setq! doom-big-font-increment 2)
+
+(map! :n "C-;" #'electric-newline-and-maybe-indent)
+
+
+(use-package! org-modern-indent
+  :hook (org-mode . org-modern-indent-mode))
+  ;; (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+
+
+(defun my/deft-set-project-doc-org-dir (orig-fn &rest args)
+  "Set `deft-directory` to `[project]/doc/org/` before calling `deft`."
+  (let ((project-root (projectile-project-root)))
+    (setq deft-directory (expand-file-name "doc/org/" project-root)))
+  (apply orig-fn args))
+
+(advice-add 'deft :around #'my/deft-set-project-doc-org-dir)
+
+(with-eval-after-load 'ob-jupyter
+ (org-babel-jupyter-aliases-from-kernelspecs)
+ )
+
+;; set writeroom-width to 80
+(setq writeroom-width 60)
+
+;; hack to make jupyter work with images
+;; https://github.com/emacs-jupyter/jupyter/issues/558
+(defun skip-undo (orig-fun &rest args)
+  "Execute ORIG-FUN with ARGS without recording undo information."
+  (let ((buffer-undo-list t)) ; Temporarily disable undo recording
+    (apply orig-fun args)))
+
+(advice-add 'jupyter-generate-request :around #'skip-undo)
+
+;; attachment
+(setq org-attach-auto-tag nil)
+
+(defun insert-attachment-from-dir ()
+  "Insert a link to a file from the current heading's attachment directory into the :ATTACHMENTS: property."
+  (interactive)
+  (require 'org-attach)
+  (let* ((attach-dir (org-attach-dir t)) ;; Get the attachment dir, create if needed
+         (files (when (file-directory-p attach-dir)
+                  (directory-files attach-dir nil "^[^.]"))) ;; List non-dotfiles
+         (file (completing-read "Choose attachment file: " files nil t))
+         (link (concat "attachment:" file))
+         (current (org-entry-get (point) "ATTACHMENTS")))
+    ;; Update the ATTACHMENTS property
+    (org-entry-put (point) "ATTACHMENTS"
+                   (string-join (remove "" (list current (format "[[%s][%s]]" link file)))))))
+
+;; map to space m a i
+(map! :leader :desc "insert attachment from dir" "m a i" #'insert-attachment-from-dir)
+
+;; make copilot ignore .eld file
+(after! copilot
+  (setq copilot-max-char-warning-disabled t)
+  )
+
+;; (setq! global-diff-hl-show-hunk-mouse-mode t)
+
+
+(map! :after evil-org
+      :map evil-org-mode-map
+      :n "C-j" #'electric-newline-and-maybe-indent)
+
+;; after evil org map g spc to evil-avy-goto-char-2
+(map! :after evil-org
+      :map evil-org-mode-map
+      :n "g SPC" #'evil-avy-goto-char-2)
+
+;; add header-args to org default properties
+(after! org
+  (add-to-list 'org-default-properties "HEADER-ARGS"))

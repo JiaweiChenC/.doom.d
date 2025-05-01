@@ -34,7 +34,7 @@
        (vertico +icons)           ; the search engine of the future
 
        :ui
-       ;; deft              ; notational velocity for Emacs
+       deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        ;; (smooth-scroll
        ;;  +interpolate)
@@ -42,7 +42,7 @@
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
        ;;(emoji +unicode)  ; 🙂
        hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
-       ;;hydra
+       hydra
        ;; indent-guides     ; highlighted indent columns
        ;;ligatures          ; ligatures and symbols to make your code pretty again
        ;;minimap           ; show a map of the code on the side
@@ -54,6 +54,7 @@
        ;; tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
+       ;; (vc-gutter +pretty)         ; vcs diff in the fringe
        ;; vc-gutter         ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
@@ -102,7 +103,7 @@
        ;;ansible
        biblio            ; Writes a PhD for you (citation needed)
        debugger ; FIXME stepping through code, to help you add bugs
-       ;;direnv
+       direnv
        ;;docker
        ;;editorconfig      ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
@@ -145,7 +146,8 @@
        ;;elm               ; care for a cup of TEA?
        (emacs-lisp +lsp)        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
-       ess
+       (ess
+        +stan)
         ;; +tree-sitter)                                ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
@@ -179,7 +181,7 @@
         +pretty
         +roam2
         +journal
-        ;; +dragndrop
+        +dragndrop
         +jupyter
         ;; +present
         )

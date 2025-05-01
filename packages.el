@@ -48,9 +48,9 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-journal hide-mode-line org
-        citar-org-roam citar citar-embark jupyter
-        yasnippet nerd-icons jupyter
+(unpin! org-journal hide-mode-line dirvish
+        citar-org-roam citar citar-embark
+        yasnippet nerd-icons doom-snippets flycheck
         )
 ;; (package! writeroom-mode)
 (package! htmlize)
@@ -89,9 +89,9 @@
 ;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
 ;;   )
 ;; (package! sideline-eglot)
-(package! org-preview-html)
-;; (package! org-modern-indent
-;;   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
+;; (package! org-preview-html)
+(package! org-modern-indent
+  :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! holo-layer
   ;; :recipe (:host github :repo "manateelazycat/holo-layer"))
 ;; (package! iscroll)
@@ -100,28 +100,26 @@
 (package! float-narrow-indirect
   :recipe (:host github
            :repo "yibie/float-narrow-indirect"))
-(package! eldoc :built-in t)
+;; (package! eldoc :built-in t)
 ;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
 (package! rainbow-csv
   :recipe (:host github :repo "emacs-vs/rainbow-csv"))
+
 (package! breadcrumb
   :recipe (:host github :repo "joaotavora/breadcrumb"))
 ;; (package! cell-mode
   ;; :recipe (:host gitlab :repo "dto/cell-mode"))
-
-(package! catppuccin-theme
-  :recipe (:host github :repo "catppuccin/emacs"
-           :files ("*.el" "data" "themes")))
 
 (package! solarized-theme
   :recipe (:host github :repo "bbatsov/solarized-emacs"))
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-(package! envrc)
+;; (package! envrc)
+(package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
-(package! org-src-context
-  :recipe (:host github :repo "karthink/org-src-context"))
+;; (package! org-src-context
+;;   :recipe (:host github :repo "karthink/org-src-context"))
 
 ;; (package! exec-path-from-shell)
 ;; (package! savefold
@@ -136,3 +134,11 @@
   :recipe (:host github :repo "misohena/phscroll"))
 ;; (package! olivetti)
 ;; (package! eat)
+(package! grip-mode)
+;; (package! xeft)
+;; (package! org-super-links
+;;   :recipe (:host github :repo "toshism/org-super-links"))
+(package! ivy)
+(package! nano-theme)
+(package! catppuccin-theme
+  :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))

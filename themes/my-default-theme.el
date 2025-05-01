@@ -26,7 +26,7 @@
 
   (custom-theme-set-faces
    'my-default
-
+   `(font-lock-comment-face ((,c :foreground "gray40")))
    ;; Dired faces
    `(dired-broken-symlink ((,c :inherit button :foreground ,err)))
    `(dired-directory ((,c :foreground ,accent-0)))
