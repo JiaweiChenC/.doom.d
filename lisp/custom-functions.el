@@ -366,6 +366,10 @@ If point is on a noweb reference (<<name>>), jump to it directly."
               (org-fold-show-context))
           (message "source-code block `%s` not found" name))))))
 
+;; map to g b in org mode
+(map! :map org-mode-map
+      :n "g b" #'my/org-babel-goto-named-src-block)
+
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
 (defface org-example-block-face
