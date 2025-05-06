@@ -48,9 +48,9 @@
                                         ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
-(unpin! org-journal hide-mode-line dirvish
-        citar-org-roam citar citar-embark
-        yasnippet nerd-icons doom-snippets flycheck
+(unpin! org-journal hide-mode-line dirvish org
+         citar-org-roam citar citar-embark flycheck
+        yasnippet nerd-icons doom-snippets
         )
 ;; (package! writeroom-mode)
 (package! htmlize)
@@ -85,10 +85,9 @@
 (package! sideline)
 (package! sideline-flycheck)
 (package! color-theme-sanityinc-tomorrow)
-;; (package! sideline-eglot
-;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
-;;   )
-;; (package! sideline-eglot)
+(package! sideline-eglot
+  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
+  )
 ;; (package! org-preview-html)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
@@ -142,3 +141,10 @@
 (package! nano-theme)
 (package! catppuccin-theme
   :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))
+;; (package! org-mac-image-paste
+;;   :recipe (:host github :repo "jdtsmith/org-mac-image-paste"))
+
+(package! eglot
+:recipe (:host github :repo "joaotavora/eglot")
+:pin "355a167c625b58a0ff2c1b1bbcc8c18bf64b3b08")
+;; (package! org-special-block-extras)

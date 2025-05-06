@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi-tinted
+(setq doom-theme 'ef-reverie
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -73,7 +73,6 @@
 
 (setq org-roam-directory "~/Documents/roam/")
 
-
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
 (setq org-agenda-files '("~/org/journal/"))
@@ -96,15 +95,12 @@
 ;; Hide the menu for as minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
-;; highlight the current line
-;; (global-hide-mode-line-mode)
-
 (setq doom-modeline-major-mode-icon t)
 
-;; (map! :n "j" 'evil-next-visual-line)
-;; (map! :n "k" 'evil-previous-visual-line)
+;; map 0 in org mode to evil beginning-of-line
 (map! (:after evil-org
        :map evil-org-mode-map
+       :n "0" #'evil-beginning-of-line
        :n "gk" (cmds! (org-on-heading-p)
                       #'org-backward-element
                       #'evil-previous-visual-line)
@@ -136,9 +132,6 @@
 
 (setq mathpix-screenshot-method "screencapture -i %s")
 
-;; (use-package! websocket
-;;   :after org-roam)
-
 (use-package! super-save
   :config
   (super-save-mode +1))
@@ -158,8 +151,6 @@
 (after! org
   ;; (setq! org-src-context-mode 1)
   (setq! org-pretty-entities nil)
-  ;; (setq org-indent-mode nil)
-  ;; (setq! org-startup-indented nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
   (setq org-download-annotate-function (lambda (link) ""))
@@ -183,68 +174,6 @@
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
-
-;; set org-image-actual-width to 700 after entering doom big font mode
-;; and set it back to 400 after exiting doom big font mode
-;; (add-hook 'doom-big-font-mode-hook
-;;           (lambda ()
-;;             (if doom-big-font-mode
-;;                 (setq org-image-actual-width 700)
-;;               (setq org-image-actual-width 400))))
-
-;; (after! org-roam
-;;   (setq org-roam-capture-templates
-;;         `(("n" "note" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/note.org]" org-roam-directory)
-;;            :target (file "note/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("b" "booknotes" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/booknotes.org]" org-roam-directory)
-;;            :target (file "booknotes/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("c" "coding" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/coding.org]" org-roam-directory)
-;;            :target (file "coding/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("l" "lectures" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/lectures.org]" org-roam-directory)
-;;            :target (file "lectures/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("p" "project" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/project.org]" org-roam-directory)
-;;            :target (file "project/%<%Y%m%d>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("r" "research" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/research.org]" org-roam-directory)
-;;            :target (file "research/%<%Y%m%d>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("a" "paper" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/paper.org]" org-roam-directory)
-;;            :target (file "paper/%<%Y%m%d>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("w" "works" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/works.org]" org-roam-directory)
-;;            :target (file "works/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("m" "math" plain
-;;            ,(format "#+title: ${title}\n\n* ${title}\n%%[%s/template/math.org]" org-roam-directory)
-;;            :target (file "math/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-;;           ("s" "secret" plain "#+title: ${title}\n\n"
-;;            :target (file "secret/%<%Y%m%d%H%M%S>-${slug}.org")
-;;            :unnarrowed t)
-
-;;           ("z" "literature note" plain
-;;            "%?"
-;;            :target (file+head
-;;             "%(expand-file-name (or citar-org-roam-subdir \"\") org-roam-directory)/${citar-citekey}.org"
-;;             "#+title: ${note-title}.\n#+created: %U\n \n* ${note-title}\n")
-;;            :unnarrowed t)
-;;           )
-;;         ;; Use human readable dates for dailies titles
-;;         org-roam-dailies-capture-templates
-;;         '(("d" "default" entry "* %?"
-;;            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%B %d, %Y>\n\n")))))
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 (setq citar-org-roam-capture-template-key "z")
@@ -287,6 +216,7 @@
 
 ;; bind quickrun to space r r
 (map! :leader :desc "quickrun" "r r" #'quickrun)
+
 ;; bind quickrun kill process to space r k
 (map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
@@ -529,27 +459,18 @@
 
 (setq! org-export-expand-links 'nil)
 
-;; (use-package! bookmark-in-project
-;;   :commands (bookmark-in-project-jump
-;;              bookmark-in-project-jump-next
-;;              bookmark-in-project-jump-previous
-;;              bookmark-in-project-delete-all)
-;;   :config
 (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
 (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
 
-;; ;; map space e g to gptel
-;; (map! :leader :desc "gptel" "e g" #'gptel)
-
-;; (setq! corfu-popupinfo-max-height 1)
+(setq! corfu-popupinfo-max-height 1)
 
 (setq! vterm-timer-delay 0.01)
 
 (use-package! writeroom-mode
   :config
   (setq! writeroom-fullscreen-effect 'nil)
-  (setq! writeroom-width 120)
+  ;; (setq! writeroom-width 120)
   (setq! writeroom-extra-line-spacing 0.5))
 
 ;; global writeroom mode to space t W
@@ -564,23 +485,8 @@
 (set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
 )
 
-;;   ;; Add this function to the hook that runs after making a new frame
-;;   (add-hook 'after-make-frame-functions
-;;             (lambda (frame)
-;;               (with-selected-frame frame
-;;                 (my-org-mode-frame-customizations))))
-
-;;   ;; Apply the customizations to the initial frame
-;;   (my-org-mode-frame-customizations)
-;; )
-
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
-
-;;(after! popup
-;;  (set-popup-rule! "^\\*doom:scratch\\*" :size 0.3 :quit t :select t :ttl 5))
-
-;; (setq! hide-mode-line-excluded-modes nil)
 
 (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
 
@@ -740,36 +646,29 @@
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
 
-;; (use-package pet
-;;   :config
-;;   (add-hook 'python-base-mode-hook 'pet-mode))
-
-;; (use-package! window-stool
-  ;; :hook (prog-mode . window-stool-mode))
-
 (use-package! eglot
   :config
-  (setq eglot-events-buffer-config 0
+  (setq eglot-events-buffer-config '(:size 0)
         eglot-report-progress nil
         eglot-extend-to-xref t
-        eglot-ignored-server-capabilities '(:inlayHintProvider)) ;; <--- Here
+        eglot-ignored-server-capabilities '(:inlayHintProvider))
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
-                 "basedpyright-langserver" "--stdio"))
-  (setq-default
-   eglot-workspace-configuration
-   '(:basedpyright (:typeCheckingMode "basic")
-     :basedpyright.analysis
-     (:diagnosticSeverityOverrides
-      (:reportUnusedCallResult "none"
-       :reportArgumentType "none")))))
+                 "pyright-langserver" "--stdio")))
+  ;; (setq-default
+  ;;  eglot-workspace-configuration
+  ;;  '(:basedpyright (:typeCheckingMode "basic")
+  ;;    :basedpyright.analysis
+  ;;    (:diagnosticSeverityOverrides
+  ;;     (:reportUnusedCallResult "none"
+  ;;      :reportArgumentType "none")))))
 
 
 ;; (setq! org-startup-truncated nil)
 (use-package! phscroll
   :hook (org-mode . org-phscroll-mode))
 
-(setq! visual-fill-column-width 100)
+(setq! visual-fill-column-width 110)
 
 ;;; Define a flag variable for the startup option (buffer-local by Org parsing)
 (defvar org-visual-fill-startup nil
@@ -807,9 +706,6 @@
  (org-babel-jupyter-aliases-from-kernelspecs)
  )
 
-;; set writeroom-width to 80
-(setq writeroom-width 60)
-
 ;; hack to make jupyter work with images
 ;; https://github.com/emacs-jupyter/jupyter/issues/558
 (defun skip-undo (orig-fun &rest args)
@@ -844,18 +740,102 @@
   (setq copilot-max-char-warning-disabled t)
   )
 
-;; (setq! global-diff-hl-show-hunk-mouse-mode t)
-
-
 (map! :after evil-org
       :map evil-org-mode-map
       :n "C-j" #'electric-newline-and-maybe-indent)
 
 ;; after evil org map g spc to evil-avy-goto-char-2
-(map! :after evil-org
-      :map evil-org-mode-map
-      :n "g SPC" #'evil-avy-goto-char-2)
+(map! :n "g SPC" #'evil-avy-goto-char-2)
 
 ;; add header-args to org default properties
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
+
+(defface org-table-block-face
+  '((t (:inherit org-block)))
+  "Face for content inside #+begin_table blocks.")
+
+(defun my/org-table-block-matcher (limit)
+  "Font-lock matcher that highlights lines between #+begin_table and #+end_table."
+  (when (re-search-forward "^\\s-*#\\+begin_table\\b.*$" limit t)
+    (let ((beg (line-beginning-position 2))) ;; start of next line
+      (when (re-search-forward "^\\s-*#\\+end_table\\b.*$" limit t)
+        (let ((end (line-beginning-position)))
+          (when (< beg end)
+            (set-match-data (list beg end))
+            t))))))
+
+(font-lock-add-keywords
+ 'org-mode
+ '((my/org-table-block-matcher (0 'org-table-block-face prepend))))
+
+
+(defface org-example-block-face
+  '((t (:background "#F7E2D2" :extend t)))
+  "Face for content inside #+begin_example blocks.")
+
+(defun my/org-example-block-matcher (limit)
+  "Font-lock matcher that highlights lines between #+begin_example and #+end_example."
+  (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)
+    (let ((beg (line-beginning-position 2))) ;; start of next line
+      (when (re-search-forward "^\\s-*#\\+end_example\\b.*$" limit t)
+        (let ((end (line-beginning-position)))
+          (when (< beg end)
+            (set-match-data (list beg end))
+            t))))))
+
+(font-lock-add-keywords
+ 'org-mode
+ '((my/org-example-block-matcher (0 'org-example-block-face prepend))))
+
+
+(defun my/org-jump-to-named-block ()
+  "Jump to a named block in the current buffer or an included file."
+  (interactive)
+  (let ((blocks nil))
+    ;; Collect named blocks in current buffer
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
+        (let ((name (match-string-no-properties 1))
+              (pos (point-marker)))
+          (push (list name (current-buffer) pos) blocks))))
+
+    ;; Find included files
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^[ \t]*#\\+INCLUDE:[ \t]+\"\\(.+\\)\"" nil t)
+        (let* ((include-path (string-trim (match-string-no-properties 1)))
+               (base-dir (if buffer-file-name
+                            (file-name-directory buffer-file-name)
+                          default-directory))
+               (abs-path (expand-file-name include-path base-dir)))
+          (message "Found include: %s" abs-path)
+          (when (file-exists-p abs-path)
+            (with-temp-buffer
+              (insert-file-contents abs-path)
+              (goto-char (point-min))
+              (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
+                (let ((name (match-string-no-properties 1)))
+                  (push (list (format "%s (in %s)" name (file-name-nondirectory abs-path))
+                              abs-path
+                              (point))
+                        blocks))))))))
+
+    ;; Present choices and jump
+    (if (null blocks)
+        (message "No named blocks found")
+      (let* ((choices (mapcar #'car blocks))
+             (selected (completing-read "Jump to block: " choices nil t))
+             (block-info (assoc selected blocks)))
+        (when block-info
+          (if (bufferp (nth 1 block-info))
+              ;; Jump to block in current buffer
+              (goto-char (nth 2 block-info))
+            ;; Jump to block in included file
+            (find-file (nth 1 block-info))
+            (goto-char (nth 2 block-info)))
+          (recenter))))))
+
+;; Optional key binding
+(global-set-key (kbd "C-c j") 'org-jump-to-named-block)
