@@ -1,6 +1,4 @@
 ;;; lisp/custom-functions.el -*- lexical-binding: t; -*-
-
-
 (defun my/copy-image-to-clipboard ()
   "Copy the image at point or current image buffer to the clipboard in macOS.
 Handles Org mode, Dired mode, and image buffers."
@@ -349,8 +347,9 @@ If point is on a noweb reference (<<name>>), jump to it directly."
           (if match
               (let ((buf (nth 1 match))
                     (pos (nth 2 match)))
+                (better-jumper-set-jump)
                 (switch-to-buffer buf)
-                (org-mark-ring-push)
+                ;; (org-mark-ring-push)
                 (goto-char pos)
                 (org-fold-show-context))
             (message "source-code block `%s` not found" default)))
@@ -360,8 +359,9 @@ If point is on a noweb reference (<<name>>), jump to it directly."
         (if match
             (let ((buf (nth 1 match))
                   (pos (nth 2 match)))
+              (better-jumper-set-jump)
               (switch-to-buffer buf)
-              (org-mark-ring-push)
+              ;; (org-mark-ring-push)
               (goto-char pos)
               (org-fold-show-context))
           (message "source-code block `%s` not found" name))))))
