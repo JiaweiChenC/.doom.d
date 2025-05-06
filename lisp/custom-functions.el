@@ -286,59 +286,85 @@ This should only apply to jupyter-lang blocks."
 (advice-add 'org-attach-new :before #'my/org-attach-new-add-link-to-attachments)
 
 
-;;;;;;;;;;;;;;;;;;;;;;; jump to named blocks
+(defun my/org-collect-named-src-blocks (&optional file visited)
+  "Return a list of (NAME BUFFER POSITION) for all named src blocks in FILE and its includes."
+  (let ((visited (or visited '()))
+        (results '()))
+    (with-current-buffer (if file (find-file-noselect file) (current-buffer))
+      (unless (member (buffer-file-name) visited)
+        (push (buffer-file-name) visited)
+        (org-with-point-at 1
+          ;; Find named src blocks
+          (let ((regexp "^[ \t]*#\\+begin_src ")
+                (case-fold-search t))
+            (while (re-search-forward regexp nil t)
+              (let ((element (org-element-at-point)))
+                (when (eq (org-element-type element) 'src-block)
+                  (let ((name (org-element-property :name element)))
+                    (when name
+                      (push (list name (current-buffer) (org-element-property :begin element))
+                            results))))))
 
-(defun my/org-jump-to-named-block ()
-  "Jump to a named block in the current buffer or an included file."
+          ;; Recursively handle includes
+          (goto-char (point-min))
+          (while (re-search-forward "^[ \t]*#\\+INCLUDE:[ \t]+\"\\([^\"]+\\)\"" nil t)
+            (let* ((included-path (string-trim (match-string 1)))
+                   (base-dir (or (and file (file-name-directory file))
+                                 default-directory))
+                   (abs-path (expand-file-name included-path base-dir)))
+              (when (file-exists-p abs-path)
+                (setq results (append results
+                                      (my/org-collect-named-src-blocks abs-path visited)))))))))
+    results)))
+
+(defun my/org-extract-block-name-at-point (names)
+  "Try to infer the block name at point from context, falling back to symbol at point."
+  (let* ((context (org-element-context))
+         (type (org-element-type context))
+         (noweb-ref (and (memq type '(inline-src-block src-block))
+                         (org-in-regexp (org-babel-noweb-wrap)))))
+    (cond
+     (noweb-ref
+      (buffer-substring
+       (+ (car noweb-ref) (length org-babel-noweb-wrap-start))
+       (- (cdr noweb-ref) (length org-babel-noweb-wrap-end))))
+     ((memq type '(babel-call inline-babel-call))
+      (org-element-property :call context))
+     ((car (org-element-property :results context)))
+     ((let ((symbol (thing-at-point 'symbol)))
+        (and symbol (member-ignore-case symbol names) symbol)))
+     (t ""))))
+
+(defun my/org-babel-goto-named-src-block ()
+  "Jump to a named source block in the current buffer or any included file.
+If point is on a noweb reference (<<name>>), jump to it directly."
   (interactive)
-  (let ((blocks nil))
-    ;; Collect named blocks in current buffer
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
-        (let ((name (match-string-no-properties 1))
-              (pos (point-marker)))
-          (push (list name (current-buffer) pos) blocks))))
-
-    ;; Find included files
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "^[ \t]*#\\+INCLUDE:[ \t]+\"\\(.+\\)\"" nil t)
-        (let* ((include-path (string-trim (match-string-no-properties 1)))
-               (base-dir (if buffer-file-name
-                            (file-name-directory buffer-file-name)
-                          default-directory))
-               (abs-path (expand-file-name include-path base-dir)))
-          (message "Found include: %s" abs-path)
-          (when (file-exists-p abs-path)
-            (with-temp-buffer
-              (insert-file-contents abs-path)
-              (goto-char (point-min))
-              (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
-                (let ((name (match-string-no-properties 1)))
-                  (push (list (format "%s (in %s)" name (file-name-nondirectory abs-path))
-                              abs-path
-                              (point))
-                        blocks))))))))
-
-    ;; Present choices and jump
-    (if (null blocks)
-        (message "No named blocks found")
-      (let* ((choices (mapcar #'car blocks))
-             (selected (completing-read "Jump to block: " choices nil t))
-             (block-info (assoc selected blocks)))
-        (when block-info
-          (if (bufferp (nth 1 block-info))
-              ;; Jump to block in current buffer
-              (goto-char (nth 2 block-info))
-            ;; Jump to block in included file
-            (find-file (nth 1 block-info))
-            (goto-char (nth 2 block-info)))
-          (recenter))))))
-
-;; Optional key binding
-(global-set-key (kbd "C-c j") 'org-jump-to-named-block)
-
+  (let* ((all-blocks (my/org-collect-named-src-blocks))
+         (names (mapcar #'car all-blocks))
+         (default (my/org-extract-block-name-at-point names))
+         (noweb-p (and default (not (string= default "")))))
+    (if noweb-p
+        ;; Jump directly if on noweb or inferred symbol
+        (let ((match (assoc default all-blocks)))
+          (if match
+              (let ((buf (nth 1 match))
+                    (pos (nth 2 match)))
+                (switch-to-buffer buf)
+                (org-mark-ring-push)
+                (goto-char pos)
+                (org-fold-show-context))
+            (message "source-code block `%s` not found" default)))
+      ;; Otherwise prompt
+      (let* ((name (completing-read "source-block name: " names nil t))
+             (match (assoc name all-blocks)))
+        (if match
+            (let ((buf (nth 1 match))
+                  (pos (nth 2 match)))
+              (switch-to-buffer buf)
+              (org-mark-ring-push)
+              (goto-char pos)
+              (org-fold-show-context))
+          (message "source-code block `%s` not found" name))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
