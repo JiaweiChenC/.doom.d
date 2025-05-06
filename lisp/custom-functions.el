@@ -284,3 +284,96 @@ This should only apply to jupyter-lang blocks."
     (switch-to-buffer origin-buffer))) ;; switch back to the attachment buffer
 
 (advice-add 'org-attach-new :before #'my/org-attach-new-add-link-to-attachments)
+
+
+;;;;;;;;;;;;;;;;;;;;;;; jump to named blocks
+
+(defun my/org-jump-to-named-block ()
+  "Jump to a named block in the current buffer or an included file."
+  (interactive)
+  (let ((blocks nil))
+    ;; Collect named blocks in current buffer
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
+        (let ((name (match-string-no-properties 1))
+              (pos (point-marker)))
+          (push (list name (current-buffer) pos) blocks))))
+
+    ;; Find included files
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward "^[ \t]*#\\+INCLUDE:[ \t]+\"\\(.+\\)\"" nil t)
+        (let* ((include-path (string-trim (match-string-no-properties 1)))
+               (base-dir (if buffer-file-name
+                            (file-name-directory buffer-file-name)
+                          default-directory))
+               (abs-path (expand-file-name include-path base-dir)))
+          (message "Found include: %s" abs-path)
+          (when (file-exists-p abs-path)
+            (with-temp-buffer
+              (insert-file-contents abs-path)
+              (goto-char (point-min))
+              (while (re-search-forward "^[ \t]*#\\+name:[ \t]*\\(.+\\)$" nil t)
+                (let ((name (match-string-no-properties 1)))
+                  (push (list (format "%s (in %s)" name (file-name-nondirectory abs-path))
+                              abs-path
+                              (point))
+                        blocks))))))))
+
+    ;; Present choices and jump
+    (if (null blocks)
+        (message "No named blocks found")
+      (let* ((choices (mapcar #'car blocks))
+             (selected (completing-read "Jump to block: " choices nil t))
+             (block-info (assoc selected blocks)))
+        (when block-info
+          (if (bufferp (nth 1 block-info))
+              ;; Jump to block in current buffer
+              (goto-char (nth 2 block-info))
+            ;; Jump to block in included file
+            (find-file (nth 1 block-info))
+            (goto-char (nth 2 block-info)))
+          (recenter))))))
+
+;; Optional key binding
+(global-set-key (kbd "C-c j") 'org-jump-to-named-block)
+
+
+;;;;;;;;;;;;;;;;;;;;;;; special block facces
+
+(defface org-example-block-face
+  '((t (:background "#F7E2D2" :extend t)))
+  "Face for content inside #+begin_example blocks.")
+
+(defun my/org-example-block-matcher (limit)
+  "Font-lock matcher that highlights lines between #+begin_example and #+end_example."
+  (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)
+    (let ((beg (line-beginning-position 2))) ;; start of next line
+      (when (re-search-forward "^\\s-*#\\+end_example\\b.*$" limit t)
+        (let ((end (line-beginning-position)))
+          (when (< beg end)
+            (set-match-data (list beg end))
+            t))))))
+
+(font-lock-add-keywords
+ 'org-mode
+ '((my/org-example-block-matcher (0 'org-example-block-face prepend))))
+
+(defface org-table-block-face
+  '((t (:inherit org-block)))
+  "Face for content inside #+begin_table blocks.")
+
+(defun my/org-table-block-matcher (limit)
+  "Font-lock matcher that highlights lines between #+begin_table and #+end_table."
+  (when (re-search-forward "^\\s-*#\\+begin_table\\b.*$" limit t)
+    (let ((beg (line-beginning-position 2))) ;; start of next line
+      (when (re-search-forward "^\\s-*#\\+end_table\\b.*$" limit t)
+        (let ((end (line-beginning-position)))
+          (when (< beg end)
+            (set-match-data (list beg end))
+            t))))))
+
+(font-lock-add-keywords
+ 'org-mode
+ '((my/org-table-block-matcher (0 'org-table-block-face prepend))))
