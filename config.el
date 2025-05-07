@@ -387,12 +387,6 @@
 
 (setq! dired-mouse-drag-files 'move)
 
-;; (setq doom-modeline-modal nil)
-
-;; (use-package! org
-;;   :hook (org-mode . org-modern-mode)
-;;   )
-
 (add-hook 'doom-load-theme-hook
           (lambda ()
             (set-face-background 'fringe (face-attribute 'default :background))))
@@ -541,8 +535,6 @@
 (after! org
   (define-key org-mode-map (kbd "S-s-<mouse-1>") 'hermanhelf-org-jump-to-pdf))
 
-;; (set-frame-parameter nil 'alpha-background 0.7)
-
 ;; map space l n to ni-narrow-to-region-floating
 (map! :leader :desc "narrow to region floating" "l n" #'ni-narrow-to-region-floating)
 
@@ -601,9 +593,6 @@
 (map! :leader
       :desc "Wrap Text with Color"
       "l r" #'wrap-text-with-color)
-
-;; (use-package! org-cite-overlay)
-
 
 (defun wrap-text-with-delete ()
   "Wrap the selected text with [[delete:red][text]]."
@@ -750,7 +739,6 @@
 ;; add header-args to org default properties
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
-
 
 
 (setq! envrc-remote t)
