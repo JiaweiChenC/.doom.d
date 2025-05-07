@@ -745,10 +745,12 @@
       :n "C-j" #'electric-newline-and-maybe-indent)
 
 ;; after evil org map g spc to evil-avy-goto-char-2
-(map! :n "g SPC" #'evil-avy-goto-char-2)
+(map! :n "g 2" #'evil-avy-goto-char-2)
 
 ;; add header-args to org default properties
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
 
 
+
+(setq! envrc-remote t)
