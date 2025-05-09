@@ -5,7 +5,22 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("19b62f442479efd3ca4c1cef81c2311579a98bbc0f3684b49cdf9321bd5dfdbf"
+   '("04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f"
+     "b11edd2e0f97a0a7d5e66a9b82091b44431401ac394478beb44389cf54e6db28"
+     "6bdc4e5f585bb4a500ea38f563ecf126570b9ab3be0598bdf607034bb07a8875"
+     "a59d0dbcbdfc57a14bc3fa28cb5a8367bc7ede82d848f517b4979b4a03c09da9"
+     "39cb0376bfc26ca69c42b8410cb8e97bc6e72a6da53b4f1268de9bd1b347b9f3"
+     "e129ccc499b0343029ec46e0b09706cb201da1d873e09e89d8892c13d22b08b4"
+     "a4bcb84bf1ccf7913858972c2facd0591efa3aafccc08f402af876222fbb9f27"
+     "fa3f9142f5c17c8e9af30c27250e72f002a91f2bc8a23f6906b47e16994d2b2d"
+     "71e6ed79ba234cbb8d042c7b7f4c35f32a9dab85dc28a908cbe5b6a5aaeaa101"
+     "4130a9efe19a6a298ebb86a09652511ffed35c4fd611ad3028b47dcea1f756f4"
+     "09e98c608045c7778c67d5671161cfbb741cc25350abe61e3eb2ce798bb88209"
+     "7ed236688b971b70744d1410d4e86cebde9b2980e0568f38d22db4f319e8d135"
+     "3538194fff1b928df280dc08f041518a8d51ac3ff704c5e46d1517f5c4d8a0e0"
+     "b3ba955a30f22fe444831d7bc89f6466b23db8ce87530076d1f1c30505a4c23b"
+     "a9eeab09d61fef94084a95f82557e147d9630fbbb82a837f971f83e66e21e5ad"
+     "19b62f442479efd3ca4c1cef81c2311579a98bbc0f3684b49cdf9321bd5dfdbf"
      "691d671429fa6c6d73098fc6ff05d4a14a323ea0a18787daeb93fde0e48ab18b"
      "ba323a013c25b355eb9a0550541573d535831c557674c8d59b9ac6aa720c21d3"
      "a9028cd93db14a5d6cdadba789563cb90a97899c4da7df6f51d58bb390e54031"
@@ -71,6 +86,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow))))
+ '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
  '(mini-echo-blue ((t (:foreground "dark cyan"))))
  '(mini-echo-yellow ((t (:foreground "dark magenta")))))

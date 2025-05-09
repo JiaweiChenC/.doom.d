@@ -373,9 +373,9 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
 (defface org-example-block-face
-  '((t (:background "#F7E2D2" :extend t)))
+  '((t (:background "#F3E6DE" :extend t)))
   "Face for content inside #+begin_example blocks.")
-
+;; #412F4F
 (defun my/org-example-block-matcher (limit)
   "Font-lock matcher that highlights lines between #+begin_example and #+end_example."
   (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)

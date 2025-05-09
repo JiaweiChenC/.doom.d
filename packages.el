@@ -139,8 +139,8 @@
 ;;   :recipe (:host github :repo "toshism/org-super-links"))
 (package! ivy)
 (package! nano-theme)
-(package! catppuccin-theme
-  :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))
+;; (package! catppuccin-theme
+  ;; :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))
 ;; (package! org-mac-image-paste
 ;;   :recipe (:host github :repo "jdtsmith/org-mac-image-paste"))
 
@@ -148,3 +148,4 @@
 :recipe (:host github :repo "joaotavora/eglot")
 :pin "355a167c625b58a0ff2c1b1bbcc8c18bf64b3b08")
 ;; (package! org-special-block-extras)
+(package! kaolin-themes)

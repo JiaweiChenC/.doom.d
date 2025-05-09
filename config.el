@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'ef-reverie
+(setq doom-theme 'doom-rose-pine-dawn
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
 ;; (setq doom-theme 'modus-operandi
@@ -71,7 +71,7 @@
 
 (setq org-latex-src-block-backend "listings")
 
-(setq org-roam-directory "~/Documents/roam/")
+(setq org-roam-directory "~/Documents/roam/note/")
 
 (setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
 
@@ -471,13 +471,13 @@
 (map! :leader :desc "writeroom mode" "t W" #'writeroom-mode)
 
 ;; disable org block highlight
-(after! org
-;; ;;   ;; Function to apply custom face attributes for org blocks
-;; ;;   (defun my-org-mode-frame-customizations ()
-;; (set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
-(set-face-attribute 'org-block-begin-line nil :foreground 'unspecified :background 'unspecified)
-(set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
-)
+;; (after! org
+;; ;; ;;   ;; Function to apply custom face attributes for org blocks
+;; ;; ;;   (defun my-org-mode-frame-customizations ()
+;; ;; (set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
+;; (set-face-attribute 'org-block-begin-line nil :foreground 'unspecified :background 'unspecified)
+;; (set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
+;; )
 
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
@@ -725,9 +725,7 @@
 (map! :leader :desc "insert attachment from dir" "m a i" #'insert-attachment-from-dir)
 
 ;; make copilot ignore .eld file
-(after! copilot
-  (setq copilot-max-char-warning-disabled t)
-  )
+(setq! copilot-max-char-warning-disabled t)
 
 (map! :after evil-org
       :map evil-org-mode-map
@@ -739,6 +737,5 @@
 ;; add header-args to org default properties
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
-
 
 (setq! envrc-remote t)

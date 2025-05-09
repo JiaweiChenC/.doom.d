@@ -53,7 +53,7 @@
        ;; tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       ;; (vc-gutter +pretty)         ; vcs diff in the fringe
+       (vc-gutter +pretty)         ; vcs diff in the fringe
        ;; vc-gutter         ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
@@ -98,6 +98,7 @@
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
+       llm
        tree-sitter
        ;;ansible
        biblio            ; Writes a PhD for you (citation needed)
@@ -121,7 +122,7 @@
        ;; rgb               ; creating color strings
        ;;taskrunner        ; taskrunner for all your projects
        ;;terraform         ; infrastructure as code
-       ;;tmux              ; an API for interacting with tmux
+       tmux              ; an API for interacting with tmux
        ;;upload            ; map local to remote projects via ssh/ftp
 
        :os
@@ -145,9 +146,9 @@
        ;;elm               ; care for a cup of TEA?
        (emacs-lisp +lsp)        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
-       ess
-        ;; +stan)
-        ;; +tree-sitter)                                ; emacs speaks statistics
+       (ess
+        +stan
+        +tree-sitter)                                ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
        ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
