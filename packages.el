@@ -52,7 +52,6 @@
          citar-org-roam citar citar-embark flycheck
         yasnippet nerd-icons doom-snippets
         )
-;; (package! writeroom-mode)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -66,11 +65,8 @@
 (package! flycheck-popup-tip :disable t)
 (package! code-cells)
 (package! org-download)
-;; (package! org-modern
-;;   :recipe (:host github :repo "minad/org-modern"))
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
-;; (package! gptel)
 (package! modus-themes)
 ;; (package! activities)
 ;; (package! spacious-padding)
@@ -91,15 +87,12 @@
 ;; (package! org-preview-html)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
-;; (package! holo-layer
-  ;; :recipe (:host github :repo "manateelazycat/holo-layer"))
 ;; (package! iscroll)
 ;; (package! nova
 ;;   :recipe (:host github :repo "thisisran/nova"))
 (package! float-narrow-indirect
   :recipe (:host github
            :repo "yibie/float-narrow-indirect"))
-;; (package! eldoc :built-in t)
 ;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
 (package! rainbow-csv
   :recipe (:host github :repo "emacs-vs/rainbow-csv"))
@@ -114,7 +107,6 @@
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-;; (package! envrc)
 (package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
 ;; (package! org-src-context
@@ -123,29 +115,18 @@
 ;; (package! exec-path-from-shell)
 ;; (package! savefold
 ;;   :recipe (:host github :repo "jcfk/savefold.el"))
-;; (package! org-cite-csl-activate
-  ;; :recipe (:host github :repo "andras-simonyi/org-cite-csl-activate"))
-;; (package! org-cite-overlay)
 ;; (package! org-supertag
   ;; :recipe (:host github :repo "yibie/org-supertag"))
-;; (package! treesit-auto)
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
 ;; (package! olivetti)
-;; (package! eat)
 (package! grip-mode)
 ;; (package! xeft)
-;; (package! org-super-links
-;;   :recipe (:host github :repo "toshism/org-super-links"))
 (package! ivy)
 (package! nano-theme)
 ;; (package! catppuccin-theme
   ;; :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))
-;; (package! org-mac-image-paste
-;;   :recipe (:host github :repo "jdtsmith/org-mac-image-paste"))
-
 (package! eglot
 :recipe (:host github :repo "joaotavora/eglot")
 :pin "355a167c625b58a0ff2c1b1bbcc8c18bf64b3b08")
-;; (package! org-special-block-extras)
 (package! kaolin-themes)

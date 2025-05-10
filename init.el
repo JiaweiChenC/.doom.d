@@ -122,7 +122,7 @@
        ;; rgb               ; creating color strings
        ;;taskrunner        ; taskrunner for all your projects
        ;;terraform         ; infrastructure as code
-       tmux              ; an API for interacting with tmux
+       ;; tmux              ; an API for interacting with tmux
        ;;upload            ; map local to remote projects via ssh/ftp
 
        :os
@@ -146,9 +146,9 @@
        ;;elm               ; care for a cup of TEA?
        (emacs-lisp +lsp)        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
-       (ess
-        +stan
-        +tree-sitter)                                ; emacs speaks statistics
+       ess
+        ;; +stan
+        ;; +tree-sitter)                                ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
        ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)

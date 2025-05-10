@@ -73,7 +73,7 @@
 
 (setq org-roam-directory "~/Documents/roam/note/")
 
-(setq vterm-tramp-shells '(("ssh" "/usr/bin/bash")))
+(setq vterm-tramp-shells '(("ssh" "/usr/bin/zsh")))
 
 (setq org-agenda-files '("~/org/journal/"))
 (setq org-journal-enable-agenda-integration t)
@@ -163,7 +163,7 @@
     (setq-local paragraph-start "[\f\\|[ \t]*$]")
     (setq-local paragraph-separate "[ \t\f]*$"))
   (setq org-startup-folded 'content)
-  (setq org-image-actual-width '(400))
+  ;; (setq org-image-actual-width '(400))
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (org-link-set-parameters "skim"
@@ -178,6 +178,7 @@
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 (setq citar-org-roam-capture-template-key "z")
 
+
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
@@ -188,20 +189,20 @@
 (setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
- :hook (prog-mode . copilot-mode)
- :bind (("M-TAB" . 'copilot-accept-completion-by-word)
-        ("M-<tab>" . 'copilot-accept-completion-by-word)
-        :map copilot-completion-map
-        ("<tab>" . 'copilot-accept-completion)
-        ("TAB" . 'copilot-accept-completion))
- :config
- (add-to-list 'copilot-indentation-alist '(prog-mode 2))
- (add-to-list 'copilot-indentation-alist '(org-mode 2))
- (add-to-list 'copilot-indentation-alist '(text-mode 2))
- (add-to-list 'copilot-indentation-alist '(closure-mode 2))
- (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
- (setq copilot-idle-delay 0.5)
- )
+:hook (prog-mode . copilot-mode)
+:bind (("M-TAB" . 'copilot-accept-completion-by-word)
+       ("M-<tab>" . 'copilot-accept-completion-by-word)
+       :map copilot-completion-map
+       ("<tab>" . 'copilot-accept-completion)
+       ("TAB" . 'copilot-accept-completion))
+:config
+(add-to-list 'copilot-indentation-alist '(prog-mode 2))
+(add-to-list 'copilot-indentation-alist '(org-mode 2))
+(add-to-list 'copilot-indentation-alist '(text-mode 2))
+(add-to-list 'copilot-indentation-alist '(closure-mode 2))
+(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+(setq copilot-idle-delay 0.5)
+)
 
 ;; set space o m as mac-os-open-with
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
@@ -224,6 +225,7 @@
   :config
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;here
 ;; set org journal to weekly
 (setq org-journal-file-type 'monthly)
 
@@ -400,7 +402,7 @@
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
-  ;; (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
 
@@ -408,7 +410,7 @@
 (map! :n "s-'" #'skim-prev-page)
 (setq org-image-actual-width nil)
 
-(setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
+;; (setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
 
 (setq-hook! LaTeX-mode TeX-command-default "LaTeXMk")
 
@@ -430,7 +432,7 @@
 ;; bind space b return to embard open bookmark external
 (map! :leader :desc "open bookmark external" "e m" #'embark-bookmark-open-externally)
 
-(use-package! embark)
+;; (use-package! embark)
 
 (setq! org-modern-table nil)
 (setq! org-modern-block-fringe nil)
@@ -443,7 +445,7 @@
 
 (setq eglot-send-changes-idle-time 0.1)
 
-(use-package! citar)
+;; (use-package! citar)
 
 (setq! org-latex-src-block-backend 'listings)
 
@@ -461,33 +463,10 @@
 
 (setq! vterm-timer-delay 0.01)
 
-(use-package! writeroom-mode
-  :config
-  (setq! writeroom-fullscreen-effect 'nil)
-  ;; (setq! writeroom-width 120)
-  (setq! writeroom-extra-line-spacing 0.5))
-
-;; global writeroom mode to space t W
-(map! :leader :desc "writeroom mode" "t W" #'writeroom-mode)
-
-;; disable org block highlight
-;; (after! org
-;; ;; ;;   ;; Function to apply custom face attributes for org blocks
-;; ;; ;;   (defun my-org-mode-frame-customizations ()
-;; ;; (set-face-attribute 'org-block nil :foreground 'unspecified :background 'unspecified)
-;; (set-face-attribute 'org-block-begin-line nil :foreground 'unspecified :background 'unspecified)
-;; (set-face-attribute 'org-block-end-line nil :foreground 'unspecified :background 'unspecified)
-;; )
-
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
 
 (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
-
-(use-package! mini-echo
-  :config
-  (mini-echo-mode)
-  )
 
 (after! flycheck
   (setq flycheck-indication-mode 'right-fringe)
@@ -575,9 +554,6 @@
   ;; (setq! cell-cursor-blink-p 'nil)
   ;; )
 ;;
-;; (remove-hook 'find-file-hook #'diff-hl-mode)
-;; (remove-hook 'vc-dir-mode-hook #'diff-hl-mode)
-;; (remove-hook 'doom-first-file #'diff-hl-mode)
 (setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
@@ -608,29 +584,12 @@
       :desc "Wrap Text with Delete"
       "l d" #'wrap-text-with-delete)
 
-;; map C-j to electric-newline-and-maybe-indent
-;; (after! org
-;;   ;; Unbind C-j from its current function in org-mode
-;;   (map! :map org-mode-map
-;;         "C-j" nil)
-
-;;   ;; Bind C-j to your new custom function in org-mode
-;;   (map! :map org-mode-map
-;;         "C-j" #'electric-newline-and-maybe-indent))
-
-;; (setq citar-file-open-functions '(("pdf" . zot-open-pdf)
-;;                                   ("html" . citar-file-open-external)
-;;                                   (t . find-file)))
-;; (setq citar-open-entry-function 'citar-open-entry-in-zotero)
-;; (setq citar-at-point-function 'embark-act)
 (map! :map citar-embark-citation-map
       :n
       "<return>" nil
       "<return>" #'zot-open-pdf)
 
 (setq! evil-kill-on-visual-paste nil)
-
-(use-package! zoom)
 
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
@@ -673,6 +632,34 @@
             (when org-visual-fill-startup
               (visual-fill-column-mode 1))))
 
+(defvar hoagie-org-narrow-startup nil
+  "Non-nil if this Org buffer should narrow to a :narrow: tag subtree on startup.")
+
+;;; Add a custom startup keyword "narrow" that sets the flag to t
+(with-eval-after-load 'org
+  (add-to-list 'org-startup-options '("narrow" hoagie-org-narrow-startup t)))
+
+(defun hoagie--heading-has-tag-p (tag)
+  "Return non-nil if the current Org heading has TAG."
+  (member tag (org-get-tags)))
+
+(defun hoagie-org-narrow-to-narrow-tag ()
+  "Narrow to the first Org heading tagged with :narrow:, if any."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward org-heading-regexp nil t)
+      (while (and (not (hoagie--heading-has-tag-p "narrow"))
+                  (re-search-forward org-heading-regexp nil t)))
+      (when (hoagie--heading-has-tag-p "narrow")
+        (org-narrow-to-subtree)))))
+
+;;; Hook to perform narrowing when #+STARTUP: narrow is present
+(add-hook 'org-mode-hook
+          (lambda ()
+            (when hoagie-org-narrow-startup
+              (hoagie-org-narrow-to-narrow-tag))))
+
+
 (setq! doom-big-font-increment 2)
 
 (map! :n "C-;" #'electric-newline-and-maybe-indent)
@@ -682,6 +669,11 @@
   :hook (org-mode . org-modern-indent-mode))
   ;; (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
+(use-package! org-modern
+  :defer t
+  :init
+  (setq! org-modern-tag nil)
+  )
 
 (defun my/deft-set-project-doc-org-dir (orig-fn &rest args)
   "Set `deft-directory` to `[project]/doc/org/` before calling `deft`."
@@ -739,3 +731,8 @@
   (add-to-list 'org-default-properties "HEADER-ARGS"))
 
 (setq! envrc-remote t)
+
+(use-package! mini-echo
+  :config
+  (mini-echo-mode)
+  )

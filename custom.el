@@ -5,7 +5,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f"
+   '("56044c5a9cc45b6ec45c0eb28df100d3f0a576f18eef33ff8ff5d32bac2d9700"
+     "04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f"
      "b11edd2e0f97a0a7d5e66a9b82091b44431401ac394478beb44389cf54e6db28"
      "6bdc4e5f585bb4a500ea38f563ecf126570b9ab3be0598bdf607034bb07a8875"
      "a59d0dbcbdfc57a14bc3fa28cb5a8367bc7ede82d848f517b4979b4a03c09da9"
@@ -62,7 +63,8 @@
      "/Users/jiawei/Projects/Bio_model/utils_for_bio_models/LearningHumans/"
      "/Users/jiawei/Projects/Bio_model/doc/" "/Users/jiawei/.doom.d/"
      "~/.emacs.d/"))
- '(warning-suppress-log-types '((org-element org-element-parser)))
+ '(warning-suppress-log-types
+   '((copilot copilot-exceeds-max-char) (org-element org-element-parser)))
  '(zoom-size '(0.8 . 0.8)))
 ;; (custom-set-faces
 ;; (custom-set-faces
