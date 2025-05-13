@@ -188,21 +188,21 @@
 (setq! citar-org-roam-subdir "paper/")
 (setq citar-org-roam-note-title-template "${title}")
 
-;;(use-package! copilot
-;;:hook (prog-mode . copilot-mode)
-;;:bind (("M-TAB" . 'copilot-accept-completion-by-word)
-;;       ("M-<tab>" . 'copilot-accept-completion-by-word)
-;;       :map copilot-completion-map
-;;       ("<tab>" . 'copilot-accept-completion)
-;;       ("TAB" . 'copilot-accept-completion))
-;;:config
-;;(add-to-list 'copilot-indentation-alist '(prog-mode 2))
-;;(add-to-list 'copilot-indentation-alist '(org-mode 2))
-;;(add-to-list 'copilot-indentation-alist '(text-mode 2))
-;;(add-to-list 'copilot-indentation-alist '(closure-mode 2))
-;;(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-;;(setq copilot-idle-delay 0.5)
-;;)
+(use-package! copilot
+:hook (prog-mode . copilot-mode)
+:bind (("M-TAB" . 'copilot-accept-completion-by-word)
+      ("M-<tab>" . 'copilot-accept-completion-by-word)
+      :map copilot-completion-map
+      ("<tab>" . 'copilot-accept-completion)
+      ("TAB" . 'copilot-accept-completion))
+:config
+(add-to-list 'copilot-indentation-alist '(prog-mode 2))
+(add-to-list 'copilot-indentation-alist '(org-mode 2))
+(add-to-list 'copilot-indentation-alist '(text-mode 2))
+(add-to-list 'copilot-indentation-alist '(closure-mode 2))
+(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+(setq copilot-idle-delay 0.5)
+)
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -738,9 +738,10 @@
   :hook (org-mode . org-latex-preview-auto-mode)
   :config
   ;; Increase preview width
-  (plist-put org-latex-preview-appearance-options
+  (plist-put org-latex-preview-appearance-options 
              :page-width 0.8)
-
+  (plist-put org-latex-preview-appearance-options
+             :zoom 1.3)
   ;; ;; Use dvisvgm to generate previews
   ;; ;; You don't need this, it's the default:
   ;; (setq org-latex-preview-process-default 'dvisvgm)
@@ -759,4 +760,12 @@
   (setq org-latex-preview-live t)
 
   ;; More immediate live-previews -- the default delay is 1 second
-  (setq org-latex-preview-live-debounce 0.25))
+  (setq org-latex-preview-live-debounce 0.25)
+
+  (defun org--latex-preview-region (beg end)
+        "Compatibility shim for old Org LaTeX preview function.
+        Calls `org-latex-preview--preview-region' with a default
+        processing type."
+  (let ((processing-type org-latex-preview-process-default))
+        (org-latex-preview--preview-region processing-type beg end)))
+  )
