@@ -26,7 +26,15 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-rose-pine-dawn
       doom-font (font-spec :family "JetBrains Mono" :size 12)
-      doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13))
+      doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
+      ;; doom-variable-pitch-font (font-spec :family "Latin Modern Roman" :size 12)
+      )
+;; (setq doom-theme 'doom-rose-pine-dawn
+;;        doom-font (font-spec :family "JetBrains Mono" :size 12)
+;;       ;; doom-serif-font (font-spec :family "ETBembo" :size 15.5)
+;;      doom-variable-pitch-font (font-spec :family "Latin Modern Roman" :size 12))
+      ;;doom-emoji-font (font-spec :family "Apple Color Emoji" :size 15.5))
+      ;;doom-symbol-font (font-spec :family "Symbola"))
 ;; (setq doom-theme 'modus-operandi
 ;;       doom-font (font-spec :family "JetBrains Mono" :size 15)
 ;;       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 16))
@@ -769,3 +777,32 @@
   (let ((processing-type org-latex-preview-process-default))
         (org-latex-preview--preview-region processing-type beg end)))
   )
+
+;; (add-hook! 'org-mode-hook #'mixed-pitch-mode)
+
+;; (after! mixed-pitch
+;;   (setq mixed-pitch-set-height t
+;;         variable-pitch-serif-font doom-variable-pitch-font)
+
+;;   (pushnew! mixed-pitch-fixed-pitch-faces
+;;             'warning
+;;             'org-drawer 'org-cite-key 'org-list-dt 'org-hide
+;;             'corfu-default 'font-latex-math-face)
+
+;;   (set-face-attribute 'variable-pitch nil :height 1.2))
+
+;; (defadvice! +org-indent--reduced-text-prefixes ()
+;;   :after #'org-indent--compute-prefixes
+;;   (setq org-indent--text-line-prefixes
+;;         (make-vector org-indent--deepest-level nil))
+;;   (when (> org-indent-indentation-per-level 0)
+;;     (dotimes (n org-indent--deepest-level)
+;;       (aset org-indent--text-line-prefixes
+;;             n
+;;             (org-add-props
+;;                 (concat (make-string (* n (1- org-indent-indentation-per-level))
+;;                                      ?\s)
+;;                         (if (> n 0)
+;;                              (char-to-string org-indent-boundary-char)
+;;                           "\u200b"))
+;;                 nil 'face 'org-indent)))))
