@@ -188,24 +188,21 @@
 (setq! citar-org-roam-subdir "paper/")
 (setq citar-org-roam-note-title-template "${title}")
 
-(use-package! copilot
-:hook (prog-mode . copilot-mode)
-:bind (("M-TAB" . 'copilot-accept-completion-by-word)
-       ("M-<tab>" . 'copilot-accept-completion-by-word)
-       :map copilot-completion-map
-       ("<tab>" . 'copilot-accept-completion)
-       ("TAB" . 'copilot-accept-completion))
-:config
-(add-to-list 'copilot-indentation-alist '(prog-mode 2))
-(add-to-list 'copilot-indentation-alist '(org-mode 2))
-(add-to-list 'copilot-indentation-alist '(text-mode 2))
-(add-to-list 'copilot-indentation-alist '(closure-mode 2))
-(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-(setq copilot-idle-delay 0.5)
-)
-
-;; set space o m as mac-os-open-with
-(map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
+;;(use-package! copilot
+;;:hook (prog-mode . copilot-mode)
+;;:bind (("M-TAB" . 'copilot-accept-completion-by-word)
+;;       ("M-<tab>" . 'copilot-accept-completion-by-word)
+;;       :map copilot-completion-map
+;;       ("<tab>" . 'copilot-accept-completion)
+;;       ("TAB" . 'copilot-accept-completion))
+;;:config
+;;(add-to-list 'copilot-indentation-alist '(prog-mode 2))
+;;(add-to-list 'copilot-indentation-alist '(org-mode 2))
+;;(add-to-list 'copilot-indentation-alist '(text-mode 2))
+;;(add-to-list 'copilot-indentation-alist '(closure-mode 2))
+;;(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+;;(setq copilot-idle-delay 0.5)
+;;)
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -736,3 +733,30 @@
   :config
   (mini-echo-mode)
   )
+
+(use-package! org-latex-preview
+  :hook (org-mode . org-latex-preview-auto-mode)
+  :config
+  ;; Increase preview width
+  (plist-put org-latex-preview-appearance-options
+             :page-width 0.8)
+
+  ;; ;; Use dvisvgm to generate previews
+  ;; ;; You don't need this, it's the default:
+  ;; (setq org-latex-preview-process-default 'dvisvgm)
+
+  ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
+  ;; (setq org-latex-preview-auto-ignored-commands
+  ;;       '(next-line previous-line mwheel-scroll
+  ;;         scroll-up-command scroll-down-command))
+
+  ;; ;; Enable consistent equation numbering
+  ;; (setq org-latex-preview-numbered t)
+
+  ;; Bonus: Turn on live previews.  This shows you a live preview of a LaTeX
+  ;; fragment and updates the preview in real-time as you edit it.
+  ;; To preview only environments, set it to '(block edit-special) instead
+  (setq org-latex-preview-live t)
+
+  ;; More immediate live-previews -- the default delay is 1 second
+  (setq org-latex-preview-live-debounce 0.25))

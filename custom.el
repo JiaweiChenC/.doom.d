@@ -90,4 +90,5 @@
  ;; If there is more than one, they won't work right.
  '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
  '(mini-echo-blue ((t (:foreground "dark cyan"))))
- '(mini-echo-yellow ((t (:foreground "dark magenta")))))
+ '(mini-echo-yellow ((t (:foreground "dark magenta"))))
+ '(vertical-border ((t (:background "#F2E9DE" :foreground "#F2E9DE")))))
