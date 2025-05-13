@@ -93,15 +93,9 @@
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
 (package! modus-themes)
 ;; (package! activities)
-;; (package! spacious-padding)
 (package! bookmark-in-project)
-;; (package! nano-modeline)
 ;; pin to a version
 (package! mini-echo)
-;; (package! doom-nano-modeline
-;;   :recipe (:host github
-;;   :repo "ronisbr/doom-nano-modeline"))
-;; (package! codeium :recipe (:host github :repo "Exafunction/codeium.el"))
 (package! sideline)
 (package! sideline-flycheck)
 (package! color-theme-sanityinc-tomorrow)
@@ -112,44 +106,26 @@
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! iscroll)
-;; (package! nova
-;;   :recipe (:host github :repo "thisisran/nova"))
 (package! float-narrow-indirect
   :recipe (:host github
            :repo "yibie/float-narrow-indirect"))
 ;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
 (package! rainbow-csv
   :recipe (:host github :repo "emacs-vs/rainbow-csv"))
-
 (package! breadcrumb
   :recipe (:host github :repo "joaotavora/breadcrumb"))
-;; (package! cell-mode
-  ;; :recipe (:host gitlab :repo "dto/cell-mode"))
-
-(package! solarized-theme
-  :recipe (:host github :repo "bbatsov/solarized-emacs"))
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
 (package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
-;; (package! org-src-context
-;;   :recipe (:host github :repo "karthink/org-src-context"))
-
 ;; (package! exec-path-from-shell)
-;; (package! savefold
-;;   :recipe (:host github :repo "jcfk/savefold.el"))
-;; (package! org-supertag
-  ;; :recipe (:host github :repo "yibie/org-supertag"))
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
-;; (package! olivetti)
 (package! grip-mode)
 ;; (package! xeft)
 (package! ivy)
 (package! nano-theme)
-;; (package! catppuccin-theme
-  ;; :recipe (:host github :repo "catppuccin/emacs" :files ("*.el" "data")))
 (package! eglot
 :recipe (:host github :repo "joaotavora/eglot")
 :pin "355a167c625b58a0ff2c1b1bbcc8c18bf64b3b08")
