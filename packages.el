@@ -133,3 +133,5 @@
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
 ;; (package! gptel)
+;; (package! jupyter
+  ;; :pin "22e6b0ee4ec90f3da0c5335cda59c6642f788e42")

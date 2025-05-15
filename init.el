@@ -168,6 +168,7 @@
         +cdlatex
         +fold
         +lsp
+        ;; +latexmk
         )
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be

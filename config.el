@@ -27,19 +27,7 @@
 (setq doom-theme 'doom-rose-pine-dawn
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
-      ;; doom-variable-pitch-font (font-spec :family "Latin Modern Roman" :size 12)
       )
-;; (setq doom-theme 'doom-rose-pine-dawn
-;;        doom-font (font-spec :family "JetBrains Mono" :size 12)
-;;       ;; doom-serif-font (font-spec :family "ETBembo" :size 15.5)
-;;      doom-variable-pitch-font (font-spec :family "Latin Modern Roman" :size 12))
-      ;;doom-emoji-font (font-spec :family "Apple Color Emoji" :size 15.5))
-      ;;doom-symbol-font (font-spec :family "Symbola"))
-;; (setq doom-theme 'modus-operandi
-;;       doom-font (font-spec :family "JetBrains Mono" :size 15)
-;;       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 16))
-
-
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -749,7 +737,7 @@
   (plist-put org-latex-preview-appearance-options 
              :page-width 0.8)
   (plist-put org-latex-preview-appearance-options
-             :zoom 1.3)
+             :zoom 1.2)
   ;; ;; Use dvisvgm to generate previews
   ;; ;; You don't need this, it's the default:
   ;; (setq org-latex-preview-process-default 'dvisvgm)
@@ -778,31 +766,32 @@
         (org-latex-preview--preview-region processing-type beg end)))
   )
 
-;; (add-hook! 'org-mode-hook #'mixed-pitch-mode)
+;;;;;;;;;; temp hack for jupyter inspect
+(defun my/jupyter-org--set-src-block-cache ()
+  "Store the begin/end of the current
+  jupyter-python src block as a cons of markers."
+  (let* ((ctx (org-element-context))
+         (beg (org-element-property :begin ctx))
+         (end (org-element-property :end   ctx)))
+    (unless (and beg end)
+      (user-error "Not in a valid jupyter-python src block"))
+    (setq jupyter-org--src-block-cache
+          (cons (copy-marker beg) (copy-marker end)))))
 
-;; (after! mixed-pitch
-;;   (setq mixed-pitch-set-height t
-;;         variable-pitch-serif-font doom-variable-pitch-font)
+(advice-add 'jupyter-org--set-src-block-cache
+            :override #'my/jupyter-org--set-src-block-cache)
 
-;;   (pushnew! mixed-pitch-fixed-pitch-faces
-;;             'warning
-;;             'org-drawer 'org-cite-key 'org-list-dt 'org-hide
-;;             'corfu-default 'font-latex-math-face)
+(defun my/jupyter-org-src-block-params ()
+  "Return the header arguments of the current jupyter-python src block as an alist."
+  (jupyter-org--set-src-block-cache)
+  (let ((ctx (org-element-context)))
+    (unless (and (eq (org-element-type ctx) 'src-block)
+                 (string= (org-element-property :language ctx) "jupyter-python"))
+      (user-error "Not in a jupyter-python block"))
+    ;; :parameters is the raw string of all header args, e.g. ":session foo :kernel bar"
+    (let ((param-str (org-element-property :parameters ctx)))
+      (org-babel-parse-header-arguments param-str))))
 
-;;   (set-face-attribute 'variable-pitch nil :height 1.2))
-
-;; (defadvice! +org-indent--reduced-text-prefixes ()
-;;   :after #'org-indent--compute-prefixes
-;;   (setq org-indent--text-line-prefixes
-;;         (make-vector org-indent--deepest-level nil))
-;;   (when (> org-indent-indentation-per-level 0)
-;;     (dotimes (n org-indent--deepest-level)
-;;       (aset org-indent--text-line-prefixes
-;;             n
-;;             (org-add-props
-;;                 (concat (make-string (* n (1- org-indent-indentation-per-level))
-;;                                      ?\s)
-;;                         (if (> n 0)
-;;                              (char-to-string org-indent-boundary-char)
-;;                           "\u200b"))
-;;                 nil 'face 'org-indent)))))
+(advice-add 'jupyter-org-src-block-params
+            :override #'my/jupyter-org-src-block-params)
+;; (setq TeX-after-compilation-finished-functions nil)
