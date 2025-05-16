@@ -61,7 +61,7 @@
 (after! cdlatex
   (add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
   (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
-  )
+  (add-to-list 'texmathp-tex-commands '("tikzpicture" env-on)))
 
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
 
@@ -85,7 +85,6 @@
 
 (setq org-log-done t)
 
-(setq org-preview-latex-default-process 'dvisvgm)
 
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for as minimalistic a startup screen as possible.
@@ -218,8 +217,6 @@
   :config
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;here
-;; set org journal to weekly
 (setq org-journal-file-type 'monthly)
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
@@ -740,7 +737,7 @@
              :zoom 1.2)
   ;; ;; Use dvisvgm to generate previews
   ;; ;; You don't need this, it's the default:
-  ;; (setq org-latex-preview-process-default 'dvisvgm)
+  (setq org-latex-preview-process-default 'dvisvgm)
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
   ;; (setq org-latex-preview-auto-ignored-commands
@@ -766,32 +763,126 @@
         (org-latex-preview--preview-region processing-type beg end)))
   )
 
+(map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
+
+;; do not export when archived
+(setq! org-export-with-archived-trees nil)
+
+
 ;;;;;;;;;; temp hack for jupyter inspect
+;; (defun my/jupyter-org--set-src-block-cache ()
+;;   "Store the begin/end of the current
+;;   jupyter-python src block as a cons of markers."
+;;   (let* ((ctx (org-element-context))
+;;          (beg (org-element-property :begin ctx))
+;;          (end (org-element-property :end   ctx)))
+;;     (unless (and beg end)
+;;       (user-error "Not in a valid jupyter-python src block"))
+;;     (setq jupyter-org--src-block-cache
+;;           (cons (copy-marker beg) (copy-marker end)))))
+
+;; (advice-add 'jupyter-org--set-src-block-cache
+;;             :override #'my/jupyter-org--set-src-block-cache)
+
+;; (defun my/jupyter-org-src-block-params ()
+;;   "Return the header arguments of the current jupyter-python src block as an alist."
+;;   (jupyter-org--set-src-block-cache)
+;;   (let ((ctx (org-element-context)))
+;;     (unless (and (eq (org-element-type ctx) 'src-block)
+;;                  (string= (org-element-property :language ctx) "jupyter-python"))
+;;       (user-error "Not in a jupyter-python block"))
+;;     ;; :parameters is the raw string of all header args, e.g. ":session foo :kernel bar"
+;;     (let ((param-str (org-element-property :parameters ctx)))
+;;       (org-babel-parse-header-arguments param-str))))
+
+;; (advice-add 'jupyter-org-src-block-params
+;;             :override #'my/jupyter-org-src-block-params)
+
+;; (defun jupyter-org--set-src-block-cache ()
+;;   "Set the src-block cache.
+;; If set successfully or if `point' is already inside the cached
+;; source block, return non-nil.  Otherwise, when `point' is not
+;; inside a Jupyter src-block, return nil."
+;;   (unless jupyter-org--src-block-cache
+;;     (setq jupyter-org--src-block-cache
+;;           (list (list 'invalid nil (make-marker)
+;;                       (let ((end (make-marker)))
+;;                         ;; Move the end marker when text is inserted
+;;                         (set-marker-insertion-type end t)
+;;                         end)))))
+;;   (if (org-in-src-block-p 'inside)
+;;       (or (jupyter-org--at-cached-src-block-p)
+;;           (when-let* ((el (org-element-at-point))
+;;                       (info (and (eq (org-element-type el) 'src-block)
+;;                                  (org-babel-jupyter-language-p
+;;                                   (org-element-property :language el))
+;;                                  (org-babel-get-src-block-info t el)))
+;;                       (params (nth 2 info)))
+;;             (when (eq (car jupyter-org--src-block-cache) 'invalid)
+;;               (pop jupyter-org--src-block-cache))
+;;             (pcase-let (((and cache `(,_ ,beg ,end))
+;;                          jupyter-org--src-block-cache))
+;;               (setcar cache params)
+;;               (save-excursion
+;;                 (goto-char (org-element-property :post-affiliated el))
+;;                 (move-marker beg (line-beginning-position 2))
+;;                 (goto-char (org-element-property :end el))
+;;                 (skip-chars-backward "\r\n")
+;;                 (move-marker end (line-beginning-position))))
+;;             t))
+;;     ;; Invalidate cache when going outside of a source block.  This
+;;     ;; way if the language of the block changes we don't end up using
+;;     ;; the cache since it is only used for Jupyter blocks.
+;;     (pcase jupyter-org--src-block-cache
+;;       ((and `(,x . ,_) (guard (not (eq x 'invalid))))
+;;        (push 'invalid jupyter-org--src-block-cache)))
+;;     nil))
+
 (defun my/jupyter-org--set-src-block-cache ()
-  "Store the begin/end of the current
-  jupyter-python src block as a cons of markers."
-  (let* ((ctx (org-element-context))
-         (beg (org-element-property :begin ctx))
-         (end (org-element-property :end   ctx)))
-    (unless (and beg end)
-      (user-error "Not in a valid jupyter-python src block"))
+  "Set the src-block cache.
+If set successfully or if `point' is already inside the cached
+source block, return non-nil. Otherwise, when `point' is not
+inside a Jupyter src-block, return nil."
+  (if (org-in-src-block-p 'inside)
+      (or (jupyter-org--at-cached-src-block-p)
+          (when-let* ((el (org-element-at-point))
+                      (info (and (eq (org-element-type el) 'src-block)
+                                 (org-babel-jupyter-language-p
+                                  (org-element-property :language el))
+                                 (org-babel-get-src-block-info t el)))
+                      (params (nth 2 info))
+                      (ctx (org-element-context))
+                      (beg (org-element-property :begin ctx)) ; these are now markers!
+                      (end (org-element-property :end ctx)))
+            (setq jupyter-org--src-block-cache
+                  (list (list params beg end)))
+            t))
+    ;; Invalidate cache when going outside of a source block.
     (setq jupyter-org--src-block-cache
-          (cons (copy-marker beg) (copy-marker end)))))
+          (list (list 'invalid nil nil nil)))
+    nil))
 
 (advice-add 'jupyter-org--set-src-block-cache
             :override #'my/jupyter-org--set-src-block-cache)
 
-(defun my/jupyter-org-src-block-params ()
-  "Return the header arguments of the current jupyter-python src block as an alist."
+(defun my/jupyter-org-src-block-params (&optional previous)
+  "Return the src-block parameters for the current Jupyter src-block.
+If PREVIOUS is non-nil and `point' is not in a Jupyter source
+block, return the parameters of the most recently visited source
+block, but only if it was in the same buffer. Otherwise return
+nil."
   (jupyter-org--set-src-block-cache)
-  (let ((ctx (org-element-context)))
-    (unless (and (eq (org-element-type ctx) 'src-block)
-                 (string= (org-element-property :language ctx) "jupyter-python"))
-      (user-error "Not in a jupyter-python block"))
-    ;; :parameters is the raw string of all header args, e.g. ":session foo :kernel bar"
-    (let ((param-str (org-element-property :parameters ctx)))
-      (org-babel-parse-header-arguments param-str))))
+  (pcase jupyter-org--src-block-cache
+    ;; If not in src-block and cache is invalid, but previous requested and buffer matches
+    (`((invalid ,params ,beg ,end))
+     (when (and previous
+                (not (jupyter-org--at-cached-src-block-p))
+                (eq (and beg (marker-buffer beg)) (current-buffer)))
+       params))
+    ;; If cache is invalid, don't return anything
+    (`((invalid . ,_)) nil)
+    ;; If cache is valid, always return params (first element)
+    (`((,params ,_beg ,_end)) params)))
 
 (advice-add 'jupyter-org-src-block-params
             :override #'my/jupyter-org-src-block-params)
-;; (setq TeX-after-compilation-finished-functions nil)
