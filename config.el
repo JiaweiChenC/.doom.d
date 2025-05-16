@@ -35,6 +35,8 @@
 
 (setq org-log-into-drawer t)
 
+(setq! blink-cursor-mode t)
+
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
@@ -768,84 +770,14 @@
 ;; do not export when archived
 (setq! org-export-with-archived-trees nil)
 
-
-;;;;;;;;;; temp hack for jupyter inspect
-;; (defun my/jupyter-org--set-src-block-cache ()
-;;   "Store the begin/end of the current
-;;   jupyter-python src block as a cons of markers."
-;;   (let* ((ctx (org-element-context))
-;;          (beg (org-element-property :begin ctx))
-;;          (end (org-element-property :end   ctx)))
-;;     (unless (and beg end)
-;;       (user-error "Not in a valid jupyter-python src block"))
-;;     (setq jupyter-org--src-block-cache
-;;           (cons (copy-marker beg) (copy-marker end)))))
-
-;; (advice-add 'jupyter-org--set-src-block-cache
-;;             :override #'my/jupyter-org--set-src-block-cache)
-
-;; (defun my/jupyter-org-src-block-params ()
-;;   "Return the header arguments of the current jupyter-python src block as an alist."
-;;   (jupyter-org--set-src-block-cache)
-;;   (let ((ctx (org-element-context)))
-;;     (unless (and (eq (org-element-type ctx) 'src-block)
-;;                  (string= (org-element-property :language ctx) "jupyter-python"))
-;;       (user-error "Not in a jupyter-python block"))
-;;     ;; :parameters is the raw string of all header args, e.g. ":session foo :kernel bar"
-;;     (let ((param-str (org-element-property :parameters ctx)))
-;;       (org-babel-parse-header-arguments param-str))))
-
-;; (advice-add 'jupyter-org-src-block-params
-;;             :override #'my/jupyter-org-src-block-params)
-
-;; (defun jupyter-org--set-src-block-cache ()
-;;   "Set the src-block cache.
-;; If set successfully or if `point' is already inside the cached
-;; source block, return non-nil.  Otherwise, when `point' is not
-;; inside a Jupyter src-block, return nil."
-;;   (unless jupyter-org--src-block-cache
-;;     (setq jupyter-org--src-block-cache
-;;           (list (list 'invalid nil (make-marker)
-;;                       (let ((end (make-marker)))
-;;                         ;; Move the end marker when text is inserted
-;;                         (set-marker-insertion-type end t)
-;;                         end)))))
-;;   (if (org-in-src-block-p 'inside)
-;;       (or (jupyter-org--at-cached-src-block-p)
-;;           (when-let* ((el (org-element-at-point))
-;;                       (info (and (eq (org-element-type el) 'src-block)
-;;                                  (org-babel-jupyter-language-p
-;;                                   (org-element-property :language el))
-;;                                  (org-babel-get-src-block-info t el)))
-;;                       (params (nth 2 info)))
-;;             (when (eq (car jupyter-org--src-block-cache) 'invalid)
-;;               (pop jupyter-org--src-block-cache))
-;;             (pcase-let (((and cache `(,_ ,beg ,end))
-;;                          jupyter-org--src-block-cache))
-;;               (setcar cache params)
-;;               (save-excursion
-;;                 (goto-char (org-element-property :post-affiliated el))
-;;                 (
-;;                 (goto-char (org-element-property :end el))
-;;                 (skip-chars-backward "\r\n")
-;;                 (move-marker end (line-beginning-position))))
-;;             t))
-;;     ;; Invalidate cache when going outside of a source block.  This
-;;     ;; way if the language of the block changes we don't end up using
-;;     ;; the cache since it is only used for Jupyter blocks.
-;;     (pcase jupyter-org--src-block-cache
-;;       ((and `(,x . ,_) (guard (not (eq x 'invalid))))
-;;        (push 'invalid jupyter-org--src-block-cache)))
-;;     nil))
-
 (defun my/jupyter-org--set-src-block-cache ()
   "Set the src-block cache.
 If set successfully or if `point' is already inside the cached
 source block, return non-nil. Otherwise, when `point' is not
 inside a Jupyter src-block, return nil."
   (unless jupyter-org--src-block-cache
-    (setq jupyter-org--src-block-cache (list (list 'invalid nil nil))))
-  (if (org-in-src-block-p 'inside)
+    (setq jupyter-org--src-block-cache (list 'invalid nil nil)))
+ (if (org-in-src-block-p 'inside)
       (or (jupyter-org--at-cached-src-block-p)
           (when-let* ((ctx (org-element-context))
                       (el (and (eq (org-element-type ctx) 'src-block) ctx))
@@ -856,21 +788,13 @@ inside a Jupyter src-block, return nil."
                       (params (nth 2 info))
                       (beg (org-element-property :begin el))
                       (end (org-element-property :end el)))
-            (when (eq (car jupyter-org--src-block-cache) 'invalid)
-              (pop jupyter-org--src-block-cache))
-            ;; Now update cache in-place
-            (let ((cache (car jupyter-org--src-block-cache)))
-              (setf (nth 0 cache) params)
-              (setf (nth 1 cache) (copy-marker beg))
-              (setf (nth 2 cache) (copy-marker end)))
+            (setq jupyter-org--src-block-cache
+                  (list params (copy-marker beg) (copy-marker end)))
             t))
-    ;; Invalidate cache when outside a source block
-    (when (and jupyter-org--src-block-cache
-               (not (eq (caar jupyter-org--src-block-cache) 'invalid)))
-      (setf (car jupyter-org--src-block-cache)
-            (list 'invalid nil nil)))
+    (pcase jupyter-org--src-block-cache
+      ((and `(,x . ,_) (guard (not (eq x 'invalid))))
+       (push 'invalid jupyter-org--src-block-cache)))
     nil))
-
 
 (advice-add 'jupyter-org--set-src-block-cache
             :override #'my/jupyter-org--set-src-block-cache)

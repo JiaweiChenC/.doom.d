@@ -129,16 +129,16 @@ the node has an Org ID."
 
 (setq org-babel-default-header-args:jupyter-python
       '((:results . "both")
-	;; This seems to lead to buffer specific sessions!
+        ;; This seems to lead to buffer specific sessions!
         (:session . (lambda () (file-name-nondirectory (buffer-file-name))))
-	(:kernel . "python3")
-	(:pandoc . "t")
-	(:exports . "both")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")
-	(:eval . "never-export")))
+        (:kernel . "python3")
+        (:pandoc . "t")
+        (:exports . "both")
+        (:cache .   "no")
+        (:noweb . "no")
+        (:hlines . "no")
+        (:tangle . "no")
+        (:eval . "never-export")))
 
 (defun scimax-jupyter-jump-to-error ()
   "In a src block, jump to the line indicated as an error in the results.
@@ -147,46 +147,46 @@ we handle it separately. It doesn't seem like it should be that
 way, but it is."
   (interactive)
   (let* ((cp (point))
-	 (location (org-babel-where-is-src-block-result))
-	 (case-fold-search t))
+         (location (org-babel-where-is-src-block-result))
+         (case-fold-search t))
 
     (when (and location
-	       (goto-char location)
-	       (looking-at org-babel-result-regexp))
+               (goto-char location)
+               (looking-at org-babel-result-regexp))
       (cond
        ;; Check for SyntaxError
        ((string-match "SyntaxError:" (buffer-substring location (org-babel-result-end)))
-	(re-search-forward (rx (zero-or-more " ") "^") nil (org-babel-result-end))
-	(previous-line)
-	(let ((pattern (string-trim-left
-			(buffer-substring-no-properties
-			 (line-beginning-position) (line-end-position)))))
-	  (goto-char cp)
-	  (goto-char (org-element-property :begin (org-element-context)))
-	  (unless
-	      (search-forward pattern (org-element-property :end (org-element-context)) t)
-	    (message "No SyntaxError found like %s" pattern))))
+        (re-search-forward (rx (zero-or-more " ") "^") nil (org-babel-result-end))
+        (previous-line)
+        (let ((pattern (string-trim-left
+                        (buffer-substring-no-properties
+                         (line-beginning-position) (line-end-position)))))
+          (goto-char cp)
+          (goto-char (org-element-property :begin (org-element-context)))
+          (unless
+              (search-forward pattern (org-element-property :end (org-element-context)) t)
+            (message "No SyntaxError found like %s" pattern))))
 
        ;; search for something like --> 21
        (t
-	(goto-char location)
-	(re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
-	(save-match-data
-	  (goto-char cp)
-	  (goto-char (org-element-property :begin (org-element-context))))
-	(forward-line (string-to-number (match-string-no-properties 1))))))))
+        (goto-char location)
+        (re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
+        (save-match-data
+          (goto-char cp)
+          (goto-char (org-element-property :begin (org-element-context))))
+        (forward-line (string-to-number (match-string-no-properties 1))))))))
 
 (setq org-babel-default-header-args:jupyter-R
       '((:results . "value")
-	(:session . "jupyter-R")
-	(:kernel . "ir")
-	(:pandoc . "t")
-	(:exports . "both")
-	(:cache .   "no")
-	(:noweb . "no")
-	(:hlines . "no")
-	(:tangle . "no")
-	(:eval . "never-export")))
+        (:session . "jupyter-R")
+        (:kernel . "ir")
+        (:pandoc . "t")
+        (:exports . "both")
+        (:cache .   "no")
+        (:noweb . "no")
+        (:hlines . "no")
+        (:tangle . "no")
+        (:eval . "never-export")))
 
 (defun scimax-jupyter-ansi ()
   "Replaces ansi-codes in exceptions with colored text.
@@ -199,28 +199,28 @@ We also add some font properties to click on goto-error.
 This should only apply to jupyter-lang blocks."
   (when (string-match "^jupyter" (car (or (org-babel-get-src-block-info t) '(""))))
     (let* ((r (org-babel-where-is-src-block-result))
-	   (result (when r
-		     (save-excursion
-		       (goto-char r)
-		       (org-element-context)))))
+           (result (when r
+                     (save-excursion
+                       (goto-char r)
+                       (org-element-context)))))
       (when result
-	(ansi-color-apply-on-region (org-element-property :begin result)
-				    (org-element-property :end result))
+        (ansi-color-apply-on-region (org-element-property :begin result)
+                                    (org-element-property :end result))
 
-	;; Let's fontify "# [goto error]" to it is clickable
-	(save-excursion
-	  (goto-char r)
-	  (when (search-forward "# [goto error]" (org-element-property :end result) t)
-	    (add-text-properties
-	     (match-beginning 0) (match-end 0)
-	     (list 'help-echo "Click to jump to error."
-		   'mouse-face 'highlight
-		   'local-map (let ((map (copy-keymap help-mode-map)))
-				(define-key map [mouse-1] (lambda ()
-							    (interactive)
-							    (search-backward "#+BEGIN_SRC")
-							    (scimax-jupyter-jump-to-error)))
-				map))))))
+        ;; Let's fontify "# [goto error]" to it is clickable
+        (save-excursion
+          (goto-char r)
+          (when (search-forward "# [goto error]" (org-element-property :end result) t)
+            (add-text-properties
+             (match-beginning 0) (match-end 0)
+             (list 'help-echo "Click to jump to error."
+                   'mouse-face 'highlight
+                   'local-map (let ((map (copy-keymap help-mode-map)))
+                                (define-key map [mouse-1] (lambda ()
+                                                            (interactive)
+                                                            (search-backward "#+BEGIN_SRC")
+                                                            (scimax-jupyter-jump-to-error)))
+                                map))))))
 
       t)))
 
@@ -238,14 +238,15 @@ This should only apply to jupyter-lang blocks."
   "Add link to attached file in the property"
   (let ((attach (pop org-stored-links)))
     (org-entry-put (point) "ATTACHMENTS"
-		   (concat
-		    (org-entry-get (point) "ATTACHMENTS")
-		    (format " [[%s][%s]]" (car attach) (cadr attach))))))
+                   (concat
+                    (org-entry-get (point) "ATTACHMENTS")
+                    (format " [[%s][%s]]" (car attach) (cadr attach))))))
 
 (advice-add 'org-attach-attach :after 'scimax-org-attach-attach-advice)
 
 (defun my/org-open-attachment-from-property ()
-  "Prompt to select a file from the ATTACHMENTS property and open it."
+  "If there is one attachment in the ATTACHMENTS property, open it.
+   If more, prompt to select."
   (interactive)
   (require 'org)
   (let* ((attachments (org-entry-get (point) "ATTACHMENTS"))
@@ -255,18 +256,23 @@ This should only apply to jupyter-lang blocks."
                       (with-temp-buffer
                         (insert attachments)
                         (goto-char (point-min))
-                        (while (re-search-forward "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]" nil t)
+                        (while (re-search-forward
+                                "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]"
+                                nil t)
                           (push (cons (match-string 3) (match-string 2)) result))
                       (nreverse result))))))
-         (choice (when links
-                   (completing-read "Open attachment: " (mapcar #'car links) nil t))))
-    (when choice
-      (let ((filename (assoc choice links)))
-        (when filename
-          (find-file (expand-file-name (cdr filename) (org-attach-dir t))))))))
+         (target
+          (cond
+           ((null links) nil)
+           ((= (length links) 1)
+            (cdar links))  ;; Only one, use its filename directly
+           (t
+            (let ((choice (completing-read "Open attachment: " (mapcar #'car links) nil t)))
+              (cdr (assoc choice links)))))))
+    (when target
+      (find-file (expand-file-name target (org-attach-dir t))))))
 
 ;; map to spc m a h
-(map! :leader :desc "org open attachment from property" "m a h" #'my/org-open-attachment-from-property)
 
 (defun my/org-attach-new-add-link-to-attachments (file)
   "After creating new FILE, add its link to the ATTACHMENTS property at the right Org entry."
@@ -373,11 +379,13 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
 (defface org-example-block-face
-  '((t (:background "#F3E6DE" :extend t)))
+  '((t (:background "#F3E6DE"
+        :extend t)))
   "Face for content inside #+begin_example blocks.")
 ;; #412F4F
 (defun my/org-example-block-matcher (limit)
-  "Font-lock matcher that highlights lines between #+begin_example and #+end_example."
+  "Font-lock matcher that highlights lines
+between #+begin_example and #+end_example."
   (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)
     (let ((beg (line-beginning-position 2))) ;; start of next line
       (when (re-search-forward "^\\s-*#\\+end_example\\b.*$" limit t)
@@ -407,3 +415,91 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 (font-lock-add-keywords
  'org-mode
  '((my/org-table-block-matcher (0 'org-table-block-face prepend))))
+
+
+;;;;;;;;;;;;;;; open attachment 
+(defun my/org--collect-heading-attachments ()
+  "Collect attachments from the current heading. Returns a list of (display . file-path)."
+  (let* ((attachments (org-entry-get (point) "ATTACHMENTS"))
+         (attach-dir (ignore-errors (org-attach-dir t))))
+    (when (and attachments attach-dir)
+      (let (result)
+        (with-temp-buffer
+          (insert attachments)
+          (goto-char (point-min))
+          (while (re-search-forward
+                  "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]"
+                  nil t)
+            (let ((file (match-string 2))
+                  (display (match-string 3)))
+              (push (cons display (expand-file-name file attach-dir)) result))))
+        (nreverse result)))))
+
+(defun my/org--collect-direct-children-attachments ()
+  "Collect attachments from direct children of current heading."
+  (let ((results nil)
+        (parent-level (org-current-level)))
+    (save-excursion
+      (org-back-to-heading t)
+      (let ((subtree-end (save-excursion (org-end-of-subtree t t))))
+        (forward-line 1)
+        (while (and (< (point) subtree-end)
+                    (re-search-forward org-heading-regexp subtree-end t))
+          (when (= (org-current-level) (1+ parent-level))
+            (let ((atts (my/org--collect-heading-attachments)))
+              (when atts
+                (setq results (append results atts))))))))
+    results))
+
+(defun my/org--collect-attachments-in-heading-and-direct-children ()
+  "Collect attachments from this heading and its direct children."
+  (let ((here-atts (my/org--collect-heading-attachments))
+        (child-atts (my/org--collect-direct-children-attachments)))
+    (append here-atts child-atts)))
+
+(defun my/org-open-attachment-from-property-child-subtree ()
+  "Open an attachment from ATTACHMENTS in this heading or its direct children."
+  (interactive)
+  (require 'org)
+  (let* ((links (my/org--collect-attachments-in-heading-and-direct-children)))
+    (if (not links)
+        (user-error "No attachments found in this heading or its direct children")
+      (let ((target
+             (if (= (length links) 1)
+                 (cdar links)
+               (let ((choice (completing-read "Open attachment: " (mapcar #'car links) nil t)))
+                 (cdr (assoc choice links))))))
+        (when target
+          (find-file target))))))
+
+(map! :leader :desc "org open attachment from property" "m a h" #'my/org-open-attachment-from-property-child-subtree)
+
+
+(defun my/jupyter-org--set-src-block-cache ()
+  "Set the src-block cache.
+If set successfully or if `point' is already inside the cached
+source block, return non-nil. Otherwise, when `point' is not
+inside a Jupyter src-block, return nil."
+  (unless jupyter-org--src-block-cache
+    (setq jupyter-org--src-block-cache (list 'invalid nil nil)))
+ (if (org-in-src-block-p 'inside)
+      (or (jupyter-org--at-cached-src-block-p)
+          (when-let* ((ctx (org-element-context))
+                      (el (and (eq (org-element-type ctx) 'src-block) ctx))
+                      (info (and el
+                                 (org-babel-jupyter-language-p
+                                  (org-element-property :language el))
+                                 (org-babel-get-src-block-info t el)))
+                      (params (nth 2 info))
+                      (beg (org-element-property :begin el))
+                      (end (org-element-property :end el)))
+            (setq jupyter-org--src-block-cache
+                  (list params (copy-marker beg) (copy-marker end)))
+            t))
+    (pcase jupyter-org--src-block-cache
+      ((and `(,x . ,_) (guard (not (eq x 'invalid))))
+       (push 'invalid jupyter-org--src-block-cache)))
+    nil))
+
+(advice-add 'jupyter-org--set-src-block-cache
+            :override #'my/jupyter-org--set-src-block-cache)
