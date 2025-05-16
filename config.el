@@ -770,31 +770,3 @@
 ;; do not export when archived
 (setq! org-export-with-archived-trees nil)
 
-(defun my/jupyter-org--set-src-block-cache ()
-  "Set the src-block cache.
-If set successfully or if `point' is already inside the cached
-source block, return non-nil. Otherwise, when `point' is not
-inside a Jupyter src-block, return nil."
-  (unless jupyter-org--src-block-cache
-    (setq jupyter-org--src-block-cache (list 'invalid nil nil)))
- (if (org-in-src-block-p 'inside)
-      (or (jupyter-org--at-cached-src-block-p)
-          (when-let* ((ctx (org-element-context))
-                      (el (and (eq (org-element-type ctx) 'src-block) ctx))
-                      (info (and el
-                                 (org-babel-jupyter-language-p
-                                  (org-element-property :language el))
-                                 (org-babel-get-src-block-info t el)))
-                      (params (nth 2 info))
-                      (beg (org-element-property :begin el))
-                      (end (org-element-property :end el)))
-            (setq jupyter-org--src-block-cache
-                  (list params (copy-marker beg) (copy-marker end)))
-            t))
-    (pcase jupyter-org--src-block-cache
-      ((and `(,x . ,_) (guard (not (eq x 'invalid))))
-       (push 'invalid jupyter-org--src-block-cache)))
-    nil))
-
-(advice-add 'jupyter-org--set-src-block-cache
-            :override #'my/jupyter-org--set-src-block-cache)
