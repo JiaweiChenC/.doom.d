@@ -5,7 +5,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("56044c5a9cc45b6ec45c0eb28df100d3f0a576f18eef33ff8ff5d32bac2d9700"
+   '("ccae31f9d6218723973eb6b8eb8ad1e45f6a00e0f67b8979bd0f519070f22fd1"
+     "56044c5a9cc45b6ec45c0eb28df100d3f0a576f18eef33ff8ff5d32bac2d9700"
      "04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f"
      "b11edd2e0f97a0a7d5e66a9b82091b44431401ac394478beb44389cf54e6db28"
      "6bdc4e5f585bb4a500ea38f563ecf126570b9ab3be0598bdf607034bb07a8875"
@@ -90,5 +91,4 @@
  ;; If there is more than one, they won't work right.
  '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
  '(mini-echo-blue ((t (:foreground "dark cyan"))))
- '(mini-echo-yellow ((t (:foreground "dark magenta"))))
- '(vertical-border ((t (:background "#F2E9DE" :foreground "#F2E9DE")))))
+ '(mini-echo-yellow ((t (:foreground "dark magenta")))))

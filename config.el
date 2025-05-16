@@ -825,7 +825,7 @@
 ;;               (setcar cache params)
 ;;               (save-excursion
 ;;                 (goto-char (org-element-property :post-affiliated el))
-;;                 (move-marker beg (line-beginning-position 2))
+;;                 (
 ;;                 (goto-char (org-element-property :end el))
 ;;                 (skip-chars-backward "\r\n")
 ;;                 (move-marker end (line-beginning-position))))
@@ -843,46 +843,34 @@
 If set successfully or if `point' is already inside the cached
 source block, return non-nil. Otherwise, when `point' is not
 inside a Jupyter src-block, return nil."
+  (unless jupyter-org--src-block-cache
+    (setq jupyter-org--src-block-cache (list (list 'invalid nil nil))))
   (if (org-in-src-block-p 'inside)
       (or (jupyter-org--at-cached-src-block-p)
-          (when-let* ((el (org-element-at-point))
-                      (info (and (eq (org-element-type el) 'src-block)
+          (when-let* ((ctx (org-element-context))
+                      (el (and (eq (org-element-type ctx) 'src-block) ctx))
+                      (info (and el
                                  (org-babel-jupyter-language-p
                                   (org-element-property :language el))
                                  (org-babel-get-src-block-info t el)))
                       (params (nth 2 info))
-                      (ctx (org-element-context))
-                      (beg (org-element-property :begin ctx)) ; these are now markers!
-                      (end (org-element-property :end ctx)))
-            (setq jupyter-org--src-block-cache
-                  (list (list params beg end)))
+                      (beg (org-element-property :begin el))
+                      (end (org-element-property :end el)))
+            (when (eq (car jupyter-org--src-block-cache) 'invalid)
+              (pop jupyter-org--src-block-cache))
+            ;; Now update cache in-place
+            (let ((cache (car jupyter-org--src-block-cache)))
+              (setf (nth 0 cache) params)
+              (setf (nth 1 cache) (copy-marker beg))
+              (setf (nth 2 cache) (copy-marker end)))
             t))
-    ;; Invalidate cache when going outside of a source block.
-    (setq jupyter-org--src-block-cache
-          (list (list 'invalid nil nil nil)))
+    ;; Invalidate cache when outside a source block
+    (when (and jupyter-org--src-block-cache
+               (not (eq (caar jupyter-org--src-block-cache) 'invalid)))
+      (setf (car jupyter-org--src-block-cache)
+            (list 'invalid nil nil)))
     nil))
+
 
 (advice-add 'jupyter-org--set-src-block-cache
             :override #'my/jupyter-org--set-src-block-cache)
-
-(defun my/jupyter-org-src-block-params (&optional previous)
-  "Return the src-block parameters for the current Jupyter src-block.
-If PREVIOUS is non-nil and `point' is not in a Jupyter source
-block, return the parameters of the most recently visited source
-block, but only if it was in the same buffer. Otherwise return
-nil."
-  (jupyter-org--set-src-block-cache)
-  (pcase jupyter-org--src-block-cache
-    ;; If not in src-block and cache is invalid, but previous requested and buffer matches
-    (`((invalid ,params ,beg ,end))
-     (when (and previous
-                (not (jupyter-org--at-cached-src-block-p))
-                (eq (and beg (marker-buffer beg)) (current-buffer)))
-       params))
-    ;; If cache is invalid, don't return anything
-    (`((invalid . ,_)) nil)
-    ;; If cache is valid, always return params (first element)
-    (`((,params ,_beg ,_end)) params)))
-
-(advice-add 'jupyter-org-src-block-params
-            :override #'my/jupyter-org-src-block-params)
