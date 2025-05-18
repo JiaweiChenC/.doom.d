@@ -35,8 +35,6 @@
 
 (setq org-log-into-drawer t)
 
-(setq! blink-cursor-mode t)
-
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
@@ -173,7 +171,7 @@
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
-(setq citar-org-roam-capture-template-key "z")
+;; (setq citar-org-roam-capture-template-key "z")
 
 
 ;; citar configuration
@@ -392,6 +390,7 @@
   (add-to-list 'org-file-apps '("\\.svg\\'" . default))
   (load! (expand-file-name "mytex.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
+  (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
@@ -541,11 +540,6 @@
 
 ;; (setq! csv-align-max-width 10000)
 
-;; (use-package! cell-mode
-  ;; :config
-  ;; (setq! cell-cursor-blink-p 'nil)
-  ;; )
-;;
 (setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
@@ -713,7 +707,8 @@
 
 (map! :after evil-org
       :map evil-org-mode-map
-      :n "C-j" #'electric-newline-and-maybe-indent)
+      :n "C-j" #'electric-newline-and-maybe-indent
+      :n "C-k" #'kill-line)
 
 ;; after evil org map g spc to evil-avy-goto-char-2
 (map! :n "g 2" #'evil-avy-goto-char-2)
@@ -734,7 +729,7 @@
   :config
   ;; Increase preview width
   (plist-put org-latex-preview-appearance-options 
-             :page-width 0.8)
+             :page-width 1.0)
   (plist-put org-latex-preview-appearance-options
              :zoom 1.2)
   ;; ;; Use dvisvgm to generate previews
@@ -770,3 +765,27 @@
 ;; do not export when archived
 (setq! org-export-with-archived-trees nil)
 
+(add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
+
+(set-popup-rule!
+  "^\\*jupyter-output\\*$"
+  :side 'bottom      ; show at the bottom
+  :size 0.2
+  :select t          ; focus the popup when opened
+  :quit t            ; can be quit with q or C-g
+  :ttl nil)          ; keep the popup open until explicitly killed
+
+
+;; (after! org
+;; (setq! org-latex-preview-auto-ignored-commands
+;;    '("evil-scroll-down", "evil-scroll-up", "evil-scroll-line-to-center",
+;;      "evil-scroll-line-to-top", "evil-scroll-line-to-bottom",
+;;      "evil-scroll-column-to-left", "evil-scroll-column-to-right",
+;;      "evil-scroll-page-down", "evil-scroll-page-up")))
+
+(after! org
+  (setq org-latex-preview-auto-ignored-commands
+        '(next-line
+          previous-line)))
+          ;; evil-next-line
+          ;; evil-previous-line)))

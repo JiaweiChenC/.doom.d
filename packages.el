@@ -74,7 +74,7 @@
 
 (unpin! org)
 (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
-         citar-org-roam citar citar-embark flycheck gptel
+         citar-org-roam citar citar-embark flycheck
         yasnippet nerd-icons doom-snippets)
 (package! htmlize)
 (package! impatient-showdown)
@@ -106,9 +106,6 @@
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! iscroll)
-(package! float-narrow-indirect
-  :recipe (:host github
-           :repo "yibie/float-narrow-indirect"))
 ;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
 (package! rainbow-csv
   :recipe (:host github :repo "emacs-vs/rainbow-csv"))
@@ -132,6 +129,5 @@
 (package! kaolin-themes)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
-;; (package! gptel)
-;; (package! jupyter
-  ;; :pin "22e6b0ee4ec90f3da0c5335cda59c6642f788e42")
+(package! uv
+  :recipe (:host github :repo "johannes-mueller/uv.el"))

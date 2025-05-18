@@ -379,7 +379,7 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
 (defface org-example-block-face
-  '((t (:background "#F3E6DE"
+  '((t (:background "#F9F2EB"
         :extend t)))
   "Face for content inside #+begin_example blocks.")
 ;; #412F4F
