@@ -321,9 +321,17 @@
 ;; map citar open files to space o C
 (map! :leader :desc "citar open files" "o c" #'my/citar-open-pdf)
 
-(after! corfu
-  (setq corfu-max-width 60)
-  )
+(use-package! corfu
+  ;; :init
+  ;; (corfu-global-mode)
+  :config
+  (setq corfu-auto nil
+        corfu-quit-no-match 'separator
+        corfu-quit-at-boundary 'separator
+        corfu-on-exact-match 'separator
+        corfu-min-width 50
+        corfu-max-width 80)
+  (map! :i "<backtab>" #'completion-at-point))
 
 (after! dabbrev
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
@@ -369,8 +377,8 @@
 
 (map! :leader :desc "Move buffer to new frame" "w F" #'my/move-buffer-to-new-frame)
 
-(after! pdf-tools
-  (setq-default pdf-view-display-size 'fit-width))
+;; (after! pdf-tools
+;;   (setq-default pdf-view-display-size 'fit-width))
 
 ;; open a file using zotero
 (eval-after-load 'citar-file
@@ -520,17 +528,12 @@
 ;; (after! float-narrow-indirect-mode
 ;;   (setq fni-floating-frame-border-color nil))
 
-;; enable highlight line
-;; (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
-
 (after! corfu
   (setq corfu-auto nil))
 
 (add-hook 'prog-mode-hook
           (lambda ()
             (face-remap-add-relative 'font-lock-comment-face :slant 'italic)))
-;; alpaa backround
-;; (set-frame-parameter nil 'alpha 90)
 
 (use-package! rainbow-csv
   :hook (csv-mode . rainbow-csv-mode))
