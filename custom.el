@@ -55,8 +55,7 @@
      "7e969364b4921a142b017eb4135005786650f76e40564abdce7ea6d0e0d46ead"
      "48042425e84cd92184837e01d0b4fe9f912d875c43021c3bcb7eeb51f1be5710"
      "e8183add41107592ee785f9f9b4b08d21bd6c43206b85bded889cea1ee231337" default))
- '(org-agenda-files
-   '("/Users/jiawei/org/journal/20250501"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20250501"))
  '(package-selected-packages
    '(avy bibtex-completion citeproc eglot htmlize hydra ox-pandoc request))
  '(safe-local-variable-directories

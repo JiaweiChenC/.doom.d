@@ -650,10 +650,8 @@
 
 (map! :n "C-;" #'electric-newline-and-maybe-indent)
 
-
 (use-package! org-modern-indent
   :hook (org-mode . org-modern-indent-mode))
-  ;; (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 
 (use-package! org-modern
   :defer t
@@ -789,3 +787,9 @@
           previous-line)))
           ;; evil-next-line
           ;; evil-previous-line)))
+
+(use-package! apheleia
+  :config
+  (setf (alist-get 'python-mode apheleia-mode-alist)
+        '(black))
+  (apheleia-global-mode +1))
