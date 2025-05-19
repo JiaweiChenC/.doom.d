@@ -177,27 +177,27 @@
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
 (setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
-(setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
-(setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
+;; (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
+;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
-(setq! citar-org-roam-subdir "paper/")
+;; (setq! citar-org-roam-subdir "paper/")
 (setq citar-org-roam-note-title-template "${title}")
 
 (use-package! copilot
-:hook (prog-mode . copilot-mode)
-:bind (("M-TAB" . 'copilot-accept-completion-by-word)
-      ("M-<tab>" . 'copilot-accept-completion-by-word)
-      :map copilot-completion-map
-      ("<tab>" . 'copilot-accept-completion)
-      ("TAB" . 'copilot-accept-completion))
-:config
-(add-to-list 'copilot-indentation-alist '(prog-mode 2))
-(add-to-list 'copilot-indentation-alist '(org-mode 2))
-(add-to-list 'copilot-indentation-alist '(text-mode 2))
-(add-to-list 'copilot-indentation-alist '(closure-mode 2))
-(add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-(setq copilot-idle-delay 0.5)
-)
+  :hook (prog-mode . copilot-mode)
+  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
+         ("M-<tab>" . 'copilot-accept-completion-by-word)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion))
+  :config
+  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
+  (add-to-list 'copilot-indentation-alist '(org-mode 2))
+  (add-to-list 'copilot-indentation-alist '(text-mode 2))
+  (add-to-list 'copilot-indentation-alist '(closure-mode 2))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+  (setq copilot-idle-delay 0.5)
+  )
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -338,19 +338,19 @@
   (map! :n "]T" 'tab-bar-switch-to-next-tab)
   (map! :n "[T" 'tab-bar-switch-to-prev-tab)
 
-   (map! :leader
+  (map! :leader
         (:prefix ("t" . "tab")
-        :desc "Switch to tab number"
-        "1" #'(lambda () (interactive) (tab-bar-select-tab))
-        "2" #'(lambda () (interactive) (tab-bar-select-tab))
-        "3" #'(lambda () (interactive) (tab-bar-select-tab))
-        "4" #'(lambda () (interactive) (tab-bar-select-tab))
-        "5" #'(lambda () (interactive) (tab-bar-select-tab))
-        "6" #'(lambda () (interactive) (tab-bar-select-tab))
-        "7" #'(lambda () (interactive) (tab-bar-select-tab))
-        "8" #'(lambda () (interactive) (tab-bar-select-tab))
-        "9" #'(lambda () (interactive) (tab-bar-select-tab))
-)))
+         :desc "Switch to tab number"
+         "1" #'(lambda () (interactive) (tab-bar-select-tab))
+         "2" #'(lambda () (interactive) (tab-bar-select-tab))
+         "3" #'(lambda () (interactive) (tab-bar-select-tab))
+         "4" #'(lambda () (interactive) (tab-bar-select-tab))
+         "5" #'(lambda () (interactive) (tab-bar-select-tab))
+         "6" #'(lambda () (interactive) (tab-bar-select-tab))
+         "7" #'(lambda () (interactive) (tab-bar-select-tab))
+         "8" #'(lambda () (interactive) (tab-bar-select-tab))
+         "9" #'(lambda () (interactive) (tab-bar-select-tab))
+         )))
 
 
 (setq! ess-startup-directory 'default-directory)
@@ -589,13 +589,13 @@
   (add-to-list 'eglot-server-programs
                '((python-mode python-ts-mode)
                  "pyright-langserver" "--stdio")))
-  ;; (setq-default
-  ;;  eglot-workspace-configuration
-  ;;  '(:basedpyright (:typeCheckingMode "basic")
-  ;;    :basedpyright.analysis
-  ;;    (:diagnosticSeverityOverrides
-  ;;     (:reportUnusedCallResult "none"
-  ;;      :reportArgumentType "none")))))
+;; (setq-default
+;;  eglot-workspace-configuration
+;;  '(:basedpyright (:typeCheckingMode "basic")
+;;    :basedpyright.analysis
+;;    (:diagnosticSeverityOverrides
+;;     (:reportUnusedCallResult "none"
+;;      :reportArgumentType "none")))))
 
 
 ;; (setq! org-startup-truncated nil)
@@ -668,8 +668,8 @@
 (advice-add 'deft :around #'my/deft-set-project-doc-org-dir)
 
 (with-eval-after-load 'ob-jupyter
- (org-babel-jupyter-aliases-from-kernelspecs)
- )
+  (org-babel-jupyter-aliases-from-kernelspecs)
+  )
 
 ;; hack to make jupyter work with images
 ;; https://github.com/emacs-jupyter/jupyter/issues/558
@@ -751,11 +751,11 @@
   (setq org-latex-preview-live-debounce 0.25)
 
   (defun org--latex-preview-region (beg end)
-        "Compatibility shim for old Org LaTeX preview function.
+    "Compatibility shim for old Org LaTeX preview function.
         Calls `org-latex-preview--preview-region' with a default
         processing type."
-  (let ((processing-type org-latex-preview-process-default))
-        (org-latex-preview--preview-region processing-type beg end)))
+    (let ((processing-type org-latex-preview-process-default))
+      (org-latex-preview--preview-region processing-type beg end)))
   )
 
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
@@ -785,11 +785,8 @@
   (setq org-latex-preview-auto-ignored-commands
         '(next-line
           previous-line)))
-          ;; evil-next-line
-          ;; evil-previous-line)))
 
 (use-package! apheleia
   :config
   (setf (alist-get 'python-mode apheleia-mode-alist)
-        '(black))
-  (apheleia-global-mode +1))
+        '(black)))
