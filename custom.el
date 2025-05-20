@@ -59,7 +59,8 @@
  '(package-selected-packages
    '(avy bibtex-completion citeproc eglot htmlize hydra ox-pandoc request))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/virtual_maze_PD/"
+   '("/Users/jiawei/Projects/figure_of_eight_PD/"
+     "/Users/jiawei/Projects/virtual_maze_PD/"
      "/Users/jiawei/Projects/virtual_maze_PD/paper/movement_disorder/"
      "/Users/jiawei/Projects/Bio_model/"
      "/Users/jiawei/Projects/Bio_model/utils_for_bio_models/LearningHumans/"

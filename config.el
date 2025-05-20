@@ -60,7 +60,9 @@
 
 (after! cdlatex
   (add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
-  (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil ))
+  (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil )))
+
+(after! texmathp
   (add-to-list 'texmathp-tex-commands '("tikzpicture" env-on)))
 
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
@@ -181,12 +183,18 @@
 ;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
 ;; (setq! citar-org-roam-subdir "paper/")
-(setq citar-org-roam-note-title-template "${title}")
+
+(setq org-roam-capture-templates
+      '(("n" "note" plain
+         "* ${title}\n\n%?"
+         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                            "#+title: ${title}\n\n")
+         :unnarrowed t
+         :empty-lines 1)))
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (("M-TAB" . 'copilot-accept-completion-by-word)
-         ("M-<tab>" . 'copilot-accept-completion-by-word)
+  :bind (("<backtab>" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
          ("TAB" . 'copilot-accept-completion))
@@ -331,7 +339,7 @@
         corfu-on-exact-match 'separator
         corfu-min-width 50
         corfu-max-width 80)
-  (map! :i "<backtab>" #'completion-at-point))
+  (map! :i "M-<tab>" #'completion-at-point))
 
 (after! dabbrev
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
