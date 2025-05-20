@@ -187,8 +187,8 @@
 (setq org-roam-capture-templates
       '(("n" "note" plain
          "* ${title}\n\n%?"
-         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n\n")
+         :target (file+head "${slug}.org"
+                            "#+title: ${title}\n#+created: %<%Y-%m-%d>")
          :unnarrowed t
          :empty-lines 1)))
 
@@ -784,13 +784,6 @@
   :quit t            ; can be quit with q or C-g
   :ttl nil)          ; keep the popup open until explicitly killed
 
-
-;; (after! org
-;; (setq! org-latex-preview-auto-ignored-commands
-;;    '("evil-scroll-down", "evil-scroll-up", "evil-scroll-line-to-center",
-;;      "evil-scroll-line-to-top", "evil-scroll-line-to-bottom",
-;;      "evil-scroll-column-to-left", "evil-scroll-column-to-right",
-;;      "evil-scroll-page-down", "evil-scroll-page-up")))
 
 (after! org
   (setq org-latex-preview-auto-ignored-commands
