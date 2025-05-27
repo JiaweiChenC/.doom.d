@@ -5,7 +5,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("ccae31f9d6218723973eb6b8eb8ad1e45f6a00e0f67b8979bd0f519070f22fd1"
+   '("2d7f9fce90ba5529d04d7b546ac4c59e017d876afe9e1eb4c554f375b69706f8"
+     "ccae31f9d6218723973eb6b8eb8ad1e45f6a00e0f67b8979bd0f519070f22fd1"
      "56044c5a9cc45b6ec45c0eb28df100d3f0a576f18eef33ff8ff5d32bac2d9700"
      "04aa1c3ccaee1cc2b93b246c6fbcd597f7e6832a97aaeac7e5891e6863236f9f"
      "b11edd2e0f97a0a7d5e66a9b82091b44431401ac394478beb44389cf54e6db28"
@@ -91,7 +92,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
+ '(lsp-flycheck-info-unnecessary-face ((t (:foreground "gray"))) t)
  '(mini-echo-blue ((t (:foreground "dark cyan"))))
- '(mini-echo-yellow ((t (:foreground "dark magenta"))))
- '(vertical-border ((t (:background "#F2E9DE" :foreground "#F2E9DE")))))
+ '(mini-echo-yellow ((t (:foreground "dark magenta")))))

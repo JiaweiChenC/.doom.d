@@ -400,7 +400,7 @@
             (set-face-background 'fringe (face-attribute 'default :background))))
 
 
-;; (load! (expand-file-name "my-quickrun.el" "~/.doom.d/lisp/"))
+(load! (expand-file-name "my-quickrun.el" "~/.doom.d/lisp/"))
 ;; load mytex.el after org
 (after! org
   (add-to-list 'org-file-apps '("\\.svg\\'" . default))
@@ -450,7 +450,7 @@
   (setq! org-appear-autolinks t)
   )
 
-(setq eglot-send-changes-idle-time 0.1)
+;; (setq eglot-send-changes-idle-time 0.1)
 
 ;; (use-package! citar)
 
@@ -491,25 +491,25 @@
       large-hscroll-threshold 1000
       syntax-wholeline-max 1000)
 
-(use-package! sideline
-  :init
-  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
-        sideline-backends-right-skip-current-line t
-        ;; sideline-order-right 'up                     ; or 'down
-        ;; sideline-format-left "%s   "                 ; format for left aligment
-        ;; sideline-format-right "   %s"                ; format for right aligment
-        sideline-priority 100                        ; overlays' priority
-        sideline-display-backend-name t
-        ;; sideline-backends-left '(sideline-eglot)
-        sideline-backends-right '(sideline-flycheck)
-        )
-  :hook ((flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
-         (flymake-mode  . sideline-mode)
-         (eglot-mode . sideline-mode)       ; for `sideline-eglot`))
-         ))            ; display the backend name
+;; (use-package! sideline
+;;   :init
+;;   (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+;;         sideline-backends-right-skip-current-line t
+;;         ;; sideline-order-right 'up                     ; or 'down
+;;         ;; sideline-format-left "%s   "                 ; format for left aligment
+;;         ;; sideline-format-right "   %s"                ; format for right aligment
+;;         sideline-priority 100                        ; overlays' priority
+;;         sideline-display-backend-name t
+;;         ;; sideline-backends-left '(sideline-eglot)
+;;         sideline-backends-right '(sideline-flycheck)
+;;         )
+;;   :hook ((flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
+;;          (flymake-mode  . sideline-mode)
+;;          (eglot-mode . sideline-mode)       ; for `sideline-eglot`))
+;;          ))            ; display the backend name
 
-(use-package! sideline-flycheck
-  :hook (flycheck-mode . sideline-flycheck-setup))
+;; (use-package! sideline-flycheck
+  ;; :hook (flycheck-mode . sideline-flycheck-setup))
 
 
 (setq! org-preview-html-viewer 'xwidget)
@@ -563,9 +563,9 @@
     (message "No text selected!")))
 
 ;; To bind this function to a key in Doom Emacs:
-(map! :leader
-      :desc "Wrap Text with Color"
-      "l r" #'wrap-text-with-color)
+;; (map! :leader
+;;       :desc "Wrap Text with Color"
+;;       "l r" #'wrap-text-with-color)
 
 (defun wrap-text-with-delete ()
   "Wrap the selected text with [[delete:red][text]]."
@@ -577,9 +577,9 @@
     (message "No text selected!")))
 
 ;; To bind this function to a key in Doom Emacs:
-(map! :leader
-      :desc "Wrap Text with Delete"
-      "l d" #'wrap-text-with-delete)
+;; (map! :leader
+;;       :desc "Wrap Text with Delete"
+;;       "l d" #'wrap-text-with-delete)
 
 (map! :map citar-embark-citation-map
       :n
@@ -591,15 +591,17 @@
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
 
-(use-package! eglot
-  :config
-  (setq eglot-events-buffer-config '(:size 0)
-        eglot-report-progress nil
-        eglot-extend-to-xref t
-        eglot-ignored-server-capabilities '(:inlayHintProvider))
-  (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode)
-                 "pyright-langserver" "--stdio")))
+;; (use-package! eglot
+;;   :hook (python-mode . eglot-ensure)
+;;   :config
+;;   (setq eglot-events-buffer-config '(:size 0)
+;;         eglot-report-progress nil
+;;         eglot-extend-to-xref t
+;;         eglot-ignored-server-capabilities '(:inlayHintProvider))
+;;   (add-to-list 'eglot-server-programs
+;;                '((python-mode python-ts-mode)
+;;                  "pyright-langserver" "--stdio")))
+
 ;; (setq-default
 ;;  eglot-workspace-configuration
 ;;  '(:basedpyright (:typeCheckingMode "basic")
@@ -728,10 +730,6 @@
 
 (setq! envrc-remote t)
 
-(use-package! mini-echo
-  :config
-  (mini-echo-mode)
-  )
 
 (use-package! org-latex-preview
   :hook (org-mode . org-latex-preview-auto-mode)
@@ -784,6 +782,14 @@
   :quit t            ; can be quit with q or C-g
   :ttl nil)          ; keep the popup open until explicitly killed
 
+;; set popup rule for *ChatGPT*
+(set-popup-rule!
+  "^\\*ChatGPT\\*$"
+  :side 'bottom
+  :size 0.3
+  :select t
+  :quit t
+  :ttl nil)
 
 (after! org
   (setq org-latex-preview-auto-ignored-commands
@@ -794,3 +800,40 @@
   :config
   (setf (alist-get 'python-mode apheleia-mode-alist)
         '(black)))
+
+(use-package! phscroll
+  :hook (org-mode . org-phscroll-mode)
+  )
+
+(use-package! mini-echo
+  :config
+  (mini-echo-mode)
+  )
+
+
+;; map lsp-ui-peek find definitions to space l d
+;; map lsp-ui-peek find references to space l r
+(after! lsp-ui
+  (setq lsp-ui-peek-always-show t)
+  (map! :map lsp-ui-mode-map
+        :leader
+        (:prefix ("l" . "lsp")
+         :desc "find definition" "d" #'lsp-ui-peek-find-definitions
+         :desc "find references" "r" #'lsp-ui-peek-find-references
+         )))
+
+;; map g / to avy go to char timer
+(map! :n "g /" #'avy-goto-char-timer)
+
+(after! evil
+  (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump))
+
+(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-treesit.el")
+
+(defun flash-emacs--set-jump-before-jump (&rest _args)
+  "Set a jump point before running `flash-emacs-jump`."
+  (better-jumper-set-jump))
+
+(advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
+

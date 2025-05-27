@@ -74,7 +74,7 @@
 
 (unpin! org)
 (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
-         citar-org-roam citar citar-embark flycheck
+         citar-org-roam citar citar-embark flycheck lsp-mode
         yasnippet nerd-icons doom-snippets)
 (package! htmlize)
 (package! impatient-showdown)
@@ -96,12 +96,12 @@
 (package! bookmark-in-project)
 ;; pin to a version
 (package! mini-echo)
-(package! sideline)
-(package! sideline-flycheck)
-(package! color-theme-sanityinc-tomorrow)
-(package! sideline-eglot
-  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
-  )
+;; (package! sideline)
+;; (package! sideline-flycheck)
+;; (package! color-theme-sanityinc-tomorrow)
+;; (package! sideline-eglot
+;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
+;;   )
 ;; (package! org-preview-html)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
@@ -125,9 +125,15 @@
 (package! nano-theme)
 (package! eglot
 :recipe (:host github :repo "joaotavora/eglot")
-:pin "355a167c625b58a0ff2c1b1bbcc8c18bf64b3b08")
-(package! kaolin-themes)
+:pin "4e2ef422a5e15283a2685a5dd99a055fbbe3f85c")
+;; (package! kaolin-themes)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
 (package! uv
   :recipe (:host github :repo "johannes-mueller/uv.el"))
+(package! lsp-treemacs)
+;; (package! flash.emacs
+;;   :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
+
+;; disable evil snipe
+(package! evil-snipe :disable t)

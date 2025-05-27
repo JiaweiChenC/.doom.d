@@ -177,6 +177,7 @@
     (css-property             :foreground green)
     (css-selector             :foreground green)
 
+    (vertical-border :background "#F2E9DE" :foreground "#F2E9DE")
     ;;bookmark
     (bookmark-face ((t (:extend t :background "#ede7e4" :distant-foreground "DarkOrange3"))))
 

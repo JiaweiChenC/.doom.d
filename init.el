@@ -53,8 +53,8 @@
        ;; tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       (vc-gutter +pretty)         ; vcs diff in the fringe
-       ;; vc-gutter         ; vcs diff in the fringe
+       ;; vc-gutter
+        ;; +pretty)         ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
        workspaces        ; tab emulation, persistence & separate workspaces
@@ -112,8 +112,9 @@
        (lookup
         +docsets
         +dictionary)              ; navigate your code and its documentation
-       (lsp
-        +eglot)
+       lsp
+        ;; +peek)
+        ;; +eglot)
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -133,6 +134,7 @@
        ;;agda              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        (cc
+        +tree-sitter
         +lsp)                ; C > C++ == 1
        ;;clojure           ; java with a lisp
        ;;common-lisp       ; if you've seen one lisp, you've seen them all
@@ -192,7 +194,7 @@
        (python            ; beautiful is better than ugly
         ;; +conda
         +lsp
-        ;; +pyright
+        +pyright
         ;; +pyenv
         +tree-sitter
         )

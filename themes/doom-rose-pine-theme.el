@@ -210,6 +210,11 @@
     (org-block-background :background (doom-blend yellow bg 0.04))
     (org-block-begin-line :background (doom-blend yellow bg 0.08) :foreground comments :extend t)
     (org-block-end-line :background (doom-blend yellow bg 0.08) :foreground comments :extend t)
+    ;; (org-example-block-face :background "#F9F2EB" :extend t)
+;; (defface org-table-block-face
+;;   '((t (:inherit org-block)))
+    (org-table-block-face :inherit 'org-block)
+
     (org-level-1 :foreground gold)
     (org-level-2 :foreground rose)
     (org-level-3 :foreground pine)

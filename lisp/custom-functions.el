@@ -379,8 +379,7 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
 (defface org-example-block-face
-  '((t (:background "#F9F2EB"
-        :extend t)))
+  '((t (:inherit org-code)))
   "Face for content inside #+begin_example blocks.")
 ;; #412F4F
 (defun my/org-example-block-matcher (limit)
@@ -415,7 +414,6 @@ between #+begin_example and #+end_example."
 (font-lock-add-keywords
  'org-mode
  '((my/org-table-block-matcher (0 'org-table-block-face prepend))))
-
 
 ;;;;;;;;;;;;;;; open attachment 
 (defun my/org--collect-heading-attachments ()
