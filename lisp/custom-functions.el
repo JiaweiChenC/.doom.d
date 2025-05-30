@@ -378,24 +378,24 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 
 ;;;;;;;;;;;;;;;;;;;;;;; special block facces
 
-(defface org-example-block-face
-  '((t (:inherit org-code)))
-  "Face for content inside #+begin_example blocks.")
-;; #412F4F
-(defun my/org-example-block-matcher (limit)
-  "Font-lock matcher that highlights lines
-between #+begin_example and #+end_example."
-  (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)
-    (let ((beg (line-beginning-position 2))) ;; start of next line
-      (when (re-search-forward "^\\s-*#\\+end_example\\b.*$" limit t)
-        (let ((end (line-beginning-position)))
-          (when (< beg end)
-            (set-match-data (list beg end))
-            t))))))
+;; (defface org-example-block-face
+;;   '((t (:inherit org-code)))
+;;   "Face for content inside #+begin_example blocks.")
+;; ;; #412F4F
+;; (defun my/org-example-block-matcher (limit)
+;;   "Font-lock matcher that highlights lines
+;; between #+begin_example and #+end_example."
+;;   (when (re-search-forward "^\\s-*#\\+begin_example\\b.*$" limit t)
+;;     (let ((beg (line-beginning-position 2))) ;; start of next line
+;;       (when (re-search-forward "^\\s-*#\\+end_example\\b.*$" limit t)
+;;         (let ((end (line-beginning-position)))
+;;           (when (< beg end)
+;;             (set-match-data (list beg end))
+;;             t))))))
 
-(font-lock-add-keywords
- 'org-mode
- '((my/org-example-block-matcher (0 'org-example-block-face prepend))))
+;; (font-lock-add-keywords
+;;  'org-mode
+;;  '((my/org-example-block-matcher (0 'org-example-block-face prepend))))
 
 (defface org-table-block-face
   '((t (:inherit org-block)))

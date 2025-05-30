@@ -38,7 +38,7 @@
 ;;; Theme definition
 (def-doom-theme doom-rose-pine-dawn
   "A light port of Rosé Pine Dawn theme"
-
+;; FFF3E5
   ;; Main theme colors
   (
     ;; name           default   256       16

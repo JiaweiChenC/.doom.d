@@ -132,8 +132,7 @@
 (package! uv
   :recipe (:host github :repo "johannes-mueller/uv.el"))
 (package! lsp-treemacs)
-;; (package! flash.emacs
-;;   :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
-
+(package! flash.emacs
+  :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
 ;; disable evil snipe
-(package! evil-snipe :disable t)
+;; (package! evil-snipe :disable t)

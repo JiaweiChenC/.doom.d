@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-rose-pine-dawn
+(setq doom-theme 'ef-day
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -491,27 +491,6 @@
       large-hscroll-threshold 1000
       syntax-wholeline-max 1000)
 
-;; (use-package! sideline
-;;   :init
-;;   (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
-;;         sideline-backends-right-skip-current-line t
-;;         ;; sideline-order-right 'up                     ; or 'down
-;;         ;; sideline-format-left "%s   "                 ; format for left aligment
-;;         ;; sideline-format-right "   %s"                ; format for right aligment
-;;         sideline-priority 100                        ; overlays' priority
-;;         sideline-display-backend-name t
-;;         ;; sideline-backends-left '(sideline-eglot)
-;;         sideline-backends-right '(sideline-flycheck)
-;;         )
-;;   :hook ((flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
-;;          (flymake-mode  . sideline-mode)
-;;          (eglot-mode . sideline-mode)       ; for `sideline-eglot`))
-;;          ))            ; display the backend name
-
-;; (use-package! sideline-flycheck
-  ;; :hook (flycheck-mode . sideline-flycheck-setup))
-
-
 (setq! org-preview-html-viewer 'xwidget)
 
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
@@ -531,10 +510,6 @@
 
 ;; (use-package! float-narrow-indirect)
 (setq ni-floating-frame-border-color nil)
-
-;; (setq ni-floating-frame-transparency '(95 . 50))
-;; (after! float-narrow-indirect-mode
-;;   (setq fni-floating-frame-border-color nil))
 
 (after! corfu
   (setq corfu-auto nil))
@@ -590,26 +565,6 @@
 
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
-
-;; (use-package! eglot
-;;   :hook (python-mode . eglot-ensure)
-;;   :config
-;;   (setq eglot-events-buffer-config '(:size 0)
-;;         eglot-report-progress nil
-;;         eglot-extend-to-xref t
-;;         eglot-ignored-server-capabilities '(:inlayHintProvider))
-;;   (add-to-list 'eglot-server-programs
-;;                '((python-mode python-ts-mode)
-;;                  "pyright-langserver" "--stdio")))
-
-;; (setq-default
-;;  eglot-workspace-configuration
-;;  '(:basedpyright (:typeCheckingMode "basic")
-;;    :basedpyright.analysis
-;;    (:diagnosticSeverityOverrides
-;;     (:reportUnusedCallResult "none"
-;;      :reportArgumentType "none")))))
-
 
 ;; (setq! org-startup-truncated nil)
 (use-package! phscroll
@@ -810,9 +765,6 @@
   (mini-echo-mode)
   )
 
-
-;; map lsp-ui-peek find definitions to space l d
-;; map lsp-ui-peek find references to space l r
 (after! lsp-ui
   (setq lsp-ui-peek-always-show t)
   (map! :map lsp-ui-mode-map
@@ -822,14 +774,28 @@
          :desc "find references" "r" #'lsp-ui-peek-find-references
          )))
 
+
 ;; map g / to avy go to char timer
 (map! :n "g /" #'avy-goto-char-timer)
 
+(defun flash-emacs-jump-after ()
+  "Call `flash-emacs-jump` and move forward one char if point moved forward."
+  (interactive)
+  (let ((origin (point)))
+    (flash-emacs-jump)
+    (when (> (point) origin)
+      ;; only move forward if point advanced
+      (forward-char))))
+
 (after! evil
-  (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump))
+  (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
+  (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
+  (define-key evil-operator-state-map (kbd "C-s") #'flash-emacs-jump-after)
+  (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts)
+  )
 
 (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-treesit.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -837,3 +803,7 @@
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
 
+(setq! lsp-pyright-multi-root 'nil)
+
+(map! :n "m" #'point-to-register)
+(map! :n "`" #'jump-to-register)
