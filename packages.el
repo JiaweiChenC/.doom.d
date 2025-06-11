@@ -72,10 +72,9 @@
               "(provide 'org-version)\n"))))
   :pin nil)
 
-(unpin! org)
 (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
-         citar-org-roam citar citar-embark flycheck lsp-mode
-        yasnippet nerd-icons doom-snippets)
+         citar-org-roam citar citar-embark ess
+        yasnippet nerd-icons doom-snippets transient)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -87,6 +86,7 @@
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! flycheck-popup-tip :disable t)
+;; (package! flymake-popon :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-appear
@@ -94,19 +94,16 @@
 (package! modus-themes)
 ;; (package! activities)
 (package! bookmark-in-project)
-;; pin to a version
 (package! mini-echo)
-;; (package! sideline)
-;; (package! sideline-flycheck)
-;; (package! color-theme-sanityinc-tomorrow)
-;; (package! sideline-eglot
-;;   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
-;;   )
-;; (package! org-preview-html)
+(package! sideline)
+(package! sideline-flycheck)
+;; (package! sideline-flymake)
+(package! sideline-eglot
+  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
+  )
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! iscroll)
-;; (package! holo-layer :recipe (:host github :repo "manateelazycat/holo-layer"))
 (package! rainbow-csv
   :recipe (:host github :repo "emacs-vs/rainbow-csv"))
 (package! breadcrumb
@@ -116,23 +113,22 @@
 (package! gruvbox-theme)
 (package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
-;; (package! exec-path-from-shell)
+(package! exec-path-from-shell)
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
 (package! grip-mode)
-;; (package! xeft)
 (package! ivy)
 (package! nano-theme)
-(package! eglot
-:recipe (:host github :repo "joaotavora/eglot")
-:pin "4e2ef422a5e15283a2685a5dd99a055fbbe3f85c")
-;; (package! kaolin-themes)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
 (package! uv
   :recipe (:host github :repo "johannes-mueller/uv.el"))
-(package! lsp-treemacs)
+;; (package! lsp-treemacs)
 (package! flash.emacs
   :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
 ;; disable evil snipe
-;; (package! evil-snipe :disable t)
+(package! evil-snipe :disable t)
+(package! kanagawa-themes)
+;; (package! evil-surround :disable t)
+(package! claude-code
+  :recipe (:host github :repo "stevemolitor/claude-code.el"))

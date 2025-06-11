@@ -5,7 +5,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("77f281064ea1c8b14938866e21c4e51e4168e05db98863bd7430f1352cab294a"
+   '("cb83d1f06ba1d0346660fba8513010e4ac3acbac58a16da5b4991a355ced3778"
+     "717eb6a430affbc27133da874d28a08abfeb248cdb5d6a666e86ae41a47bb055"
+     "77f281064ea1c8b14938866e21c4e51e4168e05db98863bd7430f1352cab294a"
      "4ca194e25d1bee52e8234471c10ac7d0bafec5304f19f9c4a0ba710e9bfcc91e"
      "2d7f9fce90ba5529d04d7b546ac4c59e017d876afe9e1eb4c554f375b69706f8"
      "ccae31f9d6218723973eb6b8eb8ad1e45f6a00e0f67b8979bd0f519070f22fd1"
@@ -58,11 +60,13 @@
      "7e969364b4921a142b017eb4135005786650f76e40564abdce7ea6d0e0d46ead"
      "48042425e84cd92184837e01d0b4fe9f912d875c43021c3bcb7eeb51f1be5710"
      "e8183add41107592ee785f9f9b4b08d21bd6c43206b85bded889cea1ee231337" default))
- '(org-agenda-files '("/Users/jiawei/org/journal/20250501"))
+ '(flymake-indicator-type 'fringes)
+ '(org-agenda-files '("/Users/jiawei/org/journal/20250601"))
  '(package-selected-packages
-   '(avy bibtex-completion citeproc eglot htmlize hydra ox-pandoc request))
+   '(avy bibtex-completion citeproc eat eglot htmlize hydra ox-pandoc request))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/figure_of_eight_PD/"
+   '("/ssh:10.206.15.106:/home/jiawei/projects/HSMR/"
+     "/Users/jiawei/Projects/figure_of_eight_PD/"
      "/Users/jiawei/Projects/virtual_maze_PD/"
      "/Users/jiawei/Projects/virtual_maze_PD/paper/movement_disorder/"
      "/Users/jiawei/Projects/Bio_model/"
@@ -94,6 +98,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
  '(mini-echo-blue ((t (:foreground "dark cyan"))))
  '(mini-echo-yellow ((t (:foreground "dark magenta"))))
  '(org-example ((t (:background "#1e1e1e" :foreground "#dcdccc" :extend t)))))
+;; (put 'scroll-left 'disabled nil)

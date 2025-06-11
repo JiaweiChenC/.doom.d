@@ -30,7 +30,7 @@
       (bookmark-save)
       (message "Deleted bookmark: %s" bookmark))))
 
-(map! :leader
-       :desc "Add to Quickrun Bookmarks" "r a" #'add-to-quickrun-bookmarks
-       :desc "Run Quickrun Bookmark" "r b" #'run-bookmarked-file-with-quickrun
-       :desc "Delete Quickrun Bookmark" "r d" #'delete-quickrun-bookmark)
+;; (map! :leader
+;;        :desc "Add to Quickrun Bookmarks" "r a" #'add-to-quickrun-bookmarks
+;;        :desc "Run Quickrun Bookmark" "r b" #'run-bookmarked-file-with-quickrun
+;;        :desc "Delete Quickrun Bookmark" "r d" #'delete-quickrun-bookmark)

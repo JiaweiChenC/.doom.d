@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'ef-day
+(setq doom-theme 'doom-rose-pine-dawn
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -89,7 +89,7 @@
 
 
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
-;; Hide the menu for as minimalistic a startup screen as possible.
+;; Hide the menu for minimalistic a startup screen as possible.
 (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
 
 (setq doom-modeline-major-mode-icon t)
@@ -152,6 +152,7 @@
   ;; disable org indent mode
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
+  ;; (setq! org-download-method 'directory)
   (setq org-download-image-dir "images")
   ;; (add-to-list 'completion-at-point-functions #'cape-file)
   (defadvice! recover-paragraph-seperate ()
@@ -193,19 +194,19 @@
          :empty-lines 1)))
 
 (use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (("<backtab>" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion))
-  :config
-  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
-  (add-to-list 'copilot-indentation-alist '(org-mode 2))
-  (add-to-list 'copilot-indentation-alist '(text-mode 2))
-  (add-to-list 'copilot-indentation-alist '(closure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-  (setq copilot-idle-delay 0.5)
-  )
+ :hook (prog-mode . copilot-mode)
+ :bind (("<backtab>" . 'copilot-accept-completion-by-word)
+        :map copilot-completion-map
+        ("<tab>" . 'copilot-accept-completion)
+        ("TAB" . 'copilot-accept-completion))
+ :config
+ (add-to-list 'copilot-indentation-alist '(prog-mode 2))
+ (add-to-list 'copilot-indentation-alist '(org-mode 2))
+ (add-to-list 'copilot-indentation-alist '(text-mode 2))
+ (add-to-list 'copilot-indentation-alist '(closure-mode 2))
+ (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+ (setq copilot-idle-delay 0.5)
+ )
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -423,23 +424,12 @@
 
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
-;; (setq! citar-open-entry-function 'citar-open-entry-in-zotero)
-;; (setq! citar-at-point-function 'embark-act)
-;; (map! :map citar-embark-citation-map
-;;       :n
-;;       "<return>" nil
-;;       "<return>" #'zot-open-pdf)
-
-;; (add-hook 'pdf-view-mode-hook 'pdf-tools-enable-minor-modes)
-
 (setq tex-fontify-script 'nil)
 
 (setq org-latex-caption-above '(table src-block special-block math))
 
 ;; bind space b return to embard open bookmark external
 (map! :leader :desc "open bookmark external" "e m" #'embark-bookmark-open-externally)
-
-;; (use-package! embark)
 
 (setq! org-modern-table nil)
 (setq! org-modern-block-fringe nil)
@@ -449,10 +439,6 @@
   :config
   (setq! org-appear-autolinks t)
   )
-
-;; (setq eglot-send-changes-idle-time 0.1)
-
-;; (use-package! citar)
 
 (setq! org-latex-src-block-backend 'listings)
 
@@ -465,7 +451,6 @@
 (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
 (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
-
 (setq! corfu-popupinfo-max-height 1)
 
 (setq! vterm-timer-delay 0.01)
@@ -475,23 +460,14 @@
 
 (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
 
-(after! flycheck
-  (setq flycheck-indication-mode 'right-fringe)
-  ;; Apply the same bitmap to all levels using a loop
-  (dolist (level '(error warning info))
-    (flycheck-define-error-level level
-      :overlay-category (intern (format "flycheck-%s-overlay" level))
-      :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
-      :fringe-face (intern (format "flycheck-fringe-%s" level)))))
+;; (setq-default bidi-display-reordering nil)
 
-(setq-default bidi-display-reordering nil)
+;; (setq bidi-inhibit-bpa t
+;;       long-line-threshold 1000
+;;       large-hscroll-threshold 1000
+;;       syntax-wholeline-max 1000)
 
-(setq bidi-inhibit-bpa t
-      long-line-threshold 1000
-      large-hscroll-threshold 1000
-      syntax-wholeline-max 1000)
-
-(setq! org-preview-html-viewer 'xwidget)
+;; (setq! org-preview-html-viewer 'xwidget)
 
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
 (setq TeX-view-program-list
@@ -499,17 +475,6 @@
 
 (after! org
   (define-key org-mode-map (kbd "S-s-<mouse-1>") 'hermanhelf-org-jump-to-pdf))
-
-;; map space l n to ni-narrow-to-region-floating
-(map! :leader :desc "narrow to region floating" "l n" #'ni-narrow-to-region-floating)
-
-;; map space l m  to ni-clear-aggregation
-(map! :leader :desc "clear aggregation" "l m" #'ni-clear-aggregation)
-
-(map! :leader :desc "float narrow t" "l t" #'ni-clear-aggregation)
-
-;; (use-package! float-narrow-indirect)
-(setq ni-floating-frame-border-color nil)
 
 (after! corfu
   (setq corfu-auto nil))
@@ -520,6 +485,15 @@
 
 (use-package! rainbow-csv
   :hook (csv-mode . rainbow-csv-mode))
+
+;; csv align mode after csv mode
+(add-hook 'csv-mode-hook 'csv-align-mode)
+
+;; disable visual line mode in csv mode
+(add-hook 'csv-mode-hook
+          (lambda ()
+            (when (eq major-mode 'csv-mode)
+              (visual-line-mode -1))))
 
 ;; map space t b to breadcrumb-mode
 (map! :leader :desc "breadcrumb mode" "t h" #'breadcrumb-mode)
@@ -616,7 +590,8 @@
 
 (setq! doom-big-font-increment 2)
 
-(map! :n "C-;" #'electric-newline-and-maybe-indent)
+(map! :n "C-;" #'scroll-other-window)
+(map! :n "C-'" #'scroll-other-window-down)
 
 (use-package! org-modern-indent
   :hook (org-mode . org-modern-indent-mode))
@@ -676,15 +651,11 @@
       :n "C-j" #'electric-newline-and-maybe-indent
       :n "C-k" #'kill-line)
 
-;; after evil org map g spc to evil-avy-goto-char-2
-(map! :n "g 2" #'evil-avy-goto-char-2)
-
 ;; add header-args to org default properties
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
 
 (setq! envrc-remote t)
-
 
 (use-package! org-latex-preview
   :hook (org-mode . org-latex-preview-auto-mode)
@@ -699,16 +670,12 @@
   (setq org-latex-preview-process-default 'dvisvgm)
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
-  ;; (setq org-latex-preview-auto-ignored-commands
-  ;;       '(next-line previous-line mwheel-scroll
-  ;;         scroll-up-command scroll-down-command))
+  (setq org-latex-preview-auto-ignored-commands
+        '(next-line previous-line))
 
   ;; ;; Enable consistent equation numbering
-  ;; (setq org-latex-preview-numbered t)
+  (setq org-latex-preview-numbered t)
 
-  ;; Bonus: Turn on live previews.  This shows you a live preview of a LaTeX
-  ;; fragment and updates the preview in real-time as you edit it.
-  ;; To preview only environments, set it to '(block edit-special) instead
   (setq org-latex-preview-live t)
 
   ;; More immediate live-previews -- the default delay is 1 second
@@ -729,54 +696,9 @@
 
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
-(set-popup-rule!
-  "^\\*jupyter-output\\*$"
-  :side 'bottom      ; show at the bottom
-  :size 0.2
-  :select t          ; focus the popup when opened
-  :quit t            ; can be quit with q or C-g
-  :ttl nil)          ; keep the popup open until explicitly killed
-
-;; set popup rule for *ChatGPT*
-(set-popup-rule!
-  "^\\*ChatGPT\\*$"
-  :side 'bottom
-  :size 0.3
-  :select t
-  :quit t
-  :ttl nil)
-
-(after! org
-  (setq org-latex-preview-auto-ignored-commands
-        '(next-line
-          previous-line)))
-
-(use-package! apheleia
-  :config
-  (setf (alist-get 'python-mode apheleia-mode-alist)
-        '(black)))
-
 (use-package! phscroll
   :hook (org-mode . org-phscroll-mode)
   )
-
-(use-package! mini-echo
-  :config
-  (mini-echo-mode)
-  )
-
-(after! lsp-ui
-  (setq lsp-ui-peek-always-show t)
-  (map! :map lsp-ui-mode-map
-        :leader
-        (:prefix ("l" . "lsp")
-         :desc "find definition" "d" #'lsp-ui-peek-find-definitions
-         :desc "find references" "r" #'lsp-ui-peek-find-references
-         )))
-
-
-;; map g / to avy go to char timer
-(map! :n "g /" #'avy-goto-char-timer)
 
 (defun flash-emacs-jump-after ()
   "Call `flash-emacs-jump` and move forward one char if point moved forward."
@@ -788,6 +710,8 @@
       (forward-char))))
 
 (after! evil
+  ;; disable evil surround global mode
+  (global-evil-surround-mode -1)
   (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
   (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
   (define-key evil-operator-state-map (kbd "C-s") #'flash-emacs-jump-after)
@@ -795,7 +719,9 @@
   )
 
 (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
+(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
+(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
+(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -803,7 +729,140 @@
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
 
-(setq! lsp-pyright-multi-root 'nil)
 
 (map! :n "m" #'point-to-register)
 (map! :n "`" #'jump-to-register)
+
+(setq avy-keys (append (number-sequence ?a ?z)))
+
+(defvar-local my/project-todo-file nil
+  "Path to the TODO file for the current project.")
+
+;; map my/project-todo to space p t
+(map! :leader :desc "Open project TODO" "p t" #'my/project-todo)
+
+(defun my/project-todo ()
+  "Open the TODO.org file for the current project in a popup with a unique name."
+  (interactive)
+  (let* ((project-name (projectile-project-name))
+         (todo-file my/project-todo-file)  ;; Your project-specific TODO path
+         (buf-name (format "*TODO:%s*" project-name)))
+    ;; Define popup rule before displaying the buffer
+    (set-popup-rule!
+      (format "^\\*TODO:%s\\*$" (regexp-quote project-name))
+      :side 'right
+      :size 0.4
+      :select t
+      :quit 'current
+      :ttl 0
+      :autosave t
+      )
+    ;; Open and rename buffer before popping up
+    (let ((buf (find-file-noselect todo-file)))
+      (with-current-buffer buf
+        (rename-buffer buf-name t))
+      (pop-to-buffer buf))))
+
+(set-popup-rule!
+"^\\*jupyter-outyut\\*$"
+:side 'bottom
+:size 0.2
+:select t
+:quit t
+:ttl nil)
+
+(use-package! apheleia
+  :config
+  (setf (alist-get 'python-mode apheleia-mode-alist)
+        '(black)))
+
+(map! :leader
+       :desc "recent dired" "r d" #'dirvish-history-jump)
+
+
+;; (after! lsp
+;; (setq! lsp-imenu-index-function #'lsp-imenu-create-categorized-index)
+;; (setq! lsp-pyright-multi-root 'nil)
+;; )
+
+(after! flycheck
+  (setq flycheck-indication-mode 'right-fringe)
+  ;; Apply the same bitmap to all levels using a loop
+  (dolist (level '(error warning info))
+    (flycheck-define-error-level level
+      :overlay-category (intern (format "flycheck-%s-overlay" level))
+      :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
+      :fringe-face (intern (format "flycheck-fringe-%s" level)))))
+
+(setq enable-remote-dir-locals t)
+
+(use-package! mini-echo
+  :config
+  (mini-echo-mode 1))
+
+;; eglot setttings
+(setq eglot-send-changes-idle-time 0.1)
+
+(use-package! sideline
+  :init
+  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+        sideline-backends-right-skip-current-line t
+        sideline-priority 100                        ; overlays' priority
+        sideline-display-backend-name t
+        sideline-backends-right '(sideline-flycheck)
+        flycheck-display-errors-function nil
+        )
+  :hook (
+         (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
+         ))            ; display the backend name
+
+(use-package! sideline-flycheck
+  :hook (flycheck-mode . sideline-flycheck-setup))
+
+(use-package! eglot
+  :hook (python-mode . eglot-ensure)
+  :config
+  (setq eglot-events-buffer-config '(:size 0)
+        eglot-report-progress nil
+        eglot-extend-to-xref t
+        eglot-ignored-server-capabilities '(:inlayHintProvider))
+  (add-to-list 'eglot-server-programs
+               '((python-mode python-ts-mode)
+                 "pyright-langserver" "--stdio")))
+
+(use-package! citar)
+
+;; (use-package! uv)
+
+(use-package! claude-code
+  :defer t
+  :config
+  (set-popup-rule! "\\*claude"
+                  :side 'right
+                  :size 0.33
+                   :select t))
+
+(use-package! gptel
+  :defer t
+  :config
+  (setq gptel-display-buffer-action nil)  ; if user changes this, popup manager will bow out
+  (set-popup-rule! "^\\*ChatGPT\\*$"
+        :side 'right :size 0.3 :select t :quit t :ttl nil))
+
+(use-package! eat
+  :defer t
+  :config
+  (setq! eat-term-name "xterm-256color")
+  )
+
+;; map j-k to evil-escape
+(after! evil-escape
+  (setq evil-escape-key-sequence "jk"))
+
+(after! vterm
+  (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer))
+
+;; (after! embark-org
+;;   (define-key embark-org-src-block-map (kbd "r") #'org-edit-special)
+;;   ;; Add any other bindings you want
+;; )

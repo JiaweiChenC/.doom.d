@@ -33,10 +33,10 @@
        (vertico +icons)           ; the search engine of the future
 
        :ui
-       deft              ; notational velocity for Emacs
+       ;; deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
-       ;; (smooth-scroll
-       ;;  +interpolate)
+       smooth-scroll
+        ;; +interpolate)
        doom-dashboard    ; a nifty splash screen for Emacs
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
        ;;(emoji +unicode)  ; 🙂
@@ -69,7 +69,7 @@
        ;; +onsave)  ; automated prettiness
        ;;god               ; run Emacs commands without modifier keys
        ;;lispy             ; vim for lisp, for people who don't like vim
-       multiple-cursors  ; editing in many places at once
+       ;; multiple-cursors  ; editing in many places at once
        ;;objed             ; text object editing for the innocent
        ;;parinfer          ; turn lisp into python, sort of
        rotate-text       ; cycle region at point between text candidates
@@ -94,6 +94,7 @@
 
        :checkers
        syntax              ; tasing you for every semicolon you forget
+        ;; +flymake)
        spell ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
@@ -112,9 +113,8 @@
        (lookup
         +docsets
         +dictionary)              ; navigate your code and its documentation
-       lsp
-        ;; +peek)
-        ;; +eglot)
+       (lsp
+        +eglot)
        magit             ; a git porcelain for Emacs
        make              ; run make tasks from Emacs
        ;;pass              ; password manager for nerds
@@ -148,9 +148,9 @@
        ;;elm               ; care for a cup of TEA?
        (emacs-lisp +lsp)        ; drown in parentheses
        ;;erlang            ; an elegant language for a more civilized age
-       ess
-       ;; +stan
-       ;; +tree-sitter)                                ; emacs speaks statistics
+       (ess
+       +stan
+       +tree-sitter)                                ; emacs speaks statistics
        ;;factor
        ;;faust             ; dsp, but you get to keep your soul
        ;;fortran           ; in FORTRAN, GOD is REAL (unless declared INTEGER)
@@ -194,7 +194,7 @@
        (python            ; beautiful is better than ugly
         ;; +conda
         +lsp
-        +pyright
+        ;; +pyright
         ;; +pyenv
         +tree-sitter
         )
