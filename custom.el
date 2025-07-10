@@ -5,7 +5,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("cb83d1f06ba1d0346660fba8513010e4ac3acbac58a16da5b4991a355ced3778"
+   '("19d62171e83f2d4d6f7c31fc0a6f437e8cec4543234f0548bad5d49be8e344cd"
+     "02ed50c5c0942ee6c53ca08b3ce09b169068a641946a5a998f96014515aa133f"
+     "cb83d1f06ba1d0346660fba8513010e4ac3acbac58a16da5b4991a355ced3778"
      "717eb6a430affbc27133da874d28a08abfeb248cdb5d6a666e86ae41a47bb055"
      "77f281064ea1c8b14938866e21c4e51e4168e05db98863bd7430f1352cab294a"
      "4ca194e25d1bee52e8234471c10ac7d0bafec5304f19f9c4a0ba710e9bfcc91e"
@@ -61,11 +63,12 @@
      "48042425e84cd92184837e01d0b4fe9f912d875c43021c3bcb7eeb51f1be5710"
      "e8183add41107592ee785f9f9b4b08d21bd6c43206b85bded889cea1ee231337" default))
  '(flymake-indicator-type 'fringes)
- '(org-agenda-files '("/Users/jiawei/org/journal/20250601"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20250701"))
  '(package-selected-packages
-   '(avy bibtex-completion citeproc eat eglot htmlize hydra ox-pandoc request))
+   '(avy bibtex-completion citeproc eglot htmlize hydra ox-pandoc request))
  '(safe-local-variable-directories
-   '("/ssh:10.206.15.106:/home/jiawei/projects/HSMR/"
+   '("/Users/jiawei/Documents/roam/"
+     "/ssh:10.206.15.106:/home/jiawei/projects/HSMR/"
      "/Users/jiawei/Projects/figure_of_eight_PD/"
      "/Users/jiawei/Projects/virtual_maze_PD/"
      "/Users/jiawei/Projects/virtual_maze_PD/paper/movement_disorder/"

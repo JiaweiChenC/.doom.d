@@ -189,6 +189,11 @@
     (doom-modeline-evil-visual-state :foreground magenta)  ; The dot color when in visual mode
     (doom-modeline-evil-insert-state :foreground orange)   ; The dot color when in insert mode
 
+    (tree-sitter-hl-face:function :inherit font-lock-function-name-face)
+    (tree-sitter-hl-face:function.call :inherit font-lock-function-name-face :underline nil)
+
+    (vertical-border :background "#D1C4BD" :foreground "#D1C4BD")
+
     ;; Helm
     (helm-selection :foreground base :weight 'bold :background blue)
 

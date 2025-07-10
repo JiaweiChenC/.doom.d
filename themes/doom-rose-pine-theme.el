@@ -224,6 +224,9 @@
     (org-level-7 :foreground pine :inherit 'bold)
     (org-level-8 :foreground iris :inherit 'bold)
 
+    (tree-sitter-hl-face:function :inherit font-lock-function-name-face)
+    (tree-sitter-hl-face:function.call :inherit font-lock-function-name-face :underline nil)
+
     ;; Solaire mode line
     (solaire-mode-line-face
       :inherit 'mode-line

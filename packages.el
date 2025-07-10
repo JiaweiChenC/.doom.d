@@ -50,30 +50,30 @@
                                         ;(unpin! t)
 (package! org :recipe
   (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
-         (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
-         :files
-         (:defaults "etc")
-         :build t :pre-build
-         (with-temp-file "org-version.el"
-           (require 'lisp-mnt)
-           (let
-               ((version
-                 (with-temp-buffer
-                   (insert-file-contents "lisp/org.el")
-                   (lm-header "version")))
-                (git-version
-                 (string-trim
-                  (with-temp-buffer
-                    (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
-                    (buffer-string)))))
-             (insert
-              (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
-              (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
-              "(provide 'org-version)\n"))))
+   (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
+   :files
+   (:defaults "etc")
+   :build t :pre-build
+   (with-temp-file "org-version.el"
+     (require 'lisp-mnt)
+     (let
+         ((version
+           (with-temp-buffer
+             (insert-file-contents "lisp/org.el")
+             (lm-header "version")))
+          (git-version
+           (string-trim
+            (with-temp-buffer
+              (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+              (buffer-string)))))
+       (insert
+        (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+        (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+        "(provide 'org-version)\n"))))
   :pin nil)
 
 (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
-         citar-org-roam citar citar-embark ess
+        citar-org-roam citar citar-embark ess persp-mode org
         yasnippet nerd-icons doom-snippets transient)
 (package! htmlize)
 (package! impatient-showdown)
@@ -95,12 +95,6 @@
 ;; (package! activities)
 (package! bookmark-in-project)
 (package! mini-echo)
-(package! sideline)
-(package! sideline-flycheck)
-;; (package! sideline-flymake)
-(package! sideline-eglot
-  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
-  )
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! iscroll)
@@ -132,3 +126,18 @@
 ;; (package! evil-surround :disable t)
 (package! claude-code
   :recipe (:host github :repo "stevemolitor/claude-code.el"))
+(package! eat)
+(package! doom-two-tone-themes
+  :recipe (:host github :repo "eliraz-refael/doom-two-tone-themes"))
+(package! doom-two-tone-themes
+  :recipe (:host github
+           :repo "eliraz-refael/doom-two-tone-themes"
+           :files ("doom-two-tone-themes.el" "themes/*.el")))
+
+;; (package! flyover)
+(package! sideline)
+(package! sideline-flycheck)
+;; (package! sideline-flymake)
+(package! sideline-eglot
+  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
+  )

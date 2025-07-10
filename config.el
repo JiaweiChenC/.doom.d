@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-rose-pine-dawn
+(setq doom-theme 'doom-monokai-light
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -590,8 +590,8 @@
 
 (setq! doom-big-font-increment 2)
 
-(map! :n "C-;" #'scroll-other-window)
-(map! :n "C-'" #'scroll-other-window-down)
+(map! :n "C-;" #'send-scroll-up-to-other-window)
+(map! :n "C-'" #'send-scroll-down-to-other-window)
 
 (use-package! org-modern-indent
   :hook (org-mode . org-modern-indent-mode))
@@ -627,7 +627,8 @@
 (setq org-attach-auto-tag nil)
 
 (defun insert-attachment-from-dir ()
-  "Insert a link to a file from the current heading's attachment directory into the :ATTACHMENTS: property."
+  "Insert a link to a file from the current heading's attachment
+   directory into the :ATTACHMENTS: property."
   (interactive)
   (require 'org-attach)
   (let* ((attach-dir (org-attach-dir t)) ;; Get the attachment dir, create if needed
@@ -661,7 +662,7 @@
   :hook (org-mode . org-latex-preview-auto-mode)
   :config
   ;; Increase preview width
-  (plist-put org-latex-preview-appearance-options 
+  (plist-put org-latex-preview-appearance-options
              :page-width 1.0)
   (plist-put org-latex-preview-appearance-options
              :zoom 1.2)
@@ -803,21 +804,6 @@
 ;; eglot setttings
 (setq eglot-send-changes-idle-time 0.1)
 
-(use-package! sideline
-  :init
-  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
-        sideline-backends-right-skip-current-line t
-        sideline-priority 100                        ; overlays' priority
-        sideline-display-backend-name t
-        sideline-backends-right '(sideline-flycheck)
-        flycheck-display-errors-function nil
-        )
-  :hook (
-         (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
-         ))            ; display the backend name
-
-(use-package! sideline-flycheck
-  :hook (flycheck-mode . sideline-flycheck-setup))
 
 (use-package! eglot
   :hook (python-mode . eglot-ensure)
@@ -842,6 +828,11 @@
                   :size 0.33
                    :select t))
 
+(after! org
+  (set-popup-rule! "\\*Org Babel Results\\*"
+                  :size 0.33
+                  :select t))
+
 (use-package! gptel
   :defer t
   :config
@@ -862,7 +853,30 @@
 (after! vterm
   (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer))
 
-;; (after! embark-org
-;;   (define-key embark-org-src-block-map (kbd "r") #'org-edit-special)
-;;   ;; Add any other bindings you want
+(after! embark-org
+  (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
+  ;; Add any other bindings you want
 ;; )
+
+(setq! org-preview-latex-default-process 'dvisvgm)
+
+(after! org
+(setq org-format-latex-options
+      (plist-put org-format-latex-options :scale 1.2)))
+
+(use-package! sideline-flycheck
+  :hook (flycheck-mode . sideline-flycheck-setup))
+
+(use-package! sideline
+  :init
+  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+        sideline-backends-right-skip-current-line t
+        sideline-priority 100                        ; overlays' priority
+        sideline-display-backend-name t
+        sideline-backends-right '(sideline-flycheck)
+        flycheck-display-errors-function nil
+        )
+  :hook (
+         (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
+         ))            ; display the backend name
+(setq! org-latex-preview-cache 'temp)

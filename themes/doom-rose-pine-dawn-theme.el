@@ -147,6 +147,7 @@
     ((font-lock-keyword-face &override) :weight 'bold)
     ((font-lock-constant-face &override) :weight 'bold)
 
+
     ;; Highlight line
     (hl-line
        :background highlightL)
@@ -177,7 +178,8 @@
     (css-property             :foreground green)
     (css-selector             :foreground green)
 
-    (vertical-border :background "#F2E9DE" :foreground "#F2E9DE")
+    ;; vertical border
+    (vertical-border :background "#D1C4BD" :foreground "#D1C4BD")
     ;;bookmark
     (bookmark-face ((t (:extend t :background "#ede7e4" :distant-foreground "DarkOrange3"))))
 
@@ -199,6 +201,9 @@
     (ivy-minibuffer-match-face-4 :foreground rose :background nil :weight 'bold)
     (ivy-minibuffer-match-highlight :foreground magenta :weight 'bold)
     (ivy-posframe :background modeline-bg-alt)
+
+    (tree-sitter-hl-face:function :inherit font-lock-function-name-face)
+    (tree-sitter-hl-face:function.call :inherit font-lock-function-name-face :underline nil)
 
     ;; Markdown mode
     (markdown-markup-face :foreground text)
@@ -228,6 +233,7 @@
       :inherit 'mode-line-inactive
       :background modeline-bg-inactive-alt
       :box (if modeline-pad `(:line-width ,modeline-pad :color ,modeline-bg-inactive-alt)))
+
 
     ;; Widget
     (widget-field :foreground fg :background muted)
