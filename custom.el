@@ -74,8 +74,9 @@
      "/Users/jiawei/Projects/virtual_maze_PD/paper/movement_disorder/"
      "/Users/jiawei/Projects/Bio_model/"
      "/Users/jiawei/Projects/Bio_model/utils_for_bio_models/LearningHumans/"
-     "/Users/jiawei/Projects/Bio_model/doc/" "/Users/jiawei/.doom.d/"
+     "/Users/jiawei/.doom.d/"
      "~/.emacs.d/"))
+ '(safe-local-variable-values '((TeX-master . "main.tex")))
  '(warning-suppress-log-types
    '((copilot copilot-exceeds-max-char) (org-element org-element-parser)))
  '(zoom-size '(0.8 . 0.8)))

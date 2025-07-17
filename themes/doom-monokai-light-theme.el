@@ -143,7 +143,7 @@
     ((font-lock-keyword-face &override) :weight 'bold)
     ((font-lock-constant-face &override) :weight 'bold)
     ((font-lock-string-face &override) :foreground yellow)
-    ((font-lock-variable-name-face &override) :foreground fg-main)
+    ((font-lock-variable-name-face &override) :foreground "#8448aa")
 
     ;; Highlight line
     (hl-line :background "#F1EAE9")

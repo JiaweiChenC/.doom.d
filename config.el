@@ -544,7 +544,7 @@
 (use-package! phscroll
   :hook (org-mode . org-phscroll-mode))
 
-(setq! visual-fill-column-width 110)
+(setq! visual-fill-column-width 100)
 
 ;;; Define a flag variable for the startup option (buffer-local by Org parsing)
 (defvar org-visual-fill-startup nil
@@ -860,9 +860,8 @@
 
 (setq! org-preview-latex-default-process 'dvisvgm)
 
-(after! org
-(setq org-format-latex-options
-      (plist-put org-format-latex-options :scale 1.2)))
+;; (after! org (setq org-format-latex-options
+;;       (plist-put org-format-latex-options :scale 1.2)))
 
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
@@ -879,4 +878,3 @@
   :hook (
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
-(setq! org-latex-preview-cache 'temp)

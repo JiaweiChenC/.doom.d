@@ -143,10 +143,10 @@
     ((font-lock-keyword-face &override) :weight 'bold)
     ((font-lock-constant-face &override) :weight 'bold)
     ((font-lock-string-face &override) :foreground yellow)
-    ((font-lock-variable-name-face &override) :foreground fg-main)
+    ((font-lock-variable-name-face &override) :foreground "#8448aa")
 
     ;; Highlight-filter-sun line
-    (hl-line :background "#F1EAE9")
+    (hl-line :background "#EEE6DE")
 
     ;; Line numbers
     ((line-number &override) :foreground "#bfb9ba")

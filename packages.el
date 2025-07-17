@@ -72,9 +72,9 @@
         "(provide 'org-version)\n"))))
   :pin nil)
 
-(unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
-        citar-org-roam citar citar-embark ess persp-mode org
-        yasnippet nerd-icons doom-snippets transient)
+;; (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter
+;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
+;;         nerd-icons doom-snippets transient)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -134,10 +134,8 @@
            :repo "eliraz-refael/doom-two-tone-themes"
            :files ("doom-two-tone-themes.el" "themes/*.el")))
 
-;; (package! flyover)
 (package! sideline)
 (package! sideline-flycheck)
-;; (package! sideline-flymake)
 (package! sideline-eglot
   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
   )
