@@ -1,37 +1,80 @@
 ;;; lisp/custom-functions.el -*- lexical-binding: t; -*-
+;; (defun my/copy-image-to-clipboard ()
+;;   "Copy the image at point or current image buffer to the clipboard in macOS.
+;; Handles Org mode, Dired mode, and image buffers."
+;;   (interactive)
+;;   (cond
+;;    ;; In Org mode, try to get the path and copy file
+;;    ((derived-mode-p 'org-mode)
+;;     (if-let ((image-path (org-element-property :path (org-element-context))))
+;;         (let ((full-path (expand-file-name image-path)))
+;;           (if (file-exists-p full-path)
+;;               (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+;;                                      full-path
+;;                                      "\") as JPEG picture)'"))
+;;             (message "File does not exist: %s" full-path)))
+;;       (message "No image file at point!")))
+;;    ;; In Dired mode, copy the file at point
+;;    ((derived-mode-p 'dired-mode)
+;;     (let ((file-path (dired-get-file-for-visit)))
+;;       (if (file-exists-p file-path)
+;;           (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+;;                                  file-path
+;;                                  "\") as JPEG picture)'"))
+;;         (message "Selected file does not exist!"))))
+;;    ;; In image mode, copy the image data directly
+;;    ((eq major-mode 'image-mode)
+;;     (let ((image-file (buffer-file-name)))
+;;       (if image-file
+;;           (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
+;;                                  image-file
+;;                                  "\") as JPEG picture)'"))
+;;         (message "No file associated with this buffer!"))))
+;;    ;; Default message when not in applicable mode
+;;    (t (message "Not in an Org, Dired, or Image buffer!"))))
+
 (defun my/copy-image-to-clipboard ()
-  "Copy the image at point or current image buffer to the clipboard in macOS.
-Handles Org mode, Dired mode, and image buffers."
+  "Copy the image at point or current image buffer to the clipboard on macOS.
+Supports Org mode (including attachment links), Dired, and image buffers."
   (interactive)
   (cond
-   ;; In Org mode, try to get the path and copy file
+   ;; Org mode: handle file and attachment links
    ((derived-mode-p 'org-mode)
-    (if-let ((image-path (org-element-property :path (org-element-context))))
-        (let ((full-path (expand-file-name image-path)))
-          (if (file-exists-p full-path)
-              (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                     full-path
-                                     "\") as JPEG picture)'"))
-            (message "File does not exist: %s" full-path)))
-      (message "No image file at point!")))
-   ;; In Dired mode, copy the file at point
+    (let* ((context (org-element-context))
+           (type (org-element-property :type context))
+           (path (org-element-property :path context))
+           (full-path
+            (cond
+             ;; Handle attachment: links
+             ((and (string= type "attachment") path)
+              (ignore-errors (org-attach-expand path)))
+             ;; Handle file: links
+             ((and (string= type "file") path)
+              (expand-file-name path))
+             (t nil))))
+      (if (and full-path (file-exists-p full-path))
+          (shell-command
+           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" full-path))
+        (message "No valid image file at point!"))))
+
+   ;; Dired mode
    ((derived-mode-p 'dired-mode)
     (let ((file-path (dired-get-file-for-visit)))
       (if (file-exists-p file-path)
-          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                 file-path
-                                 "\") as JPEG picture)'"))
+          (shell-command
+           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" file-path))
         (message "Selected file does not exist!"))))
-   ;; In image mode, copy the image data directly
+
+   ;; Image mode
    ((eq major-mode 'image-mode)
     (let ((image-file (buffer-file-name)))
-      (if image-file
-          (shell-command (concat "osascript -e 'set the clipboard to (read (POSIX file \""
-                                 image-file
-                                 "\") as JPEG picture)'"))
+      (if (and image-file (file-exists-p image-file))
+          (shell-command
+           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" image-file))
         (message "No file associated with this buffer!"))))
-   ;; Default message when not in applicable mode
-   (t (message "Not in an Org, Dired, or Image buffer!"))))
+
+   (t
+    (message "Not in an Org, Dired, or Image buffer!"))))
 
 (map! :leader :desc "copy image file at point to clipboard" "y p" #'my/copy-image-to-clipboard)
 
