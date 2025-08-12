@@ -277,60 +277,60 @@ This should only apply to jupyter-lang blocks."
 ;; map org attach attach to spc m a A
 ;; (map! :leader :desc "org attach attach" "m a A" #'org-attach-attach)
 
-(defun scimax-org-attach-attach-advice (&rest file)
-  "Add link to attached file in the property"
-  (let ((attach (pop org-stored-links)))
-    (org-entry-put (point) "ATTACHMENTS"
-                   (concat
-                    (org-entry-get (point) "ATTACHMENTS")
-                    (format " [[%s][%s]]" (car attach) (cadr attach))))))
+;; (defun scimax-org-attach-attach-advice (&rest file)
+;;   "Add link to attached file in the property"
+;;   (let ((attach (pop org-stored-links)))
+;;     (org-entry-put (point) "ATTACHMENTS"
+;;                    (concat
+;;                     (org-entry-get (point) "ATTACHMENTS")
+;;                     (format " [[%s][%s]]" (car attach) (cadr attach))))))
 
-(advice-add 'org-attach-attach :after 'scimax-org-attach-attach-advice)
+;; (advice-add 'org-attach-attach :after 'scimax-org-attach-attach-advice)
 
-(defun my/org-open-attachment-from-property ()
-  "If there is one attachment in the ATTACHMENTS property, open it.
-   If more, prompt to select."
-  (interactive)
-  (require 'org)
-  (let* ((attachments (org-entry-get (point) "ATTACHMENTS"))
-         (links (when attachments
-                  (save-match-data
-                    (let (result)
-                      (with-temp-buffer
-                        (insert attachments)
-                        (goto-char (point-min))
-                        (while (re-search-forward
-                                "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]"
-                                nil t)
-                          (push (cons (match-string 3) (match-string 2)) result))
-                      (nreverse result))))))
-         (target
-          (cond
-           ((null links) nil)
-           ((= (length links) 1)
-            (cdar links))  ;; Only one, use its filename directly
-           (t
-            (let ((choice (completing-read "Open attachment: " (mapcar #'car links) nil t)))
-              (cdr (assoc choice links)))))))
-    (when target
-      (find-file (expand-file-name target (org-attach-dir t))))))
+;; (defun my/org-open-attachment-from-property ()
+;;   "If there is one attachment in the ATTACHMENTS property, open it.
+;;    If more, prompt to select."
+;;   (interactive)
+;;   (require 'org)
+;;   (let* ((attachments (org-entry-get (point) "ATTACHMENTS"))
+;;          (links (when attachments
+;;                   (save-match-data
+;;                     (let (result)
+;;                       (with-temp-buffer
+;;                         (insert attachments)
+;;                         (goto-char (point-min))
+;;                         (while (re-search-forward
+;;                                 "\\[\\[\\(attachment:\\(.*?\\)\\)\\]\\[\\(.*?\\)\\]\\]"
+;;                                 nil t)
+;;                           (push (cons (match-string 3) (match-string 2)) result))
+;;                       (nreverse result))))))
+;;          (target
+;;           (cond
+;;            ((null links) nil)
+;;            ((= (length links) 1)
+;;             (cdar links))  ;; Only one, use its filename directly
+;;            (t
+;;             (let ((choice (completing-read "Open attachment: " (mapcar #'car links) nil t)))
+;;               (cdr (assoc choice links)))))))
+;;     (when target
+;;       (find-file (expand-file-name target (org-attach-dir t))))))
 
-;; map to spc m a h
+;; ;; map to spc m a h
 
-(defun my/org-attach-new-add-link-to-attachments (file)
-  "After creating new FILE, add its link to the ATTACHMENTS property at the right Org entry."
-  (let ((filename (file-name-nondirectory file))
-        (origin-buffer (current-buffer))) ;; save the attachment buffer
-    (when (org-back-to-heading t) ;; move to org heading if possible
-      (let* ((link (format "[[attachment:%s][%s]]" filename filename))
-             (current (org-entry-get (point) "ATTACHMENTS")))
-        (org-entry-put (point) "ATTACHMENTS"
-                       (if (and current (not (string-blank-p current)))
-                           (concat current " " link)
-                         link))))
-    (switch-to-buffer origin-buffer))) ;; switch back to the attachment buffer
+;; (defun my/org-attach-new-add-link-to-attachments (file)
+;;   "After creating new FILE, add its link to the ATTACHMENTS property at the right Org entry."
+;;   (let ((filename (file-name-nondirectory file))
+;;         (origin-buffer (current-buffer))) ;; save the attachment buffer
+;;     (when (org-back-to-heading t) ;; move to org heading if possible
+;;       (let* ((link (format "[[attachment:%s][%s]]" filename filename))
+;;              (current (org-entry-get (point) "ATTACHMENTS")))
+;;         (org-entry-put (point) "ATTACHMENTS"
+;;                        (if (and current (not (string-blank-p current)))
+;;                            (concat current " " link)
+;;                          link))))
+;;     (switch-to-buffer origin-buffer))) ;; switch back to the attachment buffer
 
-(advice-add 'org-attach-new :before #'my/org-attach-new-add-link-to-attachments)
+;; (advice-add 'org-attach-new :before #'my/org-attach-new-add-link-to-attachments)
 
 
 (defun my/org-collect-named-src-blocks (&optional file visited)

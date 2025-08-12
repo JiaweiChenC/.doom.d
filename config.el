@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-monokai-light
+(setq doom-theme 'doom-rose-pine-dawn
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -340,7 +340,8 @@
         corfu-on-exact-match 'separator
         corfu-min-width 50
         corfu-max-width 80)
-  (map! :i "M-<tab>" #'completion-at-point))
+  ;; (map! :i "<tab>" #'completion-at-point)
+  )
 
 (after! dabbrev
   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
@@ -385,9 +386,6 @@
       (switch-to-buffer (other-buffer buffer)))))
 
 (map! :leader :desc "Move buffer to new frame" "w F" #'my/move-buffer-to-new-frame)
-
-;; (after! pdf-tools
-;;   (setq-default pdf-view-display-size 'fit-width))
 
 ;; open a file using zotero
 (eval-after-load 'citar-file
@@ -526,9 +524,9 @@
     (message "No text selected!")))
 
 ;; To bind this function to a key in Doom Emacs:
-;; (map! :leader
-;;       :desc "Wrap Text with Delete"
-;;       "l d" #'wrap-text-with-delete)
+(map! :leader
+      :desc "Wrap Text with Delete"
+      "l d" #'wrap-text-with-delete)
 
 (map! :map citar-embark-citation-map
       :n
@@ -658,37 +656,37 @@
 
 (setq! envrc-remote t)
 
-(use-package! org-latex-preview
-  :hook (org-mode . org-latex-preview-auto-mode)
-  :config
-  ;; Increase preview width
-  (plist-put org-latex-preview-appearance-options
-             :page-width 1.0)
-  (plist-put org-latex-preview-appearance-options
-             :zoom 1.2)
-  ;; ;; Use dvisvgm to generate previews
-  ;; ;; You don't need this, it's the default:
-  (setq org-latex-preview-process-default 'dvisvgm)
+;; (use-package! org-latex-preview
+  ;; :hook (org-mode . org-latex-preview-auto-mode)
+  ;; :config
+  ;; ;; Increase preview width
+  ;; (plist-put org-latex-preview-appearance-options
+  ;;            :page-width 1.0)
+  ;; (plist-put org-latex-preview-appearance-options
+  ;;            :zoom 1.2)
+  ;; ;; ;; Use dvisvgm to generate previews
+  ;; ;; ;; You don't need this, it's the default:
+  ;; (setq org-latex-preview-process-default 'dvisvgm)
 
-  ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
-  (setq org-latex-preview-auto-ignored-commands
-        '(next-line previous-line))
+  ;; ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
+  ;; (setq org-latex-preview-auto-ignored-commands
+  ;;       '(next-line previous-line))
 
-  ;; ;; Enable consistent equation numbering
-  (setq org-latex-preview-numbered t)
+  ;; ;; ;; Enable consistent equation numbering
+  ;; (setq org-latex-preview-numbered t)
 
-  (setq org-latex-preview-live t)
+  ;; (setq org-latex-preview-live t)
 
-  ;; More immediate live-previews -- the default delay is 1 second
-  (setq org-latex-preview-live-debounce 0.25)
+  ;; ;; More immediate live-previews -- the default delay is 1 second
+  ;; (setq org-latex-preview-live-debounce 0.25)
 
-  (defun org--latex-preview-region (beg end)
-    "Compatibility shim for old Org LaTeX preview function.
-        Calls `org-latex-preview--preview-region' with a default
-        processing type."
-    (let ((processing-type org-latex-preview-process-default))
-      (org-latex-preview--preview-region processing-type beg end)))
-  )
+  ;; (defun org--latex-preview-region (beg end)
+  ;;   "Compatibility shim for old Org LaTeX preview function.
+  ;;       Calls `org-latex-preview--preview-region' with a default
+  ;;       processing type."
+  ;;   (let ((processing-type org-latex-preview-process-default))
+  ;;     (org-latex-preview--preview-region processing-type beg end)))
+  ;; )
 
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
 
@@ -720,9 +718,9 @@
   )
 
 (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
-(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
-(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
-(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -779,12 +777,6 @@
 
 (map! :leader
        :desc "recent dired" "r d" #'dirvish-history-jump)
-
-
-;; (after! lsp
-;; (setq! lsp-imenu-index-function #'lsp-imenu-create-categorized-index)
-;; (setq! lsp-pyright-multi-root 'nil)
-;; )
 
 (after! flycheck
   (setq flycheck-indication-mode 'right-fringe)
@@ -855,13 +847,8 @@
 
 (after! embark-org
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
-  ;; Add any other bindings you want
-;; )
 
 (setq! org-preview-latex-default-process 'dvisvgm)
-
-;; (after! org (setq org-format-latex-options
-;;       (plist-put org-format-latex-options :scale 1.2)))
 
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
@@ -878,3 +865,38 @@
   :hook (
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
+
+(use-package! org-inline-pdf
+  :hook (org-mode . org-inline-pdf-mode))
+
+(defun my/org-toggle-inline-image-at-point ()
+  "Toggle inline image (incl. PDF via org-inline-pdf) for the link at point."
+  (interactive)
+  (let* ((ctx (org-element-context))
+         (beg (org-element-property :begin ctx))
+         (end (org-element-property :end   ctx)))
+    (unless (and beg end) (user-error "No link at point"))
+    ;; Ensure PDFs can render inline
+    (unless (bound-and-true-p org-inline-pdf-mode)
+      (org-inline-pdf-mode 1))
+    (let ((has-img
+           (seq-some (lambda (ov) (overlay-get ov 'org-image-overlay))
+                     (overlays-in beg end))))
+      (if has-img
+          ;; HIDE: remove overlays in this link region
+          (org-remove-inline-images beg end)
+        ;; SHOW: render inline just for this link region
+        (org-display-inline-images t t beg end)))))
+
+(defun my/org-open-pdf-inline-toggle (_file &optional _link)
+  (my/org-toggle-inline-image-at-point)
+  t) ;; returning non-nil tells Org we handled it
+
+(after! org
+  (setq org-file-apps (assoc-delete-all "\\.pdf\\'" org-file-apps))
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . my/org-open-pdf-inline-toggle)))
+
+;; (setq! auto-window-vscroll t)
+;; (setq! scroll-margin 1)
+;; (setq! good-scroll-persist-vscroll-line-move 'nil)
+(setq! good-scroll-persist-vscroll-window-scroll 'nil)
