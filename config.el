@@ -246,7 +246,7 @@
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
 
-(setq! quickrun-timeout-seconds 10000)
+(setq! quickrun-timeout-seconds 1000000)
 
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
@@ -796,7 +796,6 @@
 ;; eglot setttings
 (setq eglot-send-changes-idle-time 0.1)
 
-
 (use-package! eglot
   :hook (python-mode . eglot-ensure)
   :config
@@ -896,7 +895,14 @@
   (setq org-file-apps (assoc-delete-all "\\.pdf\\'" org-file-apps))
   (add-to-list 'org-file-apps '("\\.pdf\\'" . my/org-open-pdf-inline-toggle)))
 
-;; (setq! auto-window-vscroll t)
-;; (setq! scroll-margin 1)
-;; (setq! good-scroll-persist-vscroll-line-move 'nil)
 (setq! good-scroll-persist-vscroll-window-scroll 'nil)
+
+(setq! org-journal-time-format ""
+       org-journal-time-prefix "** TODO ")
+
+(map! :leader
+      :prefix ("n" . "notes") ;; or choose a better prefix name
+      :desc "Find file in ./src/" "p"
+      (lambda ()
+        (interactive)
+        (projectile-find-file-in-directory (expand-file-name "src/" (projectile-project-root)))))
