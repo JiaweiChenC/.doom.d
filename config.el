@@ -656,37 +656,34 @@
 
 (setq! envrc-remote t)
 
-;; (use-package! org-latex-preview
-  ;; :hook (org-mode . org-latex-preview-auto-mode)
-  ;; :config
-  ;; ;; Increase preview width
-  ;; (plist-put org-latex-preview-appearance-options
-  ;;            :page-width 1.0)
-  ;; (plist-put org-latex-preview-appearance-options
-  ;;            :zoom 1.2)
-  ;; ;; ;; Use dvisvgm to generate previews
-  ;; ;; ;; You don't need this, it's the default:
-  ;; (setq org-latex-preview-process-default 'dvisvgm)
+(use-package! org-latex-preview
+  :hook (org-mode . org-latex-preview-mode)
+  :config
+  ;; Increase preview width
+  (plist-put org-latex-preview-appearance-options
+             :page-width 0.8)
+  (plist-put org-latex-preview-appearance-options
+             :zoom 1.2)
 
-  ;; ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
-  ;; (setq org-latex-preview-auto-ignored-commands
-  ;;       '(next-line previous-line))
+  ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
+  (setq org-latex-preview-mode-ignored-commands
+        '(next-line previous-line))
 
-  ;; ;; ;; Enable consistent equation numbering
-  ;; (setq org-latex-preview-numbered t)
+  ;; ;; Enable consistent equation numbering
+  (setq org-latex-preview-numbered t)
 
-  ;; (setq org-latex-preview-live t)
+  (setq org-latex-preview-mode-display-live t)
 
-  ;; ;; More immediate live-previews -- the default delay is 1 second
-  ;; (setq org-latex-preview-live-debounce 0.25)
+  ;; More immediate live-previews -- the default delay is 1 second
+  (setq org-latex-preview-mode-update-delay 0.25)
 
-  ;; (defun org--latex-preview-region (beg end)
-  ;;   "Compatibility shim for old Org LaTeX preview function.
-  ;;       Calls `org-latex-preview--preview-region' with a default
-  ;;       processing type."
-  ;;   (let ((processing-type org-latex-preview-process-default))
-  ;;     (org-latex-preview--preview-region processing-type beg end)))
-  ;; )
+  (defun org--latex-preview-region (beg end)
+    "Compatibility shim for old Org LaTeX preview function.
+        Calls `org-latex-preview--preview-region' with a default
+        processing type."
+    (let ((processing-type org-latex-preview-process-default))
+      (org-latex-preview--preview-region processing-type beg end)))
+  )
 
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
 
@@ -847,7 +844,7 @@
 (after! embark-org
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
 
-(setq! org-preview-latex-default-process 'dvisvgm)
+;; (setq! org-preview-latex-default-process 'dvisvgm)
 
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
@@ -865,35 +862,35 @@
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
 
-(use-package! org-inline-pdf
-  :hook (org-mode . org-inline-pdf-mode))
+;; (use-package! org-inline-pdf
+;;   :hook (org-mode . org-inline-pdf-mode))
 
-(defun my/org-toggle-inline-image-at-point ()
-  "Toggle inline image (incl. PDF via org-inline-pdf) for the link at point."
-  (interactive)
-  (let* ((ctx (org-element-context))
-         (beg (org-element-property :begin ctx))
-         (end (org-element-property :end   ctx)))
-    (unless (and beg end) (user-error "No link at point"))
-    ;; Ensure PDFs can render inline
-    (unless (bound-and-true-p org-inline-pdf-mode)
-      (org-inline-pdf-mode 1))
-    (let ((has-img
-           (seq-some (lambda (ov) (overlay-get ov 'org-image-overlay))
-                     (overlays-in beg end))))
-      (if has-img
-          ;; HIDE: remove overlays in this link region
-          (org-remove-inline-images beg end)
-        ;; SHOW: render inline just for this link region
-        (org-display-inline-images t t beg end)))))
+;; (defun my/org-toggle-inline-image-at-point ()
+;;   "Toggle inline image (incl. PDF via org-inline-pdf) for the link at point."
+;;   (interactive)
+;;   (let* ((ctx (org-element-context))
+;;          (beg (org-element-property :begin ctx))
+;;          (end (org-element-property :end   ctx)))
+;;     (unless (and beg end) (user-error "No link at point"))
+;;     ;; Ensure PDFs can render inline
+;;     (unless (bound-and-true-p org-inline-pdf-mode)
+;;       (org-inline-pdf-mode 1))
+;;     (let ((has-img
+;;            (seq-some (lambda (ov) (overlay-get ov 'org-image-overlay))
+;;                      (overlays-in beg end))))
+;;       (if has-img
+;;           ;; HIDE: remove overlays in this link region
+;;           (org-remove-inline-images beg end)
+;;         ;; SHOW: render inline just for this link region
+;;         (org-display-inline-images t t beg end)))))
 
-(defun my/org-open-pdf-inline-toggle (_file &optional _link)
-  (my/org-toggle-inline-image-at-point)
-  t) ;; returning non-nil tells Org we handled it
+;; (defun my/org-open-pdf-inline-toggle (_file &optional _link)
+;;   (my/org-toggle-inline-image-at-point)
+;;   t) ;; returning non-nil tells Org we handled it
 
-(after! org
-  (setq org-file-apps (assoc-delete-all "\\.pdf\\'" org-file-apps))
-  (add-to-list 'org-file-apps '("\\.pdf\\'" . my/org-open-pdf-inline-toggle)))
+;; (after! org
+;;   (setq org-file-apps (assoc-delete-all "\\.pdf\\'" org-file-apps))
+;;   (add-to-list 'org-file-apps '("\\.pdf\\'" . my/org-open-pdf-inline-toggle)))
 
 (setq! good-scroll-persist-vscroll-window-scroll 'nil)
 
@@ -906,3 +903,68 @@
       (lambda ()
         (interactive)
         (projectile-find-file-in-directory (expand-file-name "src/" (projectile-project-root)))))
+
+(setq! uniquify-buffer-name-style 'post-forward)
+
+(after! ox-latex
+  (add-to-list 'org-latex-classes
+               '("myarticle"
+                 "\\documentclass[11pt]{article}
+                  \\usepackage[margin=1in]{geometry}
+                  \\usepackage{amsmath}
+                  \\usepackage{graphicx}
+                  \\usepackage{hyperref}
+                 \\usepackage{tikz}
+                 \\usetikzlibrary{shapes, arrows, positioning, calc}"
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
+(setq org-latex-default-class "myarticle")
+
+(setq org-file-apps
+      '(( "\\.svg\\'" . default)
+        (remote . emacs)
+        (auto-mode . emacs)
+        (directory . "open %s")   ;; ← use Finder instead of Dired
+        ("\\.mm\\'" . default)
+        ("\\.x?html?\\'" . default)
+        ("\\.pdf\\'" . default)))
+
+(after! org-roam
+  ;; Slugify text the same way Org-roam does for filenames
+  (defun my/org-roam-slugify (s)
+    (org-roam-node-slug (org-roam-node-create :title s)))
+
+  ;; Compute relative path from the node’s title
+  ;; Example: "abc@paper" -> "paper/abc.org"
+  ;;          "abc"       -> "abc.org"
+  (defun my/org-roam-file-from-title (node)
+    (let* ((title (or (org-roam-node-title node)
+                      (plist-get org-capture-plist :title) ; fallback
+                      ""))
+           (parts (split-string title "@"))
+           (base  (string-trim (car parts)))
+           (sub   (and (cadr parts) (string-trim (cadr parts))))
+           (base-slug (my/org-roam-slugify base))
+           (sub-slug  (when sub (my/org-roam-slugify sub))))
+      ;; Create subdir if needed
+      (when sub-slug
+        (let ((dir (expand-file-name sub-slug org-roam-directory)))
+          (unless (file-directory-p dir)
+            (make-directory dir t))))
+      (if sub-slug
+          (format "%s/%s.org" sub-slug base-slug)
+        (format "%s.org" base-slug))))
+
+  ;; Clean title so "#+title:" doesn’t keep the "@paper"
+  (defun my/org-roam-clean-title (node)
+    (let* ((raw (org-roam-node-title node))
+           (base (car (split-string raw "@"))))
+      (string-trim base)))
+
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           :if-new (file+head "${my/org-roam-file-from-title}"
+                              "#+title: ${my/org-roam-clean-title}\n")
+           :unnarrowed t))))

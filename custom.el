@@ -4,8 +4,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files '("/Users/jiawei/org/journal/20250801"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20250901"))
  '(package-selected-packages '(simple-httpd))
+ '(safe-local-variable-directories
+   '("/Users/jiawei/Projects/courses/"
+     "/Users/jiawei/Projects/RobUST_stepping_task/"
+     "/Users/jiawei/Projects/figure_of_eight_PD/"
+     "/Users/jiawei/Projects/virtual_maze_multi_session/"
+     "/Users/jiawei/.doom.d/" "~/.emacs.d/"))
  '(safe-local-variable-values
    '((my/project-todo-file
       . "/Users/jiawei/Projects/virtual_maze_multi_session/.notes/TODO.org")
@@ -36,5 +42,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(eglot-diagnostic-tag-unnecessary-face ((t (:inherit shadow :underline nil))))
+ '(mini-echo-yellow ((t (:foreground "gold3")))))
 ;; (put 'scroll-left 'disabled nil)
