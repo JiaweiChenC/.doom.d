@@ -72,37 +72,61 @@ compile it, then switch back to the Org file and kill the LaTeX buffer."
 ;;                  (hermanhelf-org-jump-to-pdf)
 ;;                  )))))))))
 
-(defun org-compile-latex-and-close ()
-  "Export current Org file to a LaTeX file with body only, compile it,
-and then kill the LaTeX buffer after compilation, preserving any existing sentinel behavior."
-  (interactive)
-  (let ((original-buffer (current-buffer)))  ; Store the current Org file buffer
-    ;; Export and get the LaTeX output file name
-    (when-let ((output-file (org-latex-export-to-latex nil nil nil t nil)))
-      ;; Open the LaTeX file in the background
-      (let ((latex-buffer (find-file-noselect output-file)))
-        (with-current-buffer latex-buffer
-          ;; Call the compile command interactively in the LaTeX buffer
-          (call-interactively '+latex/compile)
-          ;; Capture any existing sentinel attached to the compile process
-          (let ((existing-sentinel (process-sentinel (get-buffer-process (current-buffer)))))
-            ;; Set a new process sentinel that incorporates the old one
-            (set-process-sentinel
-             (get-buffer-process (current-buffer))
-             (lambda (proc event)
-               ;; Call the existing sentinel, if there was one
-               (when existing-sentinel
-                 (funcall existing-sentinel proc event))
-               ;; New behavior based on the process event
-               (cond
-                ((string-match-p "finished" event)
-                 ;; (message "Compilation succeeded")
-                 (bury-buffer latex-buffer))
-                ((string-match-p "exited abnormally" event)
-                 ;; (message "Compilation failed with errors")
-                 ))
-               (when (buffer-live-p original-buffer)
-                 (switch-to-buffer original-buffer))))))))))
+;; (defun org-compile-latex-and-close ()
+;;   "Export current Org file to a LaTeX file with body only, compile it,
+;; and then kill the LaTeX buffer after compilation, preserving any existing sentinel behavior."
+;;   (interactive)
+;;   (let ((original-buffer (current-buffer)))  ; Store the current Org file buffer
+;;     ;; Export and get the LaTeX output file name
+;;     (when-let ((output-file (org-latex-export-to-latex nil nil nil t nil)))
+;;       ;; Open the LaTeX file in the background
+;;       (let ((latex-buffer (find-file-noselect output-file)))
+;;         (with-current-buffer latex-buffer
+;;           ;; Call the compile command interactively in the LaTeX buffer
+;;           (call-interactively '+latex/compile)
+;;           ;; Capture any existing sentinel attached to the compile process
+;;           (let ((existing-sentinel (process-sentinel (get-buffer-process (current-buffer)))))
+;;             ;; Set a new process sentinel that incorporates the old one
+;;             (set-process-sentinel
+;;              (get-buffer-process (current-buffer))
+;;              (lambda (proc event)
+;;                ;; Call the existing sentinel, if there was one
+;;                (when existing-sentinel
+;;                  (funcall existing-sentinel proc event))
+;;                ;; New behavior based on the process event
+;;                (cond
+;;                 ((string-match-p "finished" event)
+;;                  ;; (message "Compilation succeeded")
+;;                  (bury-buffer latex-buffer))
+;;                 ((string-match-p "exited abnormally" event)
+;;                  ;; (message "Compilation failed with errors")
+;;                  ))
+;;                (when (buffer-live-p original-buffer)
+;;                  (switch-to-buffer original-buffer))))))))))
+
+(defun org-compile-latex-and-close (&optional open-pdf)
+  "Export current Org buffer to LaTeX, then compile the master TeX file
+using `org-latex-compile`. Kills the intermediate Org-exported .tex buffer.
+If OPEN-PDF is non-nil, open the resulting PDF."
+  (interactive "P")
+  (let* ((org-buf (current-buffer))
+         (texfile (org-latex-export-to-latex nil nil nil t nil)))
+    (when texfile
+      ;; Determine the master TeX file
+      (let* ((master (or (and (boundp 'TeX-master)
+                              (stringp TeX-master)
+                              (not (string= TeX-master ""))
+                              TeX-master)
+                         ;; fallback: plain "main.tex" in current dir
+                         "main.tex"))
+             (pdffile (org-latex-compile master nil open-pdf)))
+        ;; Kill the exported .tex buffer
+        (when-let ((tex-buf (get-file-buffer texfile)))
+          (kill-buffer tex-buf))
+        ;; Return to the Org buffer
+        (when (buffer-live-p org-buf)
+          (pop-to-buffer org-buf))
+        pdffile))))
 
 ;; map compile latex to space l c
 (map! :leader :desc "compile latex" "l c" #'org-compile-latex-and-close)

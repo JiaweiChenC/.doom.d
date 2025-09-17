@@ -418,7 +418,6 @@
 
 ;; (setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
 
-(setq-hook! LaTeX-mode TeX-command-default "LaTeXMk")
 
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
@@ -968,3 +967,6 @@
            :if-new (file+head "${my/org-roam-file-from-title}"
                               "#+title: ${my/org-roam-clean-title}\n")
            :unnarrowed t))))
+
+(setq! TeX-command-default "LatexMk")
+

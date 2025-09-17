@@ -7,7 +7,7 @@
  '(org-agenda-files '("/Users/jiawei/org/journal/20250901"))
  '(package-selected-packages '(simple-httpd))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/courses/"
+   '("/Users/jiawei/Projects/Bio_model/" "/Users/jiawei/Projects/courses/"
      "/Users/jiawei/Projects/RobUST_stepping_task/"
      "/Users/jiawei/Projects/figure_of_eight_PD/"
      "/Users/jiawei/Projects/virtual_maze_multi_session/"
