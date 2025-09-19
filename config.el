@@ -981,13 +981,27 @@
 ;;        (or pub-dir default-directory))
 ;;     (funcall orig-fn ext subtreep pub-dir)))
 
+;; once in your config
+(defvar-local my/org-export-outfile nil)
+
 (defun my/org-export-output-file-name (orig-fn ext &optional subtreep pub-dir)
-  (if my/org-export-outfile
-      (let ((out my/org-export-outfile))
-        ;; add extension, but keep the directory from out itself
-        (expand-file-name
-         (concat (file-name-sans-extension out) ext)))
-    (funcall orig-fn ext subtreep pub-dir)))
-
-
+  "Prefer #+EXPORT_FILE_NAME, else `my/org-export-outfile'; fallback to ORIG-FN."
+  (let* ((kw (cdr (assoc "EXPORT_FILE_NAME"
+                         (org-collect-keywords '("EXPORT_FILE_NAME")))))
+         (file-local (car kw))                      ; first value if keyword present
+         (choice (or file-local my/org-export-outfile)))
+    (if (and choice (stringp choice) (not (string-empty-p choice)))
+        (let* ((base (file-name-sans-extension choice))
+               (target (concat base ext))
+               ;; If absolute, keep it; if relative and pub-dir was provided (e.g. publish),
+               ;; you *can* switch to (expand-file-name target pub-dir). For normal exports,
+               ;; keep it relative to the Org file's directory (default-directory).
+               (full (if (file-name-absolute-p target)
+                         target
+                       (expand-file-name target))))
+          ;; ensure destination directory exists
+          (when-let ((dir (file-name-directory full)))
+            (unless (file-exists-p dir) (make-directory dir t)))
+          full)
+      (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
