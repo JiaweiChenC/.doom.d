@@ -974,13 +974,6 @@
 ;; Put this once in your init.el
 (defvar-local my/org-export-outfile nil)
 
-;; (defun my/org-export-output-file-name (orig-fn ext &optional subtreep pub-dir)
-;;   (if my/org-export-outfile
-;;       (expand-file-name
-;;        (concat (file-name-sans-extension my/org-export-outfile) ext)
-;;        (or pub-dir default-directory))
-;;     (funcall orig-fn ext subtreep pub-dir)))
-
 ;; once in your config
 (defvar-local my/org-export-outfile nil)
 
