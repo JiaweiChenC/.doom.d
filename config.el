@@ -968,5 +968,26 @@
                               "#+title: ${my/org-roam-clean-title}\n")
            :unnarrowed t))))
 
-(setq! TeX-command-default "LatexMk")
+(setq! org-latex-pdf-process
+       '("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f -synctex=1 -shell-escape"))
 
+;; Put this once in your init.el
+(defvar-local my/org-export-outfile nil)
+
+;; (defun my/org-export-output-file-name (orig-fn ext &optional subtreep pub-dir)
+;;   (if my/org-export-outfile
+;;       (expand-file-name
+;;        (concat (file-name-sans-extension my/org-export-outfile) ext)
+;;        (or pub-dir default-directory))
+;;     (funcall orig-fn ext subtreep pub-dir)))
+
+(defun my/org-export-output-file-name (orig-fn ext &optional subtreep pub-dir)
+  (if my/org-export-outfile
+      (let ((out my/org-export-outfile))
+        ;; add extension, but keep the directory from out itself
+        (expand-file-name
+         (concat (file-name-sans-extension out) ext)))
+    (funcall orig-fn ext subtreep pub-dir)))
+
+
+(advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
