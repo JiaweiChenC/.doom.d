@@ -35,8 +35,8 @@
        :ui
        ;; deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
-       (smooth-scroll
-        +interpolate)
+       smooth-scroll
+        ;; +interpolate)
        doom-dashboard    ; a nifty splash screen for Emacs
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
        ;;(emoji +unicode)  ; 🙂
@@ -53,11 +53,11 @@
        ;; tabs              ; a tab bar for Emacs
        treemacs          ; a project drawer, like neotree but cooler
        ;;unicode           ; extended unicode support for various languages
-       (vc-gutter
-        +pretty)         ; vcs diff in the fringe
+       (vc-gutter +pretty)         ; vcs diff in the fringe
+       ;; vc-gutter         ; vcs diff in the fringe
        ;; vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        (window-select +numbers)     ; visually switch windows
-       workspaces        ; tab emulation, persistence & separate workspaces
+       ;; workspaces        ; tab emulation, persistence & separate workspaces
        zen               ; distraction-free coding or writing
 
        :editor
@@ -175,7 +175,7 @@
         )
        ;;lean              ; for folks with too much to prove
        ;;ledger            ; be audit you can be
-       ;;lua               ; one-based indices? one-based indices
+       lua               ; one-based indices? one-based indices
        markdown
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
@@ -183,7 +183,7 @@
        (org               ; organize your plain life in plain text
         ;; +noter
         +pretty
-        +roam2
+        +roam
         +journal
         +dragndrop
         +jupyter

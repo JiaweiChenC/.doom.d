@@ -6,6 +6,8 @@
 ;; map to space l b
 (map! :leader :desc "export latex body only" "l b" #'org-export-latex-body-only)
 
+;; map space m J to jump to the exported latex
+
 
 ;; (defun compile-main-tex-with-latexmk ()
 ;;   "Compile the main.tex file using latexmk."

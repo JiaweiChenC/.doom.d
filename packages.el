@@ -72,7 +72,8 @@
         "(provide 'org-version)\n"))))
   :pin nil)
 
- ;; (unpin! org-journal hide-mode-line dirvish org evil-nerd-commenter straight
+(unpin! auctex)
+;; (unpin! persp-mode)
  ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
  ;;         nerd-icons doom-snippets transient)
 (unpin! org)
@@ -87,7 +88,7 @@
 (package! copilot
   :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! flycheck-popup-tip :disable t)
-;; (package! flymake-popon :disable t)
+;; (package! evil-nerd-commenter :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-appear
@@ -106,7 +107,9 @@
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-(package! ef-themes)
+(package! ef-themes
+  :recipe (:host github :repo "JiaweiChenC/ef-themes"))
+;; (package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
 (package! exec-path-from-shell)
 (package! phscroll
@@ -114,6 +117,8 @@
 (package! grip-mode)
 (package! ivy)
 (package! nano-theme)
+;; (disable-packages! evil-nerd-commenter)
+(unpin! evil-nerd-commenter)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
 (package! uv
@@ -135,5 +140,13 @@
   )
 ;; (package! org-inline-pdf)
 ;; (package! outline-indent)
-(package! grid-table
-  :recipe (:host github :repo "yibie/grid-table"))
+;; (package! grid-table
+;;   :recipe (:host github :repo "yibie/grid-table"))
+;; (package! overleaf)
+;; (package! webdriver)
+(package! atomic-chrome)
+;;(package! reader
+;;  :recipe (:host codeberg
+;;           :repo "divyaranjan/emacs-reader"))
+(package! catppuccin-theme)
+(package! ox-pandoc)

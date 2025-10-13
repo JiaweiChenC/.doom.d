@@ -24,7 +24,8 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-rose-pine-dawn
+(setq doom-theme 'catppuccin
+;; (setq doom-theme 'doom-one
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -77,7 +78,7 @@
 (setq org-journal-enable-agenda-integration t)
 ;; add all the todo.org file to the agenda
 
-;; (global-hide-mode-line-mode)
+;; (global-hide-mode-line-model
 
 ;; do not highlight the current line
 (setq org-fontify-done-headline t)
@@ -153,7 +154,6 @@
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
   ;; (setq! org-download-method 'directory)
-  (setq org-download-image-dir "images")
   ;; (add-to-list 'completion-at-point-functions #'cape-file)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
@@ -179,7 +179,9 @@
 
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
-(setq! citar-bibliography '("~/Documents/roam/biblibrary/references.bib"))
+;; (setq! citar-bibliography '("/Users/jiawei/Documents/roam/biblibrary/references.bib"))
+(setq citar-bibliography
+      (list (expand-file-name "/Users/jiawei/Documents/roam/biblibrary/references.bib")))
 ;; (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
 ;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
@@ -408,7 +410,7 @@
   (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
-  (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
+  ;; (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
 
@@ -660,7 +662,7 @@
   :config
   ;; Increase preview width
   (plist-put org-latex-preview-appearance-options
-             :page-width 0.8)
+             :scale 2.0)
   (plist-put org-latex-preview-appearance-options
              :zoom 1.2)
 
@@ -670,7 +672,7 @@
 
   ;; ;; Enable consistent equation numbering
   (setq org-latex-preview-numbered t)
-
+                              
   (setq org-latex-preview-mode-display-live t)
 
   ;; More immediate live-previews -- the default delay is 1 second
@@ -708,9 +710,6 @@
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
   (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
-  (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
-  (define-key evil-operator-state-map (kbd "C-s") #'flash-emacs-jump-after)
-  (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts)
   )
 
 (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
@@ -723,7 +722,6 @@
   (better-jumper-set-jump))
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
-
 
 (map! :n "m" #'point-to-register)
 (map! :n "`" #'jump-to-register)
@@ -793,19 +791,25 @@
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! eglot
-  :hook (python-mode . eglot-ensure)
+  :hook ((python-mode python-ts-mode) . eglot-ensure)
   :config
   (setq eglot-events-buffer-config '(:size 0)
         eglot-report-progress nil
         eglot-extend-to-xref t
-        eglot-ignored-server-capabilities '(:inlayHintProvider))
-  (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode)
-                 "pyright-langserver" "--stdio")))
+        eglot-ignored-server-capabilities '(:inlayHintProvider)
+        ))
+
+(after! python
+  (set-eglot-client! '(python-mode python-ts-mode)
+    '("pyright-langserver" "--stdio")
+    '("pyright" "--stdio")
+    '("basedpyright-langserver" "--stdio")
+    '("pyrefly" "lsp")
+    '("ruff" "server") "ruff-lsp"
+    "jedi-language-server"
+    "pylsp" "pyls"))
 
 (use-package! citar)
-
-;; (use-package! uv)
 
 (use-package! claude-code
   :defer t
@@ -919,7 +923,7 @@
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
-(setq org-latex-default-class "myarticle")
+;; (setq org-latex-default-class "myarticle")
 
 (setq org-file-apps
       '(( "\\.svg\\'" . default)
@@ -974,9 +978,6 @@
 ;; Put this once in your init.el
 (defvar-local my/org-export-outfile nil)
 
-;; once in your config
-(defvar-local my/org-export-outfile nil)
-
 (defun my/org-export-output-file-name (orig-fn ext &optional subtreep pub-dir)
   "Prefer #+EXPORT_FILE_NAME, else `my/org-export-outfile'; fallback to ORIG-FN."
   (let* ((kw (cdr (assoc "EXPORT_FILE_NAME"
@@ -998,3 +999,39 @@
           full)
       (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
+
+(use-package! atomic-chrome
+  :config
+  (setq atomic-chrome-url-major-mode-alist
+      '(("github\\.com" . gfm-mode)
+        ("redmine" . textile-mode)
+        ("overleaf.com" . LaTeX-mode)
+        ))
+  (setq! atomic-chrome-buffer-open-style 'full)
+  )
+
+(setq! org-attach-dir-relative 't)
+
+;; ;; Put this in your config.el
+(with-eval-after-load 'org
+  (dolist (pair '(("jupyter-r"     . r)    ; or `. r` if you use r-mode
+                  ("jupyter-python" . python)
+                  ("jupyter-julia"  . julia)))
+    (add-to-list 'org-src-lang-modes pair)))
+
+(defun my/org-roam-find-global-node ()
+  "Temporarily use the global org-roam directory and find a node."
+  (interactive)
+  (let ((org-roam-directory (expand-file-name "~/Documents/roam/note/"))
+        (org-roam-db-location (expand-file-name "~/Documents/roam/note/org-roam.db")))
+    ;; Ensure the DB is loaded with correct path
+    (org-roam-node-find)))
+
+;; map to space n R
+(map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
+
+;; (setq! org-download-clipboard-with-id 't)
+
+(setq! org-startup-with-latex-preview 't)
+
+

@@ -157,6 +157,7 @@ formatted as [cite:@target1;@target2;@target3]."
       (message "Associated Org file does not exist: %s" org-filename))))
 
 (defun hermanhelf-org-jump-to-latex ()
+  (interactive)
   (let* ((line (string-trim (thing-at-point 'line t)))
          (org-filename (buffer-file-name))
          (tex-filename (concat (file-name-directory org-filename) "latex/" (file-name-base org-filename) ".tex")))
@@ -186,6 +187,8 @@ formatted as [cite:@target1;@target2;@target3]."
      (t  ;; Handles generic lines
       (search-in-file line tex-filename)))))
 
+(map! :leader :desc "jump to exported latex" "m J" #'hermanhelf-org-jump-to-latex)
+
 (defun hermanhelf-org-jump-to-pdf ()
   (interactive)
   (let ((origin-buffer (current-buffer)))  ; Store the current buffer before opening PDF
@@ -210,11 +213,11 @@ formatted as [cite:@target1;@target2;@target3]."
   (hermanhelf-latex-jump-to-org))
 
 (defun extract-graphics-path (input-line)
-  (let ((content (and (string-match "{\\(.*?\\)}" input-line)
+  (let ((content (and (string-match "/\\([^}]*\\)}" input-line)
                       (match-string 1 input-line))))
     (if content
         (let ((formatted-content (file-name-nondirectory content)))
-          ;; (message "Formatted Content: %s" formatted-content)
+          (message "Formatted Content: %s" formatted-content)
           (concat "#+NAME: fig:" formatted-content))
       (message "No content found between braces.")
       nil)))
