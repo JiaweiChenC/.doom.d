@@ -150,3 +150,5 @@
 ;;           :repo "divyaranjan/emacs-reader"))
 (package! catppuccin-theme)
 (package! ox-pandoc)
+;; (package! evil-visual-mark-mode
+  ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))

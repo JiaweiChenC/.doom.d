@@ -513,7 +513,6 @@ If point is on a noweb reference (<<name>>), jump to it directly."
 
 (map! :leader :desc "org open attachment from property" "m a h" #'my/org-open-attachment-from-property-child-subtree)
 
-
 (defun my/jupyter-org--set-src-block-cache ()
   "Set the src-block cache.
 If set successfully or if `point' is already inside the cached

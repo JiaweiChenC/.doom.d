@@ -24,7 +24,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'catppuccin
+(setq doom-theme 'ef-rose-pine-dawn
 ;; (setq doom-theme 'doom-one
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
@@ -447,6 +447,7 @@
 
 (setq! org-export-expand-links 'nil)
 
+(setq! bookmark-in-project-use-completion-ivy 'nil)
 (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
 (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
@@ -499,7 +500,7 @@
 
 ;; (setq! csv-align-max-width 10000)
 
-(setq! catppuccin-flavor 'latte)
+;; (setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
   "Wrap the selected text with [[color:red][text]]."
@@ -625,23 +626,34 @@
 ;; attachment
 (setq org-attach-auto-tag nil)
 
-(defun insert-attachment-from-dir ()
-  "Insert a link to a file from the current heading's attachment
-   directory into the :ATTACHMENTS: property."
+;; (defun insert-attachment-from-dir ()
+;;   "Insert a link to a file from the current heading's attachment
+;;    directory into the :ATTACHMENTS: property."
+;;   (interactive)
+;;   (require 'org-attach)
+;;   (let* ((attach-dir (org-attach-dir t)) ;; Get the attachment dir, create if needed
+;;          (files (when (file-directory-p attach-dir)
+;;                   (directory-files attach-dir nil "^[^.]"))) ;; List non-dotfiles
+;;          (file (completing-read "Choose attachment file: " files nil t))
+;;          (link (concat "attachment:" file))
+;;          (current (org-entry-get (point) "ATTACHMENTS")))
+;;     ;; Update the ATTACHMENTS property
+;;     (org-entry-put (point) "ATTACHMENTS"
+;;                    (string-join (remove "" (list current (format "[[%s][%s]]" link file)))))))
+
+(defun insert-attachment-link-from-dir ()
+  "Insert a link to a file from the current heading's attachment directory at point."
   (interactive)
   (require 'org-attach)
-  (let* ((attach-dir (org-attach-dir t)) ;; Get the attachment dir, create if needed
+  (let* ((attach-dir (org-attach-dir t)) ;; Create attachment dir if needed
          (files (when (file-directory-p attach-dir)
                   (directory-files attach-dir nil "^[^.]"))) ;; List non-dotfiles
          (file (completing-read "Choose attachment file: " files nil t))
-         (link (concat "attachment:" file))
-         (current (org-entry-get (point) "ATTACHMENTS")))
-    ;; Update the ATTACHMENTS property
-    (org-entry-put (point) "ATTACHMENTS"
-                   (string-join (remove "" (list current (format "[[%s][%s]]" link file)))))))
+         (link (format "[[attachment:%s][%s]]" file file)))
+    (insert link)))
 
 ;; map to space m a i
-(map! :leader :desc "insert attachment from dir" "m a i" #'insert-attachment-from-dir)
+(map! :leader :desc "insert attachment from dir" "m a i" #'insert-attachment-link-from-dir)
 
 ;; make copilot ignore .eld file
 (setq! copilot-max-char-warning-disabled t)
@@ -723,8 +735,8 @@
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
 
-(map! :n "m" #'point-to-register)
-(map! :n "`" #'jump-to-register)
+;; (map! :n "m" #'point-to-register)
+;; (map! :n "`" #'jump-to-register)
 
 (setq avy-keys (append (number-sequence ?a ?z)))
 
@@ -912,7 +924,7 @@
 (after! ox-latex
   (add-to-list 'org-latex-classes
                '("myarticle"
-                 "\\documentclass[11pt]{article}
+                 "\\documentclass[8pt]{article}
                   \\usepackage[margin=1in]{geometry}
                   \\usepackage{amsmath}
                   \\usepackage{graphicx}
@@ -923,7 +935,7 @@
                  ("\\subsection{%s}" . "\\subsection*{%s}")
                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
-;; (setq org-latex-default-class "myarticle")
+(setq org-latex-default-class "myarticle")
 
 (setq org-file-apps
       '(( "\\.svg\\'" . default)
@@ -1030,8 +1042,15 @@
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
-;; (setq! org-download-clipboard-with-id 't)
-
 (setq! org-startup-with-latex-preview 't)
+(setq! org-startup-with-inline-images 't)
 
+;; config.el
+(use-package! evil-visual-mark-mode
+  :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
+  :config
+  (evil-visual-mark-mode 1))
 
+(use-package! evil-marker-persist
+  :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
+  )
