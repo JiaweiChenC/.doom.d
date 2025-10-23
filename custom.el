@@ -6,7 +6,8 @@
  ;; If there is more than one, they won't work right.
  '(org-agenda-files '("/Users/jiawei/org/journal/20251001"))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/figure_of_eight_PD/"
+   '("/Users/jiawei/Projects/Bio_model/"
+     "/Users/jiawei/Projects/figure_of_eight_PD/"
      "/ssh:35.221.44.134:/home/jiawei/projects/hpe/"
      "/Users/jiawei/Projects/virtual_maze_multi_session/"
      "/Users/jiawei/Documents/roam/" "/Users/jiawei/Projects/courses/"

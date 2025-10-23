@@ -146,6 +146,7 @@
   )
 
 
+;; (setq org-image-actual-width nil)
 (after! org
   ;; (setq! org-src-context-mode 1)
   (setq! org-pretty-entities nil)
@@ -541,8 +542,8 @@
  '(zoom-size '(0.8 . 0.8)))
 
 ;; (setq! org-startup-truncated nil)
-(use-package! phscroll
-  :hook (org-mode . org-phscroll-mode))
+;; (use-package! phscroll
+;;   :hook (org-mode . org-phscroll-mode))
 
 (setq! visual-fill-column-width 100)
 
@@ -1054,3 +1055,26 @@
 (use-package! evil-marker-persist
   :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
   )
+
+;;; Peek breadcrumb until next keypress
+(defvar-local my--breadcrumb-peek-armed nil)
+
+(defun my--breadcrumb-peek-pre-command ()
+  "One-shot disabler for `breadcrumb-mode` before the next command."
+  (when my--breadcrumb-peek-armed
+    (setq my--breadcrumb-peek-armed nil)
+    (remove-hook 'pre-command-hook #'my--breadcrumb-peek-pre-command t)
+    (breadcrumb-mode -1)))
+
+(defun my/breadcrumb-peek ()
+  "Enable `breadcrumb-mode` until the next keypress."
+  (interactive)
+  (breadcrumb-mode 1)
+  (setq my--breadcrumb-peek-armed t)
+  ;; Buffer-local hook so it only affects this buffer
+  (add-hook 'pre-command-hook #'my--breadcrumb-peek-pre-command nil t))
+
+(map! :leader
+      :desc "Breadcrumb peek"
+      "<tab> <tab>" #'my/breadcrumb-peek)
+
