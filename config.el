@@ -66,7 +66,7 @@
 (after! texmathp
   (add-to-list 'texmathp-tex-commands '("tikzpicture" env-on)))
 
-(add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+;; (modify-all-frames-parameters '((inhibit-double-buffering . t)))
 
 (setq org-latex-src-block-backend "listings")
 
@@ -87,7 +87,6 @@
       evil-vsplit-window-right t)
 
 (setq org-log-done t)
-
 
 (setq fancy-splash-image (concat doom-user-dir "splash.png"))
 ;; Hide the menu for minimalistic a startup screen as possible.
@@ -232,10 +231,6 @@
 (setq org-journal-file-type 'monthly)
 
 ;; ;; set C-n and C-p in insert mode to next line and previous line
-(map! :map evil-insert-state-map
-      "C-n" #'next-line
-      "C-p" #'previous-line
-      )
 
 ;; initial frame size
 (setq initial-frame-alist
@@ -421,7 +416,6 @@
 
 ;; (setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
 
-
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
 (setq tex-fontify-script 'nil)
@@ -488,7 +482,7 @@
   :hook (csv-mode . rainbow-csv-mode))
 
 ;; csv align mode after csv mode
-(add-hook 'csv-mode-hook 'csv-align-mode)
+;; (add-hook 'csv-mode-hook 'csv-align-mode)
 
 ;; disable visual line mode in csv mode
 (add-hook 'csv-mode-hook
@@ -602,14 +596,6 @@
   :init
   (setq! org-modern-tag nil)
   )
-
-(defun my/deft-set-project-doc-org-dir (orig-fn &rest args)
-  "Set `deft-directory` to `[project]/doc/org/` before calling `deft`."
-  (let ((project-root (projectile-project-root)))
-    (setq deft-directory (expand-file-name "doc/org/" project-root)))
-  (apply orig-fn args))
-
-(advice-add 'deft :around #'my/deft-set-project-doc-org-dir)
 
 (with-eval-after-load 'ob-jupyter
   (org-babel-jupyter-aliases-from-kernelspecs)
@@ -747,27 +733,6 @@
 ;; map my/project-todo to space p t
 (map! :leader :desc "Open project TODO" "p t" #'my/project-todo)
 
-(defun my/project-todo ()
-  "Open the TODO.org file for the current project in a popup with a unique name."
-  (interactive)
-  (let* ((project-name (projectile-project-name))
-         (todo-file my/project-todo-file)  ;; Your project-specific TODO path
-         (buf-name (format "*TODO:%s*" project-name)))
-    ;; Define popup rule before displaying the buffer
-    (set-popup-rule!
-      (format "^\\*TODO:%s\\*$" (regexp-quote project-name))
-      :side 'right
-      :size 0.4
-      :select t
-      :quit 'current
-      :ttl 0
-      :autosave t
-      )
-    ;; Open and rename buffer before popping up
-    (let ((buf (find-file-noselect todo-file)))
-      (with-current-buffer buf
-        (rename-buffer buf-name t))
-      (pop-to-buffer buf))))
 
 (set-popup-rule!
 "^\\*jupyter-outyut\\*$"
@@ -1052,6 +1017,7 @@
   :config
   (evil-visual-mark-mode 1))
 
+
 (use-package! evil-marker-persist
   :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
   )
@@ -1077,4 +1043,46 @@
 (map! :leader
       :desc "Breadcrumb peek"
       "<tab> <tab>" #'my/breadcrumb-peek)
+
+;; temporary fix pdf view mode error
+;; https://github.com/vedang/pdf-tools/issues/283
+(defvar org-format-latex-header nil)
+
+(use-package! ef-themes
+  :load-path "/Users/jiawei/Projects/Playground/ef-themes"
+  )
+
+(add-hook! '+popup-buffer-mode
+  ;; only adjust when we really are in a popup window
+  (when (+popup-window-p)
+    (set-window-margins (selected-window) 2 2)
+    ;; optional: make the change buffer-local & refresh
+    (setq-local left-margin-width 2
+                right-margin-width 2)
+    (set-window-buffer (selected-window) (current-buffer))))
+
+(defun my/project-todo ()
+  "Open the TODO.org file for the current project in a popup with a unique name."
+  (interactive)
+  (let* ((project-name (projectile-project-name))
+         (todo-file my/project-todo-file)
+         (buf-name (format "*TODO:%s*" project-name)))
+    (set-popup-rule!
+     (format "^\\*TODO:%s\\*$" (regexp-quote project-name))
+     :side 'right :size 0.4 :select t :quit 'current :ttl 0 :autosave t)
+    (let ((buf (find-file-noselect todo-file)))
+      (with-current-buffer buf
+        (rename-buffer buf-name t))
+      (pop-to-buffer buf)
+      ;; give the popup window visible fringes (pixels)
+      (when-let ((win (get-buffer-window buf)))
+        (set-window-fringes win 8 8)   ; adjust px to taste
+        ;; if you like, keep indicators minimal:
+        ;; (setq-local fringe-indicator-alist '((continuation . nil) (truncation . nil)))
+        ))))
+
+;; Highest-priority map in Doom (general-override-mode-map)
+(map! :map override
+      :i "C-n" #'next-line
+      :i "C-p" #'previous-line)
 
