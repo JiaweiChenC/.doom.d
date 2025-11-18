@@ -1,7 +1,6 @@
 ;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Jiawei Chen"
@@ -68,7 +67,7 @@
 
 ;; (modify-all-frames-parameters '((inhibit-double-buffering . t)))
 
-(setq org-latex-src-block-backend "listings")
+;; (setq org-latex-src-block-backend "listings")
 
 (setq org-roam-directory "~/Documents/roam/note/")
 
@@ -76,9 +75,6 @@
 
 (setq org-agenda-files '("~/org/journal/"))
 (setq org-journal-enable-agenda-integration t)
-;; add all the todo.org file to the agenda
-
-;; (global-hide-mode-line-model
 
 ;; do not highlight the current line
 (setq org-fontify-done-headline t)
@@ -135,6 +131,7 @@
 
 (setq auto-save-default nil)
 (setq super-save-remote-files nil)
+
 (add-to-list 'super-save-triggers 'ace-window)
 (add-to-list 'super-save-triggers '+vterm/toggle)
 
@@ -229,8 +226,6 @@
   (set-popup-rule! "^\\*image-dired" :ignore t))
 
 (setq org-journal-file-type 'monthly)
-
-;; ;; set C-n and C-p in insert mode to next line and previous line
 
 ;; initial frame size
 (setq initial-frame-alist
@@ -332,6 +327,7 @@
   ;; :init
   ;; (corfu-global-mode)
   :config
+  (setq! corfu-popupinfo-max-height 1)
   (setq corfu-auto nil
         corfu-quit-no-match 'separator
         corfu-quit-at-boundary 'separator
@@ -341,9 +337,9 @@
   ;; (map! :i "<tab>" #'completion-at-point)
   )
 
-(after! dabbrev
-  ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
-  (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
+;; (after! dabbrev
+;;   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
+;;   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
 
 (use-package! tab-bar
   :config
@@ -351,22 +347,9 @@
   (setq tab-bar-new-tab-choice t
         tab-bar-tab-name-truncated-max 20
         tab-bar-tab-hints t)
-  (map! :n "]T" 'tab-bar-switch-to-next-tab)
-  (map! :n "[T" 'tab-bar-switch-to-prev-tab)
-
-  (map! :leader
-        (:prefix ("t" . "tab")
-         :desc "Switch to tab number"
-         "1" #'(lambda () (interactive) (tab-bar-select-tab))
-         "2" #'(lambda () (interactive) (tab-bar-select-tab))
-         "3" #'(lambda () (interactive) (tab-bar-select-tab))
-         "4" #'(lambda () (interactive) (tab-bar-select-tab))
-         "5" #'(lambda () (interactive) (tab-bar-select-tab))
-         "6" #'(lambda () (interactive) (tab-bar-select-tab))
-         "7" #'(lambda () (interactive) (tab-bar-select-tab))
-         "8" #'(lambda () (interactive) (tab-bar-select-tab))
-         "9" #'(lambda () (interactive) (tab-bar-select-tab))
-         )))
+  ;; (map! :n "]T" 'tab-bar-switch-to-next-tab)
+  ;; (map! :n "[T" 'tab-bar-switch-to-prev-tab)
+  )
 
 
 (setq! ess-startup-directory 'default-directory)
@@ -414,8 +397,6 @@
 (map! :n "s-'" #'skim-prev-page)
 (setq org-image-actual-width nil)
 
-;; (setq! imagemagick-types-inhibit (append imagemagick-types-inhibit '(SVG)))
-
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
 (setq tex-fontify-script 'nil)
@@ -434,8 +415,6 @@
   (setq! org-appear-autolinks t)
   )
 
-(setq! org-latex-src-block-backend 'listings)
-
 (setq! org-image-actual-width nil)
 
 (setq! TeX-command-extra-options "-shell-escape")
@@ -446,7 +425,6 @@
 (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
 (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
-(setq! corfu-popupinfo-max-height 1)
 
 (setq! vterm-timer-delay 0.01)
 
@@ -471,18 +449,12 @@
 (after! org
   (define-key org-mode-map (kbd "S-s-<mouse-1>") 'hermanhelf-org-jump-to-pdf))
 
-(after! corfu
-  (setq corfu-auto nil))
-
 (add-hook 'prog-mode-hook
           (lambda ()
             (face-remap-add-relative 'font-lock-comment-face :slant 'italic)))
 
 (use-package! rainbow-csv
   :hook (csv-mode . rainbow-csv-mode))
-
-;; csv align mode after csv mode
-;; (add-hook 'csv-mode-hook 'csv-align-mode)
 
 ;; disable visual line mode in csv mode
 (add-hook 'csv-mode-hook
@@ -492,10 +464,6 @@
 
 ;; map space t b to breadcrumb-mode
 (map! :leader :desc "breadcrumb mode" "t h" #'breadcrumb-mode)
-
-;; (setq! csv-align-max-width 10000)
-
-;; (setq! catppuccin-flavor 'latte)
 
 (defun wrap-text-with-color ()
   "Wrap the selected text with [[color:red][text]]."
@@ -535,7 +503,6 @@
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
 
-;; (setq! org-startup-truncated nil)
 ;; (use-package! phscroll
 ;;   :hook (org-mode . org-phscroll-mode))
 
@@ -660,6 +627,7 @@
   :hook (org-mode . org-latex-preview-mode)
   :config
   ;; Increase preview width
+  (plist-put org-latex-preview-appearance-options :page-width 0.80)
   (plist-put org-latex-preview-appearance-options
              :scale 2.0)
   (plist-put org-latex-preview-appearance-options
@@ -713,7 +681,7 @@
 
 (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
 ;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote-test.el")
 ;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
@@ -732,7 +700,6 @@
 
 ;; map my/project-todo to space p t
 (map! :leader :desc "Open project TODO" "p t" #'my/project-todo)
-
 
 (set-popup-rule!
 "^\\*jupyter-outyut\\*$"
@@ -776,6 +743,13 @@
         eglot-extend-to-xref t
         eglot-ignored-server-capabilities '(:inlayHintProvider)
         ))
+
+(after! eglot
+  ;; Don't start Eglot on remote (TRAMP) buffers
+  (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
+    :around #'eglot-ensure
+    (unless (file-remote-p default-directory)
+      (apply orig-fn args))))
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
@@ -824,8 +798,6 @@
 
 (after! embark-org
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
-
-;; (setq! org-preview-latex-default-process 'dvisvgm)
 
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
@@ -890,7 +862,7 @@
 (after! ox-latex
   (add-to-list 'org-latex-classes
                '("myarticle"
-                 "\\documentclass[8pt]{article}
+                 "\\documentclass[11pt]{article}
                   \\usepackage[margin=1in]{geometry}
                   \\usepackage{amsmath}
                   \\usepackage{graphicx}
@@ -992,7 +964,8 @@
 
 ;; ;; Put this in your config.el
 (with-eval-after-load 'org
-  (dolist (pair '(("jupyter-r"     . r)    ; or `. r` if you use r-mode
+  (dolist (pair '(("jupyter-R"     . r)
+                  ("jupyter-r"     . r)    ; or `. r` if you use r-mode
                   ("jupyter-python" . python)
                   ("jupyter-julia"  . julia)))
     (add-to-list 'org-src-lang-modes pair)))
@@ -1082,7 +1055,70 @@
         ))))
 
 ;; Highest-priority map in Doom (general-override-mode-map)
-(map! :map override
-      :i "C-n" #'next-line
-      :i "C-p" #'previous-line)
+;; (map! :map override
+;;       :i "C-j" #'next-line
+;;       :i "C-k" #'previous-line)
 
+;; map space o p to +dired/dirvish-side-and-follow
+(map! :leader :desc "dirvish side and follow" "o p" #'+dired/dirvish-side-and-follow)
+
+;; Put this in your config.el
+(add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
+(add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
+
+;; map space return to bookmark project jump
+(map! :leader :desc "bookmark project jump" "RET" #'bookmark-in-project-jump)
+
+;; dirvish bug
+;; Fix Dirvish yank under Emacs 31 where built-in `all` clashes
+(with-eval-after-load 'dirvish
+  (defun my/dirvish--all-like-and (&rest xs)
+    "Compat for old `(all …)` used by some code.
+Return non-nil iff XS is non-empty AND every element is non-nil."
+    (and xs (cl-every #'identity xs)))
+
+  (advice-remove 'dirvish-yank--apply #'ignore) ; if you added any earlier stub
+  (advice-add 'dirvish-yank--apply :around
+              (lambda (orig-fn &rest args)
+                (cl-letf (((symbol-function 'all) #'my/dirvish--all-like-and))
+                  (apply orig-fn args)))))
+
+
+;; map space l a to my/org-export-pdf-to-attach-dir
+(map! :leader :desc "org export pdf to attach dir" "l a" #'my/org-export-pdf-to-attach-dir)
+
+(map! :leader
+      :desc "Wrap Text with red"
+      "l r" #'wrap-text-with-color)
+
+;; remove 
+(after! csv-mode
+  (defun my/disable-rainbow-csv-for-large-files ()
+    (when (and (eq major-mode 'csv-mode)
+               (> (buffer-size) (* 1 1024 1024)))
+      (when (bound-and-true-p rainbow-csv-mode)
+        (rainbow-csv-mode -1))))
+  (add-hook 'csv-mode-hook #'my/disable-rainbow-csv-for-large-files t))
+
+(defun my/projectile-find-file-in-src ()
+  "Find a file under the project's src/ directory."
+  (interactive)
+  (let* ((root (projectile-project-root))
+         (src-dir (expand-file-name "src" root)))
+    (if (file-directory-p src-dir)
+        (projectile-find-file-in-directory src-dir)
+      (user-error "No src/ directory in project root"))))
+
+(map! :leader
+      :desc "Find file in src/"
+      "p s" #'my/projectile-find-file-in-src)
+
+
+(after! quickrun
+  (quickrun-add-command "python/uv"
+    '((:command . "uv")
+      (:exec    . ("%c run %s %a"))
+      (:tempfile . nil)
+      (:description . "Run Python with uv run")))
+  ;; use uv by default for .py files:
+  (add-to-list 'quickrun-file-alist '("\\.py\\'" . "python/uv")))
