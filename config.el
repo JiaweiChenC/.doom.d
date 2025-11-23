@@ -1015,7 +1015,7 @@
 
 (map! :leader
       :desc "Breadcrumb peek"
-      "<tab> <tab>" #'my/breadcrumb-peek)
+      "b b" #'my/breadcrumb-peek)
 
 ;; temporary fix pdf view mode error
 ;; https://github.com/vedang/pdf-tools/issues/283
@@ -1113,7 +1113,6 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
       :desc "Find file in src/"
       "p s" #'my/projectile-find-file-in-src)
 
-
 (after! quickrun
   (quickrun-add-command "python/uv"
     '((:command . "uv")
@@ -1122,3 +1121,10 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
       (:description . "Run Python with uv run")))
   ;; use uv by default for .py files:
   (add-to-list 'quickrun-file-alist '("\\.py\\'" . "python/uv")))
+
+;; (add-to-list 'vc-handled-backends 'Git)
+;; (after! tramp
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
