@@ -1127,3 +1127,39 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
+
+  (set-popup-rule! "^\\*vterm:.*\\*$"
+    :size 0.25
+    :vslot -4
+    :select t
+    :quit nil
+    :ttl nil) ;; keep buffer alive when popup closes
+
+  ;; 3. One vterm per project, proper toggle
+  (defun jc/vterm-project-toggle ()
+    "Toggle a project-local vterm popup.
+
+One vterm per project root:
+- If it's visible, hide its window(s).
+- If it exists but is hidden, show it.
+- If it doesn't exist yet, create it at the project root."
+    (interactive)
+    (let* ((proj-root (or (doom-project-root) default-directory))
+           (proj-name (file-name-nondirectory (directory-file-name proj-root)))
+           (buf-name (format "*vterm:%s*" proj-name))
+           (buf      (get-buffer buf-name)))
+      (if (and buf (get-buffer-window buf t))
+          ;; Hide all windows showing this vterm
+          (dolist (win (get-buffer-window-list buf nil t))
+            (delete-window win))
+        ;; Otherwise create if needed and show it
+        (progn
+          (unless (buffer-live-p buf)
+            (let ((default-directory proj-root))
+              (setq buf (vterm buf-name)))
+            ;; make Doom treat it like a normal/real buffer
+            (with-current-buffer buf
+              (setq-local doom-real-buffer-p t)))
+          (pop-to-buffer buf)))))
+
+(map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
