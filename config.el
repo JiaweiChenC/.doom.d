@@ -1122,8 +1122,7 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
   ;; use uv by default for .py files:
   (add-to-list 'quickrun-file-alist '("\\.py\\'" . "python/uv")))
 
-;; (add-to-list 'vc-handled-backends 'Git)
-;; (after! tramp
+;; tramp trick 
 (setq vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
