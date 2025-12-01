@@ -234,7 +234,7 @@
 (add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
 (add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
 
-(setq projectile-indexing-method 'native)
+(setq projectile-indexing-method 'alien)
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
@@ -753,9 +753,9 @@
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
+    '("basedpyright-langserver" "--stdio")
     '("pyright-langserver" "--stdio")
     '("pyright" "--stdio")
-    '("basedpyright-langserver" "--stdio")
     '("pyrefly" "lsp")
     '("ruff" "server") "ruff-lsp"
     "jedi-language-server"
@@ -1113,29 +1113,25 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
       :desc "Find file in src/"
       "p s" #'my/projectile-find-file-in-src)
 
-(after! quickrun
-  (quickrun-add-command "python/uv"
-    '((:command . "uv")
-      (:exec    . ("%c run %s %a"))
-      (:tempfile . nil)
-      (:description . "Run Python with uv run")))
-  ;; use uv by default for .py files:
-  (add-to-list 'quickrun-file-alist '("\\.py\\'" . "python/uv")))
-
 ;; tramp trick 
 (setq vc-ignore-dir-regexp
       (format "\\(%s\\)\\|\\(%s\\)"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
 
+(after! vterm
   (set-popup-rule! "^\\*vterm:.*\\*$"
-    :size 0.25
+    :size 0.4
     :vslot -4
     :select t
-    :quit nil
+    :quit t
     :ttl nil) ;; keep buffer alive when popup closes
 
   ;; 3. One vterm per project, proper toggle
+  )
+
+(map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
+
   (defun jc/vterm-project-toggle ()
     "Toggle a project-local vterm popup.
 
@@ -1161,5 +1157,11 @@ One vterm per project root:
             (with-current-buffer buf
               (setq-local doom-real-buffer-p t)))
           (pop-to-buffer buf)))))
+;; (use-package! pet
+;;   :config
+;;   (add-hook 'python-base-mode-hook 'pet-mode -10))
 
-(map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
+;; map space a e to eglot
+(map! :leader :desc "eglot" "e e" #'eglot)
+
+(setq! tramp-verbose 2)
