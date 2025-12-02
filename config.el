@@ -193,7 +193,7 @@
          :empty-lines 1)))
 
 (use-package! copilot
- :hook (prog-mode . copilot-mode)
+ ;; :hook (prog-mode . copilot-mode)
  :bind (("<backtab>" . 'copilot-accept-completion-by-word)
         :map copilot-completion-map
         ("<tab>" . 'copilot-accept-completion)
@@ -1119,44 +1119,42 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
 
-(after! vterm
-  (set-popup-rule! "^\\*vterm:.*\\*$"
-    :size 0.4
-    :vslot -4
-    :select t
-    :quit t
-    :ttl nil) ;; keep buffer alive when popup closes
+;; (after! vterm
+;;   (set-popup-rule! "^\\*vterm:.*\\*$"
+;;     :size 0.4
+;;     :vslot -4
+;;     :select t
+;;     :quit t
+;;     :ttl nil) ;; keep buffer alive when popup closes
+;; )
 
-  ;; 3. One vterm per project, proper toggle
-  )
+;; (map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
 
-(map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
+;;   (defun jc/vterm-project-toggle ()
+;;     "Toggle a project-local vterm popup.
 
-  (defun jc/vterm-project-toggle ()
-    "Toggle a project-local vterm popup.
-
-One vterm per project root:
-- If it's visible, hide its window(s).
-- If it exists but is hidden, show it.
-- If it doesn't exist yet, create it at the project root."
-    (interactive)
-    (let* ((proj-root (or (doom-project-root) default-directory))
-           (proj-name (file-name-nondirectory (directory-file-name proj-root)))
-           (buf-name (format "*vterm:%s*" proj-name))
-           (buf      (get-buffer buf-name)))
-      (if (and buf (get-buffer-window buf t))
-          ;; Hide all windows showing this vterm
-          (dolist (win (get-buffer-window-list buf nil t))
-            (delete-window win))
-        ;; Otherwise create if needed and show it
-        (progn
-          (unless (buffer-live-p buf)
-            (let ((default-directory proj-root))
-              (setq buf (vterm buf-name)))
-            ;; make Doom treat it like a normal/real buffer
-            (with-current-buffer buf
-              (setq-local doom-real-buffer-p t)))
-          (pop-to-buffer buf)))))
+;; One vterm per project root:
+;; - If it's visible, hide its window(s).
+;; - If it exists but is hidden, show it.
+;; - If it doesn't exist yet, create it at the project root."
+;;     (interactive)
+;;     (let* ((proj-root (or (doom-project-root) default-directory))
+;;            (proj-name (file-name-nondirectory (directory-file-name proj-root)))
+;;            (buf-name (format "*vterm:%s*" proj-name))
+;;            (buf      (get-buffer buf-name)))
+;;       (if (and buf (get-buffer-window buf t))
+;;           ;; Hide all windows showing this vterm
+;;           (dolist (win (get-buffer-window-list buf nil t))
+;;             (delete-window win))
+;;         ;; Otherwise create if needed and show it
+;;         (progn
+;;           (unless (buffer-live-p buf)
+;;             (let ((default-directory proj-root))
+;;               (setq buf (vterm buf-name)))
+;;             ;; make Doom treat it like a normal/real buffer
+;;             (with-current-buffer buf
+;;               (setq-local doom-real-buffer-p t)))
+;;           (pop-to-buffer buf)))))
 ;; (use-package! pet
 ;;   :config
 ;;   (add-hook 'python-base-mode-hook 'pet-mode -10))
@@ -1165,3 +1163,39 @@ One vterm per project root:
 (map! :leader :desc "eglot" "e e" #'eglot)
 
 (setq! tramp-verbose 2)
+
+;; temp fix for rsync dirvish 
+(after! dirvish
+  ;; Just don’t use the magic 'all symbol; restrict to marked files only.
+  (setq dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all))))
+
+;; In your config.el or eval it temporarily:
+(setq enable-remote-dir-locals nil)
+
+
+(with-eval-after-load 'projectile
+  ;; Only let Projectile touch its cache when we're local.
+  (defun jc/delete-file-projectile-remove-from-cache-no-remote
+      (orig-fun filename &optional trash)
+    "Disable Projectile's delete-file cache update on TRAMP."
+    (if (file-remote-p default-directory)
+        ;; On remote dirs: do nothing, just skip cache updates
+        nil
+      ;; On local dirs: behave exactly as Projectile intended
+      (funcall orig-fun filename trash)))
+
+  (advice-add 'delete-file-projectile-remove-from-cache
+              :around #'jc/delete-file-projectile-remove-from-cache-no-remote))
+
+(after! diff-hl
+  (defun jc/diff-hl-disable-on-remote ()
+    (when (file-remote-p default-directory)
+      (diff-hl-mode -1)
+      (diff-hl-flydiff-mode -1)))
+
+  ;; In case something else turns it on, we turn it back off for remote
+  (add-hook 'find-file-hook #'jc/diff-hl-disable-on-remote))
+
+(advice-add 'projectile-project-root :before-while
+  (lambda (&optional dir)
+    (not (file-remote-p (or dir default-directory)))))
