@@ -228,46 +228,46 @@ If OPEN-PDF is non-nil, open the resulting PDF."
   (add-to-list 'org-export-filter-table-row-functions
                'org-export-multicolumnv-filter-latex))
 
-(defun org-attach-expand (file &optional convert-to-relative)
-"Return the full path to the current entry's attachment file FILE.
-Basically, this adds the path to the attachment directory. If optional
-argument `convert-to-relative' is non-nil, then return path relative to
-`default-directory'."
-(let ((filepath (expand-file-name file (org-attach-dir))))
-(if convert-to-relative
-        (dired-make-relative filepath)
-filepath)))
+;; (defun org-attach-expand (file &optional convert-to-relative)
+;; "Return the full path to the current entry's attachment file FILE.
+;; Basically, this adds the path to the attachment directory. If optional
+;; argument `convert-to-relative' is non-nil, then return path relative to
+;; `default-directory'."
+;; (let ((filepath (expand-file-name file (org-attach-dir))))
+;; (if convert-to-relative
+;;         (dired-make-relative filepath)
+;; filepath)))
 
-(defun org-attach-expand-new (file)
-  "Return a simple concatenation of the attachment directory and FILE."
-  (let ((attach-dir (org-attach-dir)))
-    (if attach-dir
-        (concat (file-name-as-directory attach-dir) file)
-      (error "No attachment directory exists"))))
+;; (defun org-attach-expand-new (file)
+;;   "Return a simple concatenation of the attachment directory and FILE."
+;;   (let ((attach-dir (org-attach-dir)))
+;;     (if attach-dir
+;;         (concat (file-name-as-directory attach-dir) file)
+;;       (error "No attachment directory exists"))))
 
-  (defun org-attach-expand-links (_)
-    "Expand links in current buffer.
-  It is meant to be added to `org-export-before-parsing-hook'."
-    (save-excursion
-      (while (re-search-forward "attachment:" nil t)
-        (let ((link (org-element-context)))
-    (when (and (org-element-type-p link 'link)
-           (string-equal "attachment"
-                 (org-element-property :type link)))
-      (let* ((description (and (org-element-contents-begin link)
-                   (buffer-substring-no-properties
-                    (org-element-contents-begin link)
-                    (org-element-contents-end link))))
-         (file (org-element-property :path link))
-         (new-link (org-link-make-string
-                ;; only difference is the following two lines
-                ;; (concat "file:" (org-attach-expand file))
-                (concat "file:" (org-attach-expand file 'convert-to-relative))
-                description)))
-        (goto-char (org-element-end link))
-        (skip-chars-backward " \t")
-        (delete-region (org-element-begin link) (point))
-        (insert new-link)))))))
+;;   (defun org-attach-expand-links (_)
+;;     "Expand links in current buffer.
+;;   It is meant to be added to `org-export-before-parsing-hook'."
+;;     (save-excursion
+;;       (while (re-search-forward "attachment:" nil t)
+;;         (let ((link (org-element-context)))
+;;     (when (and (org-element-type-p link 'link)
+;;            (string-equal "attachment"
+;;                  (org-element-property :type link)))
+;;       (let* ((description (and (org-element-contents-begin link)
+;;                    (buffer-substring-no-properties
+;;                     (org-element-contents-begin link)
+;;                     (org-element-contents-end link))))
+;;          (file (org-element-property :path link))
+;;          (new-link (org-link-make-string
+;;                 ;; only difference is the following two lines
+;;                 ;; (concat "file:" (org-attach-expand file))
+;;                 (concat "file:" (org-attach-expand file 'convert-to-relative))
+;;                 description)))
+;;         (goto-char (org-element-end link))
+;;         (skip-chars-backward " \t")
+;;         (delete-region (org-element-begin link) (point))
+;;         (insert new-link)))))))
 
 ;; (advice-add 'org-export-resolve-fuzzy-link :override #'my/org-export-resolve-fuzzy-link)
 ;; (defun my/org-export-resolve-fuzzy-link (link info &rest pseudo-types)

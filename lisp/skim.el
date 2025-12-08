@@ -187,6 +187,98 @@ formatted as [cite:@target1;@target2;@target3]."
      (t  ;; Handles generic lines
       (search-in-file line tex-filename)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTEST
+(require 's)
+(require 'org-attach)
+(require 'cl-lib)
+
+(defun hermanhelf--candidate-tex-files (org-file)
+  "Return a list of .tex files to search for ORG-FILE.
+Priority: ./latex/<basename>.tex, else all .tex in the heading's attach dir,
+else <basename>.tex in the attach dir (if none found)."
+  (let* ((proj-dir  (file-name-directory org-file))
+         (base      (file-name-base org-file))
+         (latex-dir (expand-file-name "latex" proj-dir))
+         (attach-dir (ignore-errors
+                       (org-with-wide-buffer
+                         (org-attach-dir t)))))
+    (cond
+     ;; Preferred: project latex/<base>.tex
+     ((file-exists-p latex-dir)
+      (list (expand-file-name (concat base ".tex") latex-dir)))
+     ;; Fallback: any .tex in attach dir (if it exists)
+     ((and attach-dir (file-directory-p attach-dir))
+      (let* ((all-tex (directory-files attach-dir t "\\.tex\\'"))
+             (fallback (expand-file-name (concat base ".tex") attach-dir)))
+        (if all-tex
+            all-tex
+          (list fallback))))
+     ;; Last resort: nothing sensible
+     (t
+      nil))))
+
+(defun hermanhelf--search-in-candidates (needle files)
+  "Search for NEEDLE in the first matching FILES.
+Calls `search-in-file' on each existing file until one succeeds."
+  (let ((found nil))
+    (dolist (f files)
+      (when (and (not found) (file-exists-p f))
+        ;; Assume your `search-in-file' navigates to the match and
+        ;; returns non-nil on success; if it doesn't return a status,
+        ;; we still stop at the first existing file.
+        (setq found (ignore-errors (search-in-file needle f)))
+        (when found
+          (message "Searched in: %s" f))))
+    (unless found
+      (message "No match found. Checked: %s"
+               (mapconcat #'identity (cl-remove-if-not #'file-exists-p files) ", ")))
+    found))
+
+(defun hermanhelf-org-jump-to-latex ()
+  (interactive)
+  (let* ((line (string-trim (thing-at-point 'line t)))
+         (org-filename (buffer-file-name))
+         (tex-files (hermanhelf--candidate-tex-files org-filename)))
+    (unless tex-files
+      (user-error "No latex/ dir and no attach dir found for this heading"))
+    (cond
+     ;; Citations
+     ((s-contains? "cite:@" line t)
+      (let ((needle (replace-citations line)))
+        (message "Modified line: %s" needle)
+        (hermanhelf--search-in-candidates needle tex-files)))
+     ;; Headings
+     ((s-contains? "* " line t)
+      (hermanhelf--search-in-candidates
+       (concat "{" (heading-text-org line) "}") tex-files))
+     ;; Figure refs
+     ((s-contains? "[[fig:" line t)
+      (let ((needle (replace-fig-ref line)))
+        (message "Modified line: %s" needle)
+        (hermanhelf--search-in-candidates needle tex-files)))
+     ;; Table refs
+     ((s-contains? "[[tbl:" line t)
+      (let ((needle (replace-tbl-ref line)))
+        (message "Modified line: %s" needle)
+        (hermanhelf--search-in-candidates needle tex-files)))
+     ;; Attachment links → strip extension then search
+     ((s-contains? "attachment:" line t)
+      (let* ((name (replace-regexp-in-string
+                    "\\[\\[attachment:\\([^]]+\\)\\]\\]" "\\1" line))
+             (stem (replace-regexp-in-string "\\.[^.]+\\'" "" name)))
+        (hermanhelf--search-in-candidates stem tex-files)))
+     ;; Captions
+     ((s-contains? "#+caption:" line t)
+      (let ((caption (replace-regexp-in-string "^#\\+caption:[ \t]*" "" line)))
+        (message "Caption text: %s" caption)
+        (hermanhelf--search-in-candidates caption tex-files)))
+     ;; Fallback: literal line
+     (t
+      (hermanhelf--search-in-candidates line tex-files)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTEST
+
 (map! :leader :desc "jump to exported latex" "m J" #'hermanhelf-org-jump-to-latex)
 
 (defun hermanhelf-org-jump-to-pdf ()
@@ -208,7 +300,7 @@ formatted as [cite:@target1;@target2;@target3]."
 (defun open-file-jump-to-line-and-call-function (file line)
   "Open FILE, jump to LINE, and call `hermanhelf-latex-jump-to-org`."
   (find-file file)
-  (goto-line line)
+  (goto-line (string-to-number line))
   ;; close the current buffer
   (hermanhelf-latex-jump-to-org))
 

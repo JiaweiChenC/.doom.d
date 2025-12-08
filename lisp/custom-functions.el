@@ -140,7 +140,7 @@ Supports Org mode (including attachment links), Dired, and image buffers."
 
 (map! :leader
       :desc "Open project file externally"
-      "e e" #'open-project-file-externally)
+      "e E" #'open-project-file-externally)
 
 ;; (defun update-breadcrumb-mode-based-on-window-count ()
 ;;   "Toggle breadcrumb-mode based on the number of visible windows."
@@ -543,64 +543,135 @@ inside a Jupyter src-block, return nil."
             :override #'my/jupyter-org--set-src-block-cache)
 
 ;;;###autoload
-(defun my/org--resolve-attach-dir ()
-  "Resolve attach directory at point, honoring :DIR: / :ATTACH_DIR: and org-attach."
+
+;; Save babel :file outputs into the current heading's org-attach directory.
+;; If :file is relative (e.g., "plot.png"), it's rewritten to
+;; "<attach-dir>/plot.png" before execution.
+
+(with-eval-after-load 'org
+  (require 'org-attach)
+  (require 'cl-lib)
+
+  (defun my/ob--maybe-rewrite-file-into-attach (info)
+    "If INFO has a relative :file, rewrite it into the heading's attach dir."
+    (let* ((params (nth 2 info))
+           (file   (cdr (assq :file params))))
+      (when file
+        (let* ((attach-dir (ignore-errors (org-with-wide-buffer (org-attach-dir t)))))
+          (when (and attach-dir
+                     (stringp file)
+                     (not (file-name-absolute-p file)))
+            (let* ((abs (expand-file-name file attach-dir))
+                   (new-params (org-babel-merge-params
+                                params
+                                (list (cons :file abs) '(:mkdirp . "yes"))))
+                   (new-info (cl-copy-list info)))
+              (setf (nth 2 new-info) new-params)
+              (setq info new-info)))))
+      info))
+
+  (defun my/ob-attach-default-file (orig-fn &optional arg info)
+    "Around advice for `org-babel-execute-src-block' to target attach dir."
+    (let ((info* (my/ob--maybe-rewrite-file-into-attach (or info (org-babel-get-src-block-info t)))))
+      (funcall orig-fn arg info*)))
+
+  (advice-add 'org-babel-execute-src-block :around #'my/ob-attach-default-file))
+
+
+;; a ugly workaround to make the display work
+
+(with-eval-after-load 'org
+  ;; Keep attachment links inlined (Org 9.7+)
+  (when (boundp 'org-link-image-types)
+    (dolist (ty '("attachment" "att"))
+      (add-to-list 'org-link-image-types ty)))
+
+  ;; Remove Doom's helper
+  (remove-hook 'org-babel-after-execute-hook
+               #'+org-redisplay-inline-images-in-babel-result-h)
+
+  ;; Region-scoped hard refresh for the just-executed block
+  (defun my/org-refresh-inline-images-in-result ()
+    "Hard refresh inline images only within the current block's results."
+    (unless (or (and (boundp 'org-export-current-backend) org-export-current-backend)
+                (string-match-p "^ \\*temp" (buffer-name)))
+      (save-excursion
+        (let* ((beg (org-babel-where-is-src-block-result))
+               (end (when beg
+                      (goto-char beg)
+                      (forward-line)                 ; move past #+RESULTS:
+                      (org-babel-result-end))))
+          (when (and beg end)
+            ;; Remove then re-display images only in [beg, end]
+            ;; (org-link-preview-clear beg end)
+            (org-link-preview-region t t beg end))))))
+
+  ;; Defer a tick so file writes/links settle, but only for the result region
+  (defun my/org-refresh-inline-images-after-babel ()
+    (run-at-time 0 nil #'my/org-refresh-inline-images-in-result))
+
+  (add-hook 'org-babel-after-execute-hook
+            #'my/org-refresh-inline-images-after-babel 'append))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; export to attach dir 
+(defun my/org--resolve-attach-dir (&optional at-file-level)
+  "Resolve attach directory, honoring :DIR: / :ATTACH_DIR: and org-attach.
+If AT-FILE-LEVEL is non-nil, pretend point is at the beginning of the buffer
+so file-level :PROPERTIES: are used."
   (require 'org) (require 'org-attach)
-  (let* ((prop-dir (or (org-entry-get-with-inheritance "DIR")
-                       (org-entry-get-with-inheritance "ATTACH_DIR")))
-         (abs-dir
-          (cond
-           (prop-dir
-            (if (file-name-absolute-p prop-dir)
-                (expand-file-name prop-dir)
-              (expand-file-name prop-dir
-                                (or (and (buffer-file-name)
-                                         (file-name-directory (buffer-file-name)))
-                                    default-directory))))
-           (t (or (org-attach-dir 'create)
-                  (user-error "Could not resolve an attach directory"))))))
-    (make-directory abs-dir 'parents)
-    abs-dir))
+  (org-with-wide-buffer
+    (save-excursion
+      (when at-file-level
+        (goto-char (point-min)))
+      (let* ((prop-dir (or (org-entry-get-with-inheritance "DIR")
+                           (org-entry-get-with-inheritance "ATTACH_DIR")))
+             (abs-dir
+              (cond
+               (prop-dir
+                (if (file-name-absolute-p prop-dir)
+                    (expand-file-name prop-dir)
+                  (expand-file-name prop-dir
+                                    (or (and (buffer-file-name)
+                                             (file-name-directory (buffer-file-name)))
+                                        default-directory))))
+               (t
+                ;; Fall back to org-attach at (possibly file-level) point
+                (or (org-attach-dir 'create)
+                    (user-error "Could not resolve an attach directory"))))))
+        (make-directory abs-dir 'parents)
+        abs-dir))))
 
 ;;;###autoload
 (defun my/org-export-pdf-to-attach-dir (&optional subtreep)
-  "Export current Org buffer (or SUBTREEP) to PDF into the attach dir at point.
-PDF is named after the Org file. Respects :DIR:/ :ATTACH_DIR: and org-attach."
+  "Export current Org buffer (or SUBTREEP) to PDF into the attach dir.
+PDF is named after the Org file. Respects file-level :DIR:/ :ATTACH_DIR: and org-attach."
   (interactive "P")
   (require 'org) (require 'org-attach) (require 'cl-lib)
-
   (unless (buffer-file-name)
     (user-error "This buffer isn't visiting a file; can't determine base name"))
 
-  (let* ((attach-dir (my/org--resolve-attach-dir))
+  ;; Use file-level resolution (pretend point is at BOL of the file)
+  (let* ((attach-dir (my/org--resolve-attach-dir t))
          (base       (file-name-base (buffer-file-name)))
-         ;; Targets we *want*:
-         (tex-target (expand-file-name (concat base ".tex") attach-dir))
          (pdf-target (expand-file-name (concat base ".pdf") attach-dir)))
-
+    (unless (file-directory-p attach-dir)
+      (make-directory attach-dir t))
     (let ((default-directory attach-dir))
       (cl-letf (((symbol-function 'org-export-output-file-name)
                  (lambda (ext &optional _subtreep pub-dir)
                    (expand-file-name (concat base ext)
                                      (or pub-dir attach-dir)))))
         (let* ((outfile (org-latex-export-to-pdf nil subtreep))
-               ;; Normalize the exporter’s return (can be relative):
                (src (when outfile
                       (if (file-name-absolute-p outfile)
                           (expand-file-name outfile)
                         (expand-file-name outfile default-directory))))
                (dst pdf-target))
-          ;; Relocate only if needed and safe.
-          (when (and src
-                     (not (string-equal src dst))
-                     (file-exists-p src))
-            (condition-case err
-                (progn
-                  (when (file-exists-p dst) (delete-file dst))
-                  (rename-file src dst t))
-              (file-error
-               ;; If rename fails (e.g., race or same file), fall back to copy.
-               (when (file-exists-p src)
-                 (copy-file src dst t t t)))))
+          (when (and src (not (string-equal src dst)) (file-exists-p src))
+            (condition-case _
+                (progn (when (file-exists-p dst) (delete-file dst))
+                       (rename-file src dst t))
+              (file-error (copy-file src dst t t t))))
           (message "Exported PDF → %s" dst)
           dst)))))

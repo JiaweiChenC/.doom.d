@@ -72,7 +72,7 @@
         "(provide 'org-version)\n"))))
   :pin nil)
 
-(unpin! auctex)
+(unpin! auctex evil-easymotion dirvish eglot)
 ;; (unpin! persp-mode)
  ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
  ;;         nerd-icons doom-snippets transient)
@@ -95,20 +95,19 @@
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
 (package! modus-themes)
 ;; (package! activities)
-(package! bookmark-in-project)
+;; (package! tabspaces)
+;; (package! bookmark-in-project)
 (package! mini-echo)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
 ;; (package! iscroll)
-(package! rainbow-csv
-  :recipe (:host github :repo "emacs-vs/rainbow-csv"))
 (package! breadcrumb
   :recipe (:host github :repo "joaotavora/breadcrumb"))
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-(package! ef-themes
-  :recipe (:host github :repo "JiaweiChenC/ef-themes"))
+;; (package! ef-themes
+;;   :recipe (:host github :repo "JiaweiChenC/ef-themes"))
 ;; (package! ef-themes)
 ;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
 (package! exec-path-from-shell)
@@ -140,10 +139,6 @@
   )
 ;; (package! org-inline-pdf)
 ;; (package! outline-indent)
-;; (package! grid-table
-;;   :recipe (:host github :repo "yibie/grid-table"))
-;; (package! overleaf)
-;; (package! webdriver)
 (package! atomic-chrome)
 ;;(package! reader
 ;;  :recipe (:host codeberg
@@ -152,3 +147,9 @@
 (package! ox-pandoc)
 ;; (package! evil-visual-mark-mode
   ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
+;; (package! zotxt)
+;; (package! minuet)
+(package! find-file-in-project)
+;; (package! mason)
+(package! tramp-hlo
+  :recipe (:host github :repo "jsadusk/tramp-hlo"))
