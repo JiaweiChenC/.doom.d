@@ -46,12 +46,20 @@ For each entry, we set up a dir-locals class that binds
 ;;; Doom project integration (unchanged logic)
 ;;; ---------------------------------------------------------------------------
 
-(defun jc/doom-project-root-from-dir-locals (orig-fun &rest args)
-  "If `jc/project-root` is set in this buffer, use it instead of auto-detection."
-  (if (and (bound-and-true-p jc/project-root)
-           (stringp jc/project-root))
-      jc/project-root
-    (apply orig-fun args)))
+(defun jc/doom-project-root-from-dir-locals (orig-fun &optional dir &rest _)
+  "If `jc/project-root` matches DIR (and DIR is remote), use it;
+else call ORIG-FUN."
+  (let* ((dir  (or dir default-directory))
+         (root (and (bound-and-true-p jc/project-root)
+                    (stringp jc/project-root)
+                    jc/project-root)))
+    (if (and root
+             (file-remote-p dir)
+             ;; Only override when DIR is really under our remote root
+             (string-prefix-p (file-name-as-directory root)
+                              (file-name-as-directory dir)))
+        root
+      (funcall orig-fun dir))))
 
 (advice-add #'doom-project-root :around #'jc/doom-project-root-from-dir-locals)
 
