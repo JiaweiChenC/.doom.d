@@ -71,7 +71,6 @@
 
 (setq org-roam-directory "~/Documents/roam/note/")
 
-(setq vterm-tramp-shells '(("ssh" "/usr/bin/zsh")))
 
 (setq org-agenda-files '("~/org/journal/"))
 (setq org-journal-enable-agenda-integration t)
@@ -167,8 +166,6 @@
         "C-M-y" #'zz/org-download-paste-clipboard)
   )
 
-(after! tramp
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 ;; (setq citar-org-roam-capture-template-key "z")
@@ -286,20 +283,6 @@
 
 (setq split-width-threshold nil)
 
-(defun my/switch-to-workspace-in-new-frame ()
-  "Prompt for an existing workspace, then open it in a new frame."
-  (interactive)
-  (let* ((workspaces (+workspace-list-names)) ; Get a list of existing workspace names
-         (workspace (completing-read "Select workspace: " workspaces))) ; Prompt to select
-    (let ((new-frame (make-frame))) ; Create a new frame
-      (select-frame-set-input-focus new-frame) ; Focus the new frame
-      (+workspace/switch-to workspace) ; Switch to the selected workspace in the new frame
-      (+workspace/display))) ; Display the workspace tab bar in the new frame
-  )
-
-;; map to space tab ,
-(map! :leader :desc "switch to workspace in new frame" "TAB ," #'my/switch-to-workspace-in-new-frame)
-
 (setq org-hide-macro-markers t)
 
 (defun my/citar-open-pdf ()
@@ -347,8 +330,8 @@
   (setq tab-bar-new-tab-choice t
         tab-bar-tab-name-truncated-max 20
         tab-bar-tab-hints t)
-  ;; (map! :n "]T" 'tab-bar-switch-to-next-tab)
-  ;; (map! :n "[T" 'tab-bar-switch-to-prev-tab)
+  (map! :n "]T" 'tab-bar-switch-to-next-tab)
+  (map! :n "[T" 'tab-bar-switch-to-prev-tab)
   )
 
 
@@ -421,9 +404,9 @@
 
 (setq! org-export-expand-links 'nil)
 
-(setq! bookmark-in-project-use-completion-ivy 'nil)
-(map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
-(map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
+;; (setq! bookmark-in-project-use-completion-ivy 'nil)
+;; (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
+;; (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
 
 
 (setq! vterm-timer-delay 0.01)
@@ -715,7 +698,7 @@
         '(black)))
 
 (map! :leader
-       :desc "recent dired" "r d" #'dirvish-history-jump)
+       :desc "recent dired" "r d" #'consult-dir)
 
 (after! flycheck
   (setq flycheck-indication-mode 'right-fringe)
@@ -726,7 +709,6 @@
       :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
       :fringe-face (intern (format "flycheck-fringe-%s" level)))))
 
-(setq enable-remote-dir-locals t)
 
 (use-package! mini-echo
   :config
@@ -1067,7 +1049,7 @@
 (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
 
 ;; map space return to bookmark project jump
-(map! :leader :desc "bookmark project jump" "RET" #'bookmark-in-project-jump)
+;; (map! :leader :desc "bookmark project jump" "RET" #'bookmark-in-project-jump)
 
 ;; dirvish bug
 ;; Fix Dirvish yank under Emacs 31 where built-in `all` clashes
@@ -1113,89 +1095,100 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
       :desc "Find file in src/"
       "p s" #'my/projectile-find-file-in-src)
 
-;; tramp trick 
-(setq vc-ignore-dir-regexp
-      (format "\\(%s\\)\\|\\(%s\\)"
-              vc-ignore-dir-regexp
-              tramp-file-name-regexp))
 
-;; (after! vterm
-;;   (set-popup-rule! "^\\*vterm:.*\\*$"
-;;     :size 0.4
-;;     :vslot -4
-;;     :select t
-;;     :quit t
-;;     :ttl nil) ;; keep buffer alive when popup closes
-;; )
+(after! vterm
+  (set-popup-rule! "^\\*vterm:.*\\*$"
+    :size 0.3
+    :vslot -4
+    :select t
+    :quit t
+    :ttl nil) ;; keep buffer alive when popup closes
+)
 
-;; (map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
+(map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
 
-;;   (defun jc/vterm-project-toggle ()
-;;     "Toggle a project-local vterm popup.
+  (defun jc/vterm-project-toggle ()
+    "Toggle a project-local vterm popup.
 
-;; One vterm per project root:
-;; - If it's visible, hide its window(s).
-;; - If it exists but is hidden, show it.
-;; - If it doesn't exist yet, create it at the project root."
-;;     (interactive)
-;;     (let* ((proj-root (or (doom-project-root) default-directory))
-;;            (proj-name (file-name-nondirectory (directory-file-name proj-root)))
-;;            (buf-name (format "*vterm:%s*" proj-name))
-;;            (buf      (get-buffer buf-name)))
-;;       (if (and buf (get-buffer-window buf t))
-;;           ;; Hide all windows showing this vterm
-;;           (dolist (win (get-buffer-window-list buf nil t))
-;;             (delete-window win))
-;;         ;; Otherwise create if needed and show it
-;;         (progn
-;;           (unless (buffer-live-p buf)
-;;             (let ((default-directory proj-root))
-;;               (setq buf (vterm buf-name)))
-;;             ;; make Doom treat it like a normal/real buffer
-;;             (with-current-buffer buf
-;;               (setq-local doom-real-buffer-p t)))
-;;           (pop-to-buffer buf)))))
-;; (use-package! pet
-;;   :config
-;;   (add-hook 'python-base-mode-hook 'pet-mode -10))
+One vterm per project root:
+- If it's visible, hide its window(s).
+- If it exists but is hidden, show it.
+- If it doesn't exist yet, create it at the project root."
+    (interactive)
+    (let* ((proj-root (or (doom-project-root) default-directory))
+           (proj-name (file-name-nondirectory (directory-file-name proj-root)))
+           (buf-name (format "*vterm:%s*" proj-name))
+           (buf      (get-buffer buf-name)))
+      (if (and buf (get-buffer-window buf t))
+          ;; Hide all windows showing this vterm
+          (dolist (win (get-buffer-window-list buf nil t))
+            (delete-window win))
+        ;; Otherwise create if needed and show it
+        (progn
+          (unless (buffer-live-p buf)
+            (let ((default-directory proj-root))
+              (setq buf (vterm buf-name)))
+            ;; make Doom treat it like a normal/real buffer
+            (with-current-buffer buf
+              (setq-local doom-real-buffer-p t)))
+          (pop-to-buffer buf)))))
 
 ;; map space a e to eglot
 (map! :leader :desc "eglot" "e e" #'eglot)
 
-(setq! tramp-verbose 2)
+;; In ~/.doom.d/config.el
+
+;; (let* ((rsync (assoc "rsync" tramp-methods))
+;;        (cell  (assoc 'tramp-remote-shell (cdr rsync))))
+;;   (when (and rsync cell)
+;;     ;; If it's a dotted pair (tramp-remote-shell . "/usr/bin/zsh"),
+;;     ;; convert it back to a proper list.
+;;     (unless (consp (cdr cell))
+;;       (setcdr cell (list (cdr cell))))   ;; now => (tramp-remote-shell "/usr/bin/zsh")
+;;     ;; Now you can safely change the shell path:
+;;     (setcar (cdr cell) "/usr/bin/zsh")))
+;; (with-eval-after-load 'tramp-sh
+;;   ;; Use zsh as remote shell for ssh to 100.105.242.51
+;;   ;; (add-to-list
+;;   ;;  'tramp-connection-properties
+;;   ;;  (list (regexp-quote "/ssh:100.105.242.51:")
+;;   ;;        "remote-shell" "/usr/bin/zsh"))
+
+;;   ;; And for rsync to the same host
 
 ;; temp fix for rsync dirvish 
 (after! dirvish
   ;; Just don’t use the magic 'all symbol; restrict to marked files only.
   (setq dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all))))
 
-;; In your config.el or eval it temporarily:
-(setq enable-remote-dir-locals nil)
+(defun cc/yank-markdown-as-org ()
+  "Yank Markdown text as Org.
+
+This command will convert Markdown text in the top of the `kill-ring'
+and convert it to Org using the pandoc utility."
+  (interactive)
+  (save-excursion
+    (with-temp-buffer
+      (yank)
+      (shell-command-on-region
+       (point-min) (point-max)
+       "pandoc -f markdown -t org --wrap=preserve" t t)
+      (kill-region (point-min) (point-max)))
+    (yank)))
 
 
-(with-eval-after-load 'projectile
-  ;; Only let Projectile touch its cache when we're local.
-  (defun jc/delete-file-projectile-remove-from-cache-no-remote
-      (orig-fun filename &optional trash)
-    "Disable Projectile's delete-file cache update on TRAMP."
-    (if (file-remote-p default-directory)
-        ;; On remote dirs: do nothing, just skip cache updates
-        nil
-      ;; On local dirs: behave exactly as Projectile intended
-      (funcall orig-fun filename trash)))
+;; map ] F to ns-next-frame
+(map! :n "] F" #'ns-next-frame)
+; map [ F to ns-previous-frame]
+(map! :n "[ F" #'ns-previous-frame)
 
-  (advice-add 'delete-file-projectile-remove-from-cache
-              :around #'jc/delete-file-projectile-remove-from-cache-no-remote))
 
-(after! diff-hl
-  (defun jc/diff-hl-disable-on-remote ()
-    (when (file-remote-p default-directory)
-      (diff-hl-mode -1)
-      (diff-hl-flydiff-mode -1)))
+;; tramp trick 
+(setq vc-ignore-dir-regexp
+      (format "\\(%s\\)\\|\\(%s\\)"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
 
-  ;; In case something else turns it on, we turn it back off for remote
-  (add-hook 'find-file-hook #'jc/diff-hl-disable-on-remote))
+(load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 
-(advice-add 'projectile-project-root :before-while
-  (lambda (&optional dir)
-    (not (file-remote-p (or dir default-directory)))))
+(setq enable-remote-dir-locals t)
