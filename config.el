@@ -709,11 +709,6 @@
       :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
       :fringe-face (intern (format "flycheck-fringe-%s" level)))))
 
-
-(use-package! mini-echo
-  :config
-  (mini-echo-mode 1))
-
 ;; eglot setttings
 (setq eglot-send-changes-idle-time 0.1)
 
@@ -726,12 +721,6 @@
         eglot-ignored-server-capabilities '(:inlayHintProvider)
         ))
 
-(after! eglot
-  ;; Don't start Eglot on remote (TRAMP) buffers
-  (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
-    :around #'eglot-ensure
-    (unless (file-remote-p default-directory)
-      (apply orig-fn args))))
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
@@ -1180,15 +1169,19 @@ and convert it to Org using the pandoc utility."
 ;; map ] F to ns-next-frame
 (map! :n "] F" #'ns-next-frame)
 ; map [ F to ns-previous-frame]
-(map! :n "[ F" #'ns-previous-frame)
+(map! :n "[ F" #'ns-prev-frame)
 
-
-;; tramp trick 
-(setq vc-ignore-dir-regexp
-      (format "\\(%s\\)\\|\\(%s\\)"
-              vc-ignore-dir-regexp
-              tramp-file-name-regexp))
-
+;; tramp trick
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
-
 (setq enable-remote-dir-locals t)
+
+(use-package! mini-echo
+  :config
+  (mini-echo-mode 1))
+
+(after! eglot
+  ;; Don't start Eglot on remote (TRAMP) buffers
+  (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
+    :around #'eglot-ensure
+    (unless (file-remote-p default-directory)
+      (apply orig-fn args))))
