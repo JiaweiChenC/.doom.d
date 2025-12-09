@@ -149,7 +149,7 @@
   ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
 ;; (package! zotxt)
 ;; (package! minuet)
-(package! find-file-in-project)
+;; (package! find-file-in-project)
 ;; (package! mason)
-(package! tramp-hlo
-  :recipe (:host github :repo "jsadusk/tramp-hlo"))
+;; (package! tramp-hlo
+  ;; :recipe (:host github :repo "jsadusk/tramp-hlo"))
