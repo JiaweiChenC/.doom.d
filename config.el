@@ -713,13 +713,11 @@
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! eglot
-  :hook ((python-mode python-ts-mode) . eglot-ensure)
   :config
   (setq eglot-events-buffer-config '(:size 0)
         eglot-report-progress nil
         eglot-extend-to-xref t
-        eglot-ignored-server-capabilities '(:inlayHintProvider)
-        ))
+        eglot-ignored-server-capabilities '(:inlayHintProvider)))
 
 
 (after! python
@@ -1034,7 +1032,7 @@
 (map! :leader :desc "dirvish side and follow" "o p" #'+dired/dirvish-side-and-follow)
 
 ;; Put this in your config.el
-(add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
+;; (add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
 (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
 
 ;; map space return to bookmark project jump
@@ -1179,9 +1177,43 @@ and convert it to Org using the pandoc utility."
   :config
   (mini-echo-mode 1))
 
-(after! eglot
-  ;; Don't start Eglot on remote (TRAMP) buffers
-  (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
-    :around #'eglot-ensure
-    (unless (file-remote-p default-directory)
-      (apply orig-fn args))))
+;; (after! eglot
+;;   ;; Don't start Eglot on remote (TRAMP) buffers
+;;   (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
+;;     :around #'eglot-ensure
+;;     (unless (file-remote-p default-directory)
+;;       (apply orig-fn args))))
+
+;; fix a quickrun bug
+(defun my-quickrun--insert-header-advice (process)
+  "Insert header to PROCESS buffer with correct default-directory."
+  (unless quickrun-output-only
+    (with-current-buffer (process-buffer process)
+      (let ((inhibit-read-only t)
+            (time (substring (current-time-string) 0 19))
+            ;; Get the actual execution directory
+            (exec-dir (or quickrun-option-default-directory
+                         (with-current-buffer quickrun--original-buffer
+                           default-directory))))
+        (goto-char (point-min))
+        ;; Remove the incorrect header line if it exists
+        (when (looking-at "-\\*-.*-\\*-\n")
+          (delete-region (point) (line-end-position 2)))
+        ;; Insert correct header
+        (insert "-*- mode: quickrun-; default-directory: \""
+                exec-dir
+                "\" -*-\n")))))
+
+;; Advice the function to run after it completes
+(with-eval-after-load 'quickrun
+  (advice-add 'quickrun--insert-header :after #'my-quickrun--insert-header-advice))
+
+
+(defun lsp! ()
+  "Dispatch to call the currently used lsp client entrypoint.
+Skip remote (TRAMP) buffers silently."
+  (unless (file-remote-p default-directory)
+    (when (require 'eglot nil t)
+      (if (eglot--lookup-mode major-mode)
+          (eglot-ensure)
+        (eglot--message "No client defined for %s" major-mode)))))
