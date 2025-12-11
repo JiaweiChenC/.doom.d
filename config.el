@@ -404,11 +404,6 @@
 
 (setq! org-export-expand-links 'nil)
 
-;; (setq! bookmark-in-project-use-completion-ivy 'nil)
-;; (map! :leader :desc "bookmark in project" "p m" #'bookmark-in-project-toggle)
-;; (map! :leader :desc "bookmark in project jump" "p j" #'bookmark-in-project-jump)
-
-
 (setq! vterm-timer-delay 0.01)
 
 ;; space t e to mini-echo-mode
@@ -1035,9 +1030,6 @@
 ;; (add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
 (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
 
-;; map space return to bookmark project jump
-;; (map! :leader :desc "bookmark project jump" "RET" #'bookmark-in-project-jump)
-
 ;; dirvish bug
 ;; Fix Dirvish yank under Emacs 31 where built-in `all` clashes
 (with-eval-after-load 'dirvish
@@ -1123,26 +1115,6 @@ One vterm per project root:
 ;; map space a e to eglot
 (map! :leader :desc "eglot" "e e" #'eglot)
 
-;; In ~/.doom.d/config.el
-
-;; (let* ((rsync (assoc "rsync" tramp-methods))
-;;        (cell  (assoc 'tramp-remote-shell (cdr rsync))))
-;;   (when (and rsync cell)
-;;     ;; If it's a dotted pair (tramp-remote-shell . "/usr/bin/zsh"),
-;;     ;; convert it back to a proper list.
-;;     (unless (consp (cdr cell))
-;;       (setcdr cell (list (cdr cell))))   ;; now => (tramp-remote-shell "/usr/bin/zsh")
-;;     ;; Now you can safely change the shell path:
-;;     (setcar (cdr cell) "/usr/bin/zsh")))
-;; (with-eval-after-load 'tramp-sh
-;;   ;; Use zsh as remote shell for ssh to 100.105.242.51
-;;   ;; (add-to-list
-;;   ;;  'tramp-connection-properties
-;;   ;;  (list (regexp-quote "/ssh:100.105.242.51:")
-;;   ;;        "remote-shell" "/usr/bin/zsh"))
-
-;;   ;; And for rsync to the same host
-
 ;; temp fix for rsync dirvish 
 (after! dirvish
   ;; Just don’t use the magic 'all symbol; restrict to marked files only.
@@ -1176,13 +1148,6 @@ and convert it to Org using the pandoc utility."
 (use-package! mini-echo
   :config
   (mini-echo-mode 1))
-
-;; (after! eglot
-;;   ;; Don't start Eglot on remote (TRAMP) buffers
-;;   (defadvice! my/eglot-skip-remote-a (orig-fn &rest args)
-;;     :around #'eglot-ensure
-;;     (unless (file-remote-p default-directory)
-;;       (apply orig-fn args))))
 
 ;; fix a quickrun bug
 (defun my-quickrun--insert-header-advice (process)
@@ -1218,6 +1183,16 @@ Skip remote (TRAMP) buffers silently."
           (eglot-ensure)
         (eglot--message "No client defined for %s" major-mode)))))
 
-;; add scpx login in to vterm tramp shells 
-(after! vterm
-  (add-to-list 'vterm-tramp-shells '("scpx" login-shell) t))
+
+(use-package! projectile
+  :config
+  (defun projectile-find-file-hook-function ()
+    "Called by `find-file-hook' when `projectile-mode' is on.
+This version also runs fully on remote files."
+    (projectile-maybe-limit-project-file-buffers)
+    (when projectile-dynamic-mode-line
+      (projectile-update-mode-line))
+    (when projectile-auto-update-cache
+      (projectile-cache-files-find-file-hook))
+    (projectile-track-known-projects-find-file-hook)
+    (projectile-visit-project-tags-table)))
