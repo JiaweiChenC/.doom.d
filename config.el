@@ -1217,3 +1217,7 @@ Skip remote (TRAMP) buffers silently."
       (if (eglot--lookup-mode major-mode)
           (eglot-ensure)
         (eglot--message "No client defined for %s" major-mode)))))
+
+;; add scpx login in to vterm tramp shells 
+(after! vterm
+  (add-to-list 'vterm-tramp-shells '("scpx" login-shell) t))
