@@ -60,16 +60,16 @@ the buffer is remote; otherwise return it as-is.  Return nil if unset."
 ;; Multiple remote servers: dir-locals registration
 ;;---------------------------------------------------------------------------
 
-(defvar jc/remote-project-specs
-  '(("/scpx:100.105.242.51:"
-     ;; "/home/jiawei/projects/GVHMR/"
-     ;; "/home/jiawei/projects/SKEL/"
-     ;; "/home/jiawei/projects/HSMR/"
-     ))
-  "List of remote project specs.
+;; (defvar jc/remote-project-specs
+;;   '(("/scpx:100.105.242.51:"
+;;      ;; "/home/jiawei/projects/GVHMR/"
+;;      ;; "/home/jiawei/projects/SKEL/"
+;;      ;; "/home/jiawei/projects/HSMR/"
+;;      ))
+;;   "List of remote project specs.
 
-Each element is a list: (TRAMP-PREFIX ROOT1 ROOT2 ...), where ROOT*
-are host-local directories on that server (no TRAMP prefix).")
+;; Each element is a list: (TRAMP-PREFIX ROOT1 ROOT2 ...), where ROOT*
+;; are host-local directories on that server (no TRAMP prefix).")
 
 ;; (defun jc/register-remote-project-roots ()
 ;;   "Create dir-locals classes for all `jc/remote-project-specs'.
@@ -160,40 +160,20 @@ On local files, defer to ORIG-FN."
 ;; mini-echo integration
 ;;---------------------------------------------------------------------------
 
-(defun jc/mini-echo-project-root ()
-  "Project root for mini-echo, consistent with `jc/project-root' / Doom."
-  (or
-   ;; Explicit override for remote/local via jc/project-root-local.
-   (jc/project-root)
-   ;; Doom's project root (already advised to use jc/project-root on remote).
-   (when (fboundp 'doom-project-root)
-     (doom-project-root))
-   ;; Last fallback: just use the current directory.
-   (file-name-as-directory
-    (directory-file-name default-directory))))
+;; (defun jc/mini-echo-project-root ()
+;;   "Project root for mini-echo, consistent with `jc/project-root' / Doom."
+;;   (or
+;;    ;; Explicit override for remote/local via jc/project-root-local.
+;;    (jc/project-root)
+;;    ;; Doom's project root (already advised to use jc/project-root on remote).
+;;    (when (fboundp 'doom-project-root)
+;;      (doom-project-root))
+;;    ;; Last fallback: just use the current directory.
+;;    (file-name-as-directory
+;;     (directory-file-name default-directory))))
 
-(setq mini-echo-project-detection #'jc/mini-echo-project-root)
-
-;; (provide 'tramp_optim)
-;;; tramp_optim.el ends here
-
+;; (setq mini-echo-project-detection #'jc/mini-echo-project-root)
 
 ;; add scpx login in to vterm tramp shells 
 (after! vterm
   (add-to-list 'vterm-tramp-shells '("scpx" login-shell) t))
-
-;; enable cache udpating on remote, we will see whether is is a performance issue
-(after! projectile
-  (defun jc/projectile-find-file-hook-function ()
-    "Like `projectile-find-file-hook-function' but also for remote files."
-    (projectile-maybe-limit-project-file-buffers)
-    (when projectile-dynamic-mode-line
-      (projectile-update-mode-line))
-    (when projectile-auto-update-cache
-      (projectile-cache-files-find-file-hook))
-    (projectile-track-known-projects-find-file-hook)
-    (projectile-visit-project-tags-table))
-
-  ;; Replace Projectile’s version with ours
-  (remove-hook 'find-file-hook #'projectile-find-file-hook-function)
-  (add-hook 'find-file-hook #'jc/projectile-find-file-hook-function))
