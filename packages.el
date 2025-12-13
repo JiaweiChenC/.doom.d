@@ -72,7 +72,7 @@
         "(provide 'org-version)\n"))))
   :pin nil)
 
-(unpin! auctex evil-easymotion dirvish eglot)
+(unpin! auctex evil-easymotion dirvish eglot quickrun)
 ;; (unpin! persp-mode)
  ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
  ;;         nerd-icons doom-snippets transient)
@@ -153,3 +153,7 @@
 ;; (package! mason)
 ;; (package! tramp-hlo
   ;; :recipe (:host github :repo "jsadusk/tramp-hlo"))
+;; (package! zlua
+;;   :recipe (:host github
+;;            :repo "Kinneyzhang/zlua"
+;;            :files ("*.el" "z.lua")))
