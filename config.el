@@ -231,7 +231,6 @@
 (add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
 (add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
 
-(setq projectile-indexing-method 'alien)
 
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
@@ -717,6 +716,7 @@
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
+    '("rass" "python")
     '("basedpyright-langserver" "--stdio")
     '("pyright-langserver" "--stdio")
     '("pyright" "--stdio")
@@ -1113,7 +1113,7 @@ One vterm per project root:
           (pop-to-buffer buf)))))
 
 ;; map space a e to eglot
-(map! :leader :desc "eglot" "e e" #'eglot)
+;; (map! :leader :desc "eglot" "e e" #'eglot)
 
 ;; temp fix for rsync dirvish 
 (after! dirvish
@@ -1186,6 +1186,7 @@ Skip remote (TRAMP) buffers silently."
 
 (use-package! projectile
   :config
+  (setq projectile-indexing-method 'alien)
   (defun projectile-find-file-hook-function ()
     "Called by `find-file-hook' when `projectile-mode' is on.
 This version also runs fully on remote files."
@@ -1196,3 +1197,30 @@ This version also runs fully on remote files."
       (projectile-cache-files-find-file-hook))
     (projectile-track-known-projects-find-file-hook)
     (projectile-visit-project-tags-table)))
+
+;; consut dir using zlua 
+(use-package! consult-dir
+    :init
+    (setq consult-dir-default-command #'consult-dir-dired)
+    :config
+    (defvar consult-dir--source-zlua
+      `(:name     "Zlua Dir"
+        :narrow   ?z
+        :category file
+        :face     consult-file
+        :history  file-name-history
+        :enabled  ,(lambda () (getenv "ZLUA_SCRIPT"))
+        :items
+        ,(lambda ()
+           (nreverse (mapcar
+                      (lambda (p) (abbreviate-file-name (file-name-as-directory p)))
+                      ;; REQUIRE export `ZLUA_SCRIPT' in parent-shell
+                      (split-string (shell-command-to-string
+                                     "lua $ZLUA_SCRIPT -l | perl -lane 'print $F[1]'")
+                                    "\n" t)))))
+      "Zlua directory source for `consult-dir'.")
+    (add-to-list 'consult-dir-sources 'consult-dir--source-zlua))
+
+(after! tramp-sh
+  (setq! tramp-default-remote-shell "/bin/zsh"))
+
