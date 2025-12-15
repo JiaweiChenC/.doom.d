@@ -34,3 +34,19 @@
 ;;        :desc "Add to Quickrun Bookmarks" "r a" #'add-to-quickrun-bookmarks
 ;;        :desc "Run Quickrun Bookmark" "r b" #'run-bookmarked-file-with-quickrun
 ;;        :desc "Delete Quickrun Bookmark" "r d" #'delete-quickrun-bookmark)
+
+
+(make-variable-buffer-local 'quickrun--with-arg--history)
+
+(defun quickrun-with-arg (arg)
+  "Run QuickRun for current buffer with extra ARG."
+  (interactive
+   (list (completing-read "QuickRun Arg: "
+                          quickrun--with-arg--history
+                          nil nil nil
+                          'quickrun--with-arg--history)))
+  (setq-local quickrun-option-args arg)
+  (quickrun))
+
+;; mape quickrun with arg to space r a
+(map! :leader :desc "Quickrun with Arg" "r a" #'quickrun-with-arg)
