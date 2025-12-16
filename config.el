@@ -371,7 +371,6 @@
   (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
-  ;; (load! (expand-file-name "lib-gptel" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
 
@@ -667,9 +666,6 @@
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
 
-;; (map! :n "m" #'point-to-register)
-;; (map! :n "`" #'jump-to-register)
-
 (setq avy-keys (append (number-sequence ?a ?z)))
 
 (defvar-local my/project-todo-file nil
@@ -679,7 +675,7 @@
 (map! :leader :desc "Open project TODO" "p t" #'my/project-todo)
 
 (set-popup-rule!
-"^\\*jupyter-outyut\\*$"
+"^\\*jupyter-output\\*$"
 :side 'bottom
 :size 0.2
 :select t
@@ -914,15 +910,15 @@
       (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
 
-(use-package! atomic-chrome
-  :config
-  (setq atomic-chrome-url-major-mode-alist
-      '(("github\\.com" . gfm-mode)
-        ("redmine" . textile-mode)
-        ("overleaf.com" . LaTeX-mode)
-        ))
-  (setq! atomic-chrome-buffer-open-style 'full)
-  )
+;; (use-package! atomic-chrome
+;;   :config
+;;   (setq atomic-chrome-url-major-mode-alist
+;;       '(("github\\.com" . gfm-mode)
+;;         ("redmine" . textile-mode)
+;;         ("overleaf.com" . LaTeX-mode)
+;;         ))
+;;   (setq! atomic-chrome-buffer-open-style 'full)
+;;   
 
 (setq! org-attach-dir-relative 't)
 
@@ -1112,9 +1108,6 @@ One vterm per project root:
               (setq-local doom-real-buffer-p t)))
           (pop-to-buffer buf)))))
 
-;; map space a e to eglot
-;; (map! :leader :desc "eglot" "e e" #'eglot)
-
 ;; temp fix for rsync dirvish 
 (after! dirvish
   ;; Just don’t use the magic 'all symbol; restrict to marked files only.
@@ -1219,8 +1212,17 @@ This version also runs fully on remote files."
                                      "lua $ZLUA_SCRIPT -l | perl -lane 'print $F[1]'")
                                     "\n" t)))))
       "Zlua directory source for `consult-dir'.")
-    (add-to-list 'consult-dir-sources 'consult-dir--source-zlua))
+    (add-to-list 'consult-dir-sources 'consult-dir--source-zlua t))
 
 (after! tramp-sh
   (setq! tramp-default-remote-shell "/bin/zsh"))
 
+
+;; do not move when hl 
+(defun jc/evil-hl-word-under-cursor ()
+  "Like Vim's *, but only set/search-highlight the word under cursor; don't move point."
+  (interactive)
+  (save-excursion
+    (evil-ex-search-word-forward 1)))
+
+(map! :n "*" #'jc/evil-hl-word-under-cursor)
