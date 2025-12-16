@@ -208,3 +208,76 @@ links to Org-mode links and paste it at the end of the buffer."
                          :follow #'my/org-delete-link-follow
                          :export #'my/org-delete-link-export
                          :face 'my/org-delete-link-face)
+
+(defvar org-latexmk--last-comp-buf nil
+  "Last latexmk compilation buffer used by `org-compile-latex-and-close-latexmk'.")
+
+(defun org-compile-latex-and-close-latexmk (&optional open-pdf)
+  "Export current Org buffer to LaTeX, then compile via latexmk (async).
+
+- Does NOT pop up the compilation buffer.
+- Silences Org export 'Wrote ...' messages.
+- When finished successfully, prints: \"PDF exported: ...\".
+If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
+  (interactive "P")
+  (require 'subr-x)
+
+  (let* ((org-buf (current-buffer))
+         (texfile (let ((inhibit-message t)
+                        (message-log-max nil))
+                    (org-latex-export-to-latex nil nil nil t nil))))
+    (when texfile
+      (let* ((texdir (file-name-directory texfile))
+             (master-name (or (and (boundp 'TeX-master)
+                                   (stringp TeX-master)
+                                   (not (string-empty-p TeX-master))
+                                   TeX-master)
+                              "main.tex"))
+             (master (cond
+                      ((file-name-absolute-p master-name) master-name)
+                      ((file-exists-p (expand-file-name master-name texdir))
+                       (expand-file-name master-name texdir))
+                      ((file-exists-p (expand-file-name master-name default-directory))
+                       (expand-file-name master-name default-directory))
+                      (t (expand-file-name master-name texdir))))
+             (pdffile (concat (file-name-sans-extension master) ".pdf"))
+             (comp-buf-name (format "*latexmk: %s*"
+                                    (file-name-nondirectory master)))
+             ;; IMPORTANT: run latexmk in the directory where master lives
+             (default-directory (file-name-directory master)))
+
+        ;; Kill the exported .tex buffer (same as your original)
+        (when-let ((tex-buf (get-file-buffer texfile)))
+          (kill-buffer tex-buf))
+
+        ;; Create/clear compilation buffer, but don't display it
+        (setq org-latexmk--last-comp-buf (get-buffer-create comp-buf-name))
+        (with-current-buffer org-latexmk--last-comp-buf
+          (let ((inhibit-read-only t))
+            (erase-buffer))
+          (compilation-mode))
+
+        ;; Start latexmk async
+        (let* ((cmd (format "latexmk -pdf -interaction=nonstopmode %s"
+                            (shell-quote-argument (file-name-nondirectory master))))
+               (proc (start-process-shell-command "latexmk"
+                                                  org-latexmk--last-comp-buf
+                                                  cmd)))
+          (set-process-sentinel
+           proc
+           (lambda (p _event)
+             (when (memq (process-status p) '(exit signal))
+               (if (= (process-exit-status p) 0)
+                   (progn
+                     (when (file-exists-p pdffile)
+                       (message "PDF exported: %s" (abbreviate-file-name pdffile))
+                       (when open-pdf
+                         (org-open-file pdffile))))
+                 (message "latexmk failed (see buffer %s)"
+                          (buffer-name org-latexmk--last-comp-buf)))))))
+
+        ;; Return to Org buffer (no compilation popup)
+        (when (buffer-live-p org-buf)
+          (pop-to-buffer org-buf))
+
+        pdffile))))
