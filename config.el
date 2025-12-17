@@ -712,6 +712,7 @@
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
+    `("ty" "server")
     '("rass" "python")
     '("basedpyright-langserver" "--stdio")
     '("pyright-langserver" "--stdio")
