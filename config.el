@@ -1241,3 +1241,26 @@ This version also runs fully on remote files."
   :config
   (global-javelin-minor-mode 1))
 
+(after! consult
+  (defun my/consult-tmux-session ()
+    "Pick a tmux session with Consult and switch/attach to it (by name)."
+    (interactive)
+    (require 'consult)
+    (let* ((sessions (+tmux-list-sessions))
+           (cands
+            (mapcar (lambda (s)
+                      (let* ((name (plist-get (cdr s) :name))
+                             (attached (plist-get (cdr s) :attached))
+                             (label (format "%s%s" name (if attached "  (attached)" ""))))
+                        (cons label name)))
+                    sessions))
+           (choice (consult--read (mapcar #'car cands)
+                                  :prompt "tmux session: "
+                                  :sort nil
+                                  :require-match t)))
+      (when choice
+        (let ((name (cdr (assoc choice cands))))
+          (condition-case _
+              (+tmux (format "switch-client -t %s" (shell-quote-argument name)))
+            (error
+             (+tmux (format "attach-session -t %s" (shell-quote-argument name))))))))))
