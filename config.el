@@ -607,7 +607,7 @@
   (plist-put org-latex-preview-appearance-options
              :scale 2.0)
   (plist-put org-latex-preview-appearance-options
-             :zoom 1.2)
+             :zoom 1.1)
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
   (setq org-latex-preview-mode-ignored-commands
@@ -1221,9 +1221,23 @@ This version also runs fully on remote files."
 
 ;; do not move when hl 
 (defun jc/evil-hl-word-under-cursor ()
-  "Like Vim's *, but only set/search-highlight the word under cursor; don't move point."
+  "Like Vim's *, but only set/search-highlight
+    the word under cursor; don't move point."
   (interactive)
   (save-excursion
     (evil-ex-search-word-forward 1)))
 
 (map! :n "*" #'jc/evil-hl-word-under-cursor)
+
+;; map space tab to projectile-switch-to-buffer
+(map! :leader :desc "projectile switch to buffer" "TAB" #'projectile-switch-to-buffer)
+
+(use-package! dirvish
+  :config
+  (setq! dired-kill-when-opening-new-dired-buffer t)
+  )
+
+(use-package! javelin
+  :config
+  (global-javelin-minor-mode 1))
+
