@@ -258,7 +258,7 @@ If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
           (compilation-mode))
 
         ;; Start latexmk async
-        (let* ((cmd (format "latexmk -pdf -interaction=nonstopmode %s"
+        (let* ((cmd (format "latexmk -pdf -synctex=1 -interaction=nonstopmode %s"
                             (shell-quote-argument (file-name-nondirectory master))))
                (proc (start-process-shell-command "latexmk"
                                                   org-latexmk--last-comp-buf
@@ -281,3 +281,5 @@ If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
           (pop-to-buffer org-buf))
 
         pdffile))))
+
+(map! :leader :desc "compile latex" "l c" #'org-compile-latex-and-close-latexmk)

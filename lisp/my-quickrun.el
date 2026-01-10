@@ -36,6 +36,7 @@
 ;;        :desc "Delete Quickrun Bookmark" "r d" #'delete-quickrun-bookmark)
 
 
+(after! quickrun
 (make-variable-buffer-local 'quickrun--with-arg--history)
 
 (defun quickrun-with-arg (arg)
@@ -49,4 +50,4 @@
   (quickrun))
 
 ;; mape quickrun with arg to space r a
-(map! :leader :desc "Quickrun with Arg" "r a" #'quickrun-with-arg)
+(map! :leader :desc "Quickrun with Arg" "r a" #'quickrun-with-arg))

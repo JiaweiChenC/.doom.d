@@ -140,7 +140,7 @@ Supports Org mode (including attachment links), Dired, and image buffers."
 
 (map! :leader
       :desc "Open project file externally"
-      "e E" #'open-project-file-externally)
+      "e e" #'open-project-file-externally)
 
 ;; (defun update-breadcrumb-mode-based-on-window-count ()
 ;;   "Toggle breadcrumb-mode based on the number of visible windows."
