@@ -1264,3 +1264,5 @@ This version also runs fully on remote files."
               (+tmux (format "switch-client -t %s" (shell-quote-argument name)))
             (error
              (+tmux (format "attach-session -t %s" (shell-quote-argument name))))))))))
+
+(setq! diff-refine 'navigation)
