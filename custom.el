@@ -5,7 +5,15 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("fb232a8ae1311f1b8acecb1f766880d12d7a01b7d8d547e7c09325a074a31237"
+   '("5382c626e8bd3d37b528793185dab2ad72d1ff55dca42fd40dae0461c4f21a3f"
+     "a23295788e507947c48684e48a55cc2387b853e440dc75c985e47bbb7ea30630"
+     "aad7fd3672aad03901bf91e338cd530b87efc2162697a6bef79d7f8281fd97e3"
+     "83a2b638aa06eb69b904275482d2b2e7217d674068227c3a91fd48022d2240ca"
+     "837498bc2e586e1ffc0951db4db0dc615b4ade7b51d7c6a8b6ce366b60aeb199"
+     "49d83bb6551043b13c34f6047fa2783d3ac7e6396417885f1e586d4cbab9a4fb"
+     "cc866bcd9fe622c3888cd2d9745cda2479b6ca4e7d5f26469e5bcb5fc9573303"
+     "f09f3703fe9003d47ee9b297c3577d68578708d72bb15b07779c7b5d808eb3ed"
+     "fb232a8ae1311f1b8acecb1f766880d12d7a01b7d8d547e7c09325a074a31237"
      "3799f9b2e997c7cf7d1a5d9846095c8976bce96852eda40d8bf9248157c2615f"
      "f9575ecd8da2a02c114e427f2ebb49ffee94285c5963f33a0abf357c5a33a1d9"
      "a653d827813de11c7416eaebe9b5cf5700ec272296a89b67dd37650dca8b7dfc"
@@ -31,11 +39,15 @@
      "69a25b1d88aad37bb3a7c311a4a648772fa794a8ab4c1fa69b9455112e536449"
      "a8347c492511ecc002df26d2b268f1342d84af50c43901e0d88dd678134729d8"
      "cfc1e49eec0d57e2f70ef3a6db3b543bbb2edcf16a9f164231afcc4d1263f9fb" default))
- '(org-agenda-files '("/Users/jiawei/org/journal/20251201"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20260101"))
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen with-editor))
  '(safe-local-variable-directories
-   '("/scpx:100.105.242.51:/home/jiawei/projects/SKEL/"
+   '("/Users/jiawei/Projects/stepping_task/"
+     "/ssh:100.105.242.51:/home/jiawei/projects/SKEL/"
+     "/Users/jiawei/Projects/weight_lifting/"
+     "/rsync:100.105.242.51:/home/jiawei/projects/SKEL/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/SKEL/"
      "/ssh:100.105.242.51:/home/jiawei/projects/GVHMR/"
      "/rsync:100.105.242.51:/home/jiawei/projects/GVHMR/"
      "/scpx:100.105.242.51:/home/jiawei/projects/GVHMR/"
@@ -72,5 +84,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(diff-refine-added ((t (:background "#8fd6b7" :foreground "#286983"))))
  '(mini-echo-yellow ((t (:foreground "DarkGoldenrod3")))))
 ;; (put 'scroll-left 'disabled nil)
