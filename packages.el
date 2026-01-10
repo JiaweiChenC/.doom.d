@@ -72,11 +72,11 @@
         "(provide 'org-version)\n"))))
   :pin nil)
 
-(unpin! auctex evil-easymotion dirvish eglot quickrun)
+(unpin! auctex evil-easymotion dirvish quickrun)
 ;; (unpin! persp-mode)
  ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
  ;;         nerd-icons doom-snippets transient)
-(unpin! org)
+(unpin! org diff-hl)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -120,8 +120,8 @@
 (unpin! evil-nerd-commenter)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
-(package! uv
-  :recipe (:host github :repo "johannes-mueller/uv.el"))
+;; (package! uv
+;;   :recipe (:host github :repo "johannes-mueller/uv.el"))
 ;; (package! lsp-treemacs)
 ;; (package! flash.emacs
 ;;   :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
@@ -139,7 +139,7 @@
   )
 ;; (package! org-inline-pdf)
 ;; (package! outline-indent)
-(package! atomic-chrome)
+;; (package! atomic-chrome)
 ;;(package! reader
 ;;  :recipe (:host codeberg
 ;;           :repo "divyaranjan/emacs-reader"))
@@ -157,3 +157,15 @@
 ;;   :recipe (:host github
 ;;            :repo "Kinneyzhang/zlua"
 ;;            :files ("*.el" "z.lua")))
+
+(package! javelin)
+(package! org-sliced-images)
+  ;; :recipe (:host github :repo "ringawho/org-sliced-images"))
+;; (package! iscroll)
+(package! evil-easymotion
+  :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
+
+(package! diff-hl
+  :recipe (:host github
+           :repo "JiaweiChenC/diff-hl"
+           :branch "feature/show-hunk-refine"))
