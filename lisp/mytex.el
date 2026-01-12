@@ -248,7 +248,7 @@ If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
 
         ;; Kill the exported .tex buffer (same as your original)
         (when-let ((tex-buf (get-file-buffer texfile)))
-          (kill-buffer tex-buf))
+          (bury-buffer tex-buf))
 
         ;; Create/clear compilation buffer, but don't display it
         (setq org-latexmk--last-comp-buf (get-buffer-create comp-buf-name))

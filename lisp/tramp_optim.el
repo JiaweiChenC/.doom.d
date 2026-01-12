@@ -177,3 +177,6 @@ On local files, defer to ORIG-FN."
 ;; add scpx login in to vterm tramp shells 
 (after! vterm
   (add-to-list 'vterm-tramp-shells '("scpx" login-shell) t))
+
+(after! tramp
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
