@@ -159,8 +159,8 @@
 ;;            :files ("*.el" "z.lua")))
 
 (package! javelin)
-(package! org-sliced-images)
-  ;; :recipe (:host github :repo "ringawho/org-sliced-images"))
+(package! org-sliced-images
+  :recipe (:host github :repo "ringawho/org-sliced-images"))
 ;; (package! iscroll)
 (package! evil-easymotion
   :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
