@@ -1291,3 +1291,15 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 (after! evil
   (define-key evil-normal-state-map (kbd "j") #'next-line)
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
+
+;; (add-to-list 'load-path "/Users/jiawei/Projects/Playground/emacs-tramp-rpc/lisp")
+; (require 'tramp-rpc)
+    
+(use-package! mini-echo
+  :config
+  (mini-echo-mode 1))
+
+;; (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
+
+;; continuous scrolling for pdf 
+(add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
