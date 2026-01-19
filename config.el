@@ -24,7 +24,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'ef-rose-pine-dawn
-;; (setq doom-theme 'doom-one
+      ;; (setq doom-theme 'doom-one
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -371,6 +371,7 @@
   (load! (expand-file-name "skim.el" "~/.doom.d/lisp/"))
   (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "org-sliced-image-fix.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
@@ -604,11 +605,7 @@
   :hook (org-mode . org-latex-preview-mode)
   :config
   ;; Increase preview width
-  (plist-put org-latex-preview-appearance-options :page-width 1.0)
-  (plist-put org-latex-preview-appearance-options
-             :scale 2.0)
-  (plist-put org-latex-preview-appearance-options
-             :zoom 1.2)
+  (plist-put org-latex-preview-appearance-options :page-width 0.8)
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
   (setq org-latex-preview-mode-ignored-commands
@@ -616,7 +613,7 @@
 
   ;; ;; Enable consistent equation numbering
   (setq org-latex-preview-numbered t)
-                              
+  
   (setq org-latex-preview-mode-display-live t)
 
   ;; More immediate live-previews -- the default delay is 1 second
@@ -676,12 +673,12 @@
 (map! :leader :desc "Open project TODO" "p t" #'my/project-todo)
 
 (set-popup-rule!
-"^\\*jupyter-output\\*$"
-:side 'bottom
-:size 0.2
-:select t
-:quit t
-:ttl nil)
+  "^\\*jupyter-output\\*$"
+  :side 'bottom
+  :size 0.2
+  :select t
+  :quit t
+  :ttl nil)
 
 (use-package! apheleia
   :config
@@ -689,7 +686,7 @@
         '(black)))
 
 (map! :leader
-       :desc "recent dired" "r d" #'consult-dir)
+      :desc "recent dired" "r d" #'consult-dir)
 
 (after! flycheck
   (setq flycheck-indication-mode 'right-fringe)
@@ -944,7 +941,6 @@
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
 (setq! org-startup-with-latex-preview 't)
-(setq! org-startup-with-inline-images 't)
 
 ;; config.el
 (use-package! evil-visual-mark-mode
@@ -988,13 +984,13 @@
   )
 
 (add-hook! '+popup-buffer-mode
-  ;; only adjust when we really are in a popup window
-  (when (+popup-window-p)
-    (set-window-margins (selected-window) 2 2)
-    ;; optional: make the change buffer-local & refresh
-    (setq-local left-margin-width 2
-                right-margin-width 2)
-    (set-window-buffer (selected-window) (current-buffer))))
+           ;; only adjust when we really are in a popup window
+           (when (+popup-window-p)
+             (set-window-margins (selected-window) 2 2)
+             ;; optional: make the change buffer-local & refresh
+             (setq-local left-margin-width 2
+                         right-margin-width 2)
+             (set-window-buffer (selected-window) (current-buffer))))
 
 (defun my/project-todo ()
   "Open the TODO.org file for the current project in a popup with a unique name."
@@ -1003,8 +999,8 @@
          (todo-file my/project-todo-file)
          (buf-name (format "*TODO:%s*" project-name)))
     (set-popup-rule!
-     (format "^\\*TODO:%s\\*$" (regexp-quote project-name))
-     :side 'right :size 0.4 :select t :quit 'current :ttl 0 :autosave t)
+      (format "^\\*TODO:%s\\*$" (regexp-quote project-name))
+      :side 'right :size 0.4 :select t :quit 'current :ttl 0 :autosave t)
     (let ((buf (find-file-noselect todo-file)))
       (with-current-buffer buf
         (rename-buffer buf-name t))
@@ -1080,35 +1076,35 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
     :select t
     :quit t
     :ttl nil) ;; keep buffer alive when popup closes
-)
+  )
 
 (map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
 
-  (defun jc/vterm-project-toggle ()
-    "Toggle a project-local vterm popup.
+(defun jc/vterm-project-toggle ()
+  "Toggle a project-local vterm popup.
 
 One vterm per project root:
 - If it's visible, hide its window(s).
 - If it exists but is hidden, show it.
 - If it doesn't exist yet, create it at the project root."
-    (interactive)
-    (let* ((proj-root (or (doom-project-root) default-directory))
-           (proj-name (file-name-nondirectory (directory-file-name proj-root)))
-           (buf-name (format "*vterm:%s*" proj-name))
-           (buf      (get-buffer buf-name)))
-      (if (and buf (get-buffer-window buf t))
-          ;; Hide all windows showing this vterm
-          (dolist (win (get-buffer-window-list buf nil t))
-            (delete-window win))
-        ;; Otherwise create if needed and show it
-        (progn
-          (unless (buffer-live-p buf)
-            (let ((default-directory proj-root))
-              (setq buf (vterm buf-name)))
-            ;; make Doom treat it like a normal/real buffer
-            (with-current-buffer buf
-              (setq-local doom-real-buffer-p t)))
-          (pop-to-buffer buf)))))
+  (interactive)
+  (let* ((proj-root (or (doom-project-root) default-directory))
+         (proj-name (file-name-nondirectory (directory-file-name proj-root)))
+         (buf-name (format "*vterm:%s*" proj-name))
+         (buf      (get-buffer buf-name)))
+    (if (and buf (get-buffer-window buf t))
+        ;; Hide all windows showing this vterm
+        (dolist (win (get-buffer-window-list buf nil t))
+          (delete-window win))
+      ;; Otherwise create if needed and show it
+      (progn
+        (unless (buffer-live-p buf)
+          (let ((default-directory proj-root))
+            (setq buf (vterm buf-name)))
+          ;; make Doom treat it like a normal/real buffer
+          (with-current-buffer buf
+            (setq-local doom-real-buffer-p t)))
+        (pop-to-buffer buf)))))
 
 ;; temp fix for rsync dirvish 
 (after! dirvish
@@ -1133,7 +1129,7 @@ and convert it to Org using the pandoc utility."
 
 ;; map ] F to ns-next-frame
 (map! :n "] F" #'ns-next-frame)
-; map [ F to ns-previous-frame]
+                                        ; map [ F to ns-previous-frame]
 (map! :n "[ F" #'ns-prev-frame)
 
 ;; tramp trick
@@ -1153,8 +1149,8 @@ and convert it to Org using the pandoc utility."
             (time (substring (current-time-string) 0 19))
             ;; Get the actual execution directory
             (exec-dir (or quickrun-option-default-directory
-                         (with-current-buffer quickrun--original-buffer
-                           default-directory))))
+                          (with-current-buffer quickrun--original-buffer
+                            default-directory))))
         (goto-char (point-min))
         ;; Remove the incorrect header line if it exists
         (when (looking-at "-\\*-.*-\\*-\n")
@@ -1295,92 +1291,3 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 (after! evil
   (define-key evil-normal-state-map (kbd "j") #'next-line)
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
-
-(after! org
-  (require 'org-sliced-images)
-  (org-sliced-images-mode 1)
-
-  (defun jiawei/org-sliced-images-fix-startup ()
-    (when (and org-startup-with-inline-images
-               (bound-and-true-p org-sliced-images-mode))
-      ;; Org 9.8+ may render startup images via org-link-preview, bypassing org-sliced-images advice.
-      (when (fboundp 'org-link-preview)
-        (ignore-errors (org-link-preview '(64)))) ; hide previews in accessible buffer
-      (ignore-errors (org-display-inline-images)))) ; redraw through advised path
-
-  (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90))
-
-(use-package! org-sliced-images
-  :after org
-  :demand t
-  :config
-  (org-sliced-images-mode 1))
-
-;; Make org-sliced-images "fake newline" cells un-visitable by point
-(after! org-sliced-images
-
-  ;; Mark the fake-newline overlay as cursor-intangible
-  (advice-add
-   'org-sliced-images--make-inline-image-overlay
-   :around
-   (lambda (orig start end spec)
-     (let ((ov (funcall orig start end spec)))
-       (when (equal spec "\n")
-         ;; This overlay is the dummy cell used to simulate slice line breaks
-         (overlay-put ov 'cursor-intangible t))
-       ov)))
-
-  ;; Enable cursor-intangible-mode when sliced images are displayed
-  (advice-add
-   'org-sliced-images-display-inline-images
-   :after
-   (lambda (&rest _)
-     (cursor-intangible-mode 1)))
-
-  ;; Optional: disable mode when images are removed
-  (advice-add
-   'org-sliced-images-remove-inline-images
-   :after
-   (lambda (&rest _)
-     (unless (seq-some (lambda (ov)
-                         (overlay-get ov 'org-image-overlay))
-                       (overlays-in (point-min) (point-max)))
-       (cursor-intangible-mode -1)))))
-
-
-(with-eval-after-load 'org
-  (defun jw/osi--delete-blank-overlays (beg end)
-    (dolist (ov (overlays-in beg end))
-      (when (overlay-get ov 'jw-osi-blank)
-        (delete-overlay ov))))
-
-  (defun jw/osi--has-org-image-overlays-p (beg end)
-    (catch 'yes
-      (dolist (ov (overlays-in beg end) nil)
-        (when (overlay-get ov 'org-image-overlay)
-          (throw 'yes t)))))
-
-  (advice-add
-   '+org--toggle-inline-images-in-subtree
-   :around
-   (lambda (orig &optional beg end refresh)
-     ;; Compute the same region defaults as Doom’s helper.
-     (let* ((beg (or beg
-                     (if (org-before-first-heading-p)
-                         (save-excursion (point-min))
-                       (save-excursion (org-back-to-heading) (point)))))
-            (end (or end
-                     (if (org-before-first-heading-p)
-                         (save-excursion (org-next-visible-heading 1) (point))
-                       (save-excursion (org-end-of-subtree) (point)))))
-            ;; If images already exist, this RET is toggling OFF.
-            (toggling-off (jw/osi--has-org-image-overlays-p beg end)))
-       ;; Always clean stale blanks first (from previous state/bugs).
-       (jw/osi--delete-blank-overlays beg end)
-
-       ;; Run Doom’s original toggler (creates or removes org-image-overlay overlays).
-       (prog1 (funcall orig beg end refresh)
-         ;; Only remove blanks after if we toggled OFF.
-         ;; If we toggled ON, we WANT blanks to remain to hide the long link text.
-         (when toggling-off
-           (jw/osi--delete-blank-overlays beg end)))))))
