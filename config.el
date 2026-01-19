@@ -142,7 +142,7 @@
   )
 
 
-;; (setq org-image-actual-width nil)
+(setq org-image-actual-width nil)
 (after! org
   ;; (setq! org-src-context-mode 1)
   (setq! org-pretty-entities nil)
@@ -191,19 +191,19 @@
          :empty-lines 1)))
 
 (use-package! copilot
- ;; :hook (prog-mode . copilot-mode)
- :bind (("<backtab>" . 'copilot-accept-completion-by-word)
-        :map copilot-completion-map
-        ("<tab>" . 'copilot-accept-completion)
-        ("TAB" . 'copilot-accept-completion))
- :config
- (add-to-list 'copilot-indentation-alist '(prog-mode 2))
- (add-to-list 'copilot-indentation-alist '(org-mode 2))
- (add-to-list 'copilot-indentation-alist '(text-mode 2))
- (add-to-list 'copilot-indentation-alist '(closure-mode 2))
- (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
- (setq copilot-idle-delay 0.5)
- )
+  ;; :hook (prog-mode . copilot-mode)
+  :bind (("<backtab>" . 'copilot-accept-completion-by-word)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion))
+  :config
+  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
+  (add-to-list 'copilot-indentation-alist '(org-mode 2))
+  (add-to-list 'copilot-indentation-alist '(text-mode 2))
+  (add-to-list 'copilot-indentation-alist '(closure-mode 2))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
+  (setq copilot-idle-delay 0.5)
+  )
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -713,15 +713,15 @@
 
 (after! python
   (set-eglot-client! '(python-mode python-ts-mode)
-    ;; `("ty" "server")
-    ;; '("rass" "python")
-    '("basedpyright-langserver" "--stdio")
-    '("pyright-langserver" "--stdio")
-    '("pyright" "--stdio")
-    '("pyrefly" "lsp")
-    '("ruff" "server") "ruff-lsp"
-    "jedi-language-server"
-    "pylsp" "pyls"))
+                     ;; `("ty" "server")
+                     ;; '("rass" "python")
+                     '("basedpyright-langserver" "--stdio")
+                     '("pyright-langserver" "--stdio")
+                     '("pyright" "--stdio")
+                     '("pyrefly" "lsp")
+                     '("ruff" "server") "ruff-lsp"
+                     "jedi-language-server"
+                     "pylsp" "pyls"))
 
 (use-package! citar)
 
@@ -729,21 +729,21 @@
   :defer t
   :config
   (set-popup-rule! "\\*claude"
-                  :side 'right
-                  :size 0.33
-                   :select t))
+    :side 'right
+    :size 0.33
+    :select t))
 
 (after! org
   (set-popup-rule! "\\*Org Babel Results\\*"
-                  :size 0.33
-                  :select t))
+    :size 0.33
+    :select t))
 
 (use-package! gptel
   :defer t
   :config
   (setq gptel-display-buffer-action nil)  ; if user changes this, popup manager will bow out
   (set-popup-rule! "^\\*ChatGPT\\*$"
-        :side 'right :size 0.3 :select t :quit t :ttl nil))
+    :side 'right :size 0.3 :select t :quit t :ttl nil))
 
 (use-package! eat
   :defer t
@@ -1195,26 +1195,26 @@ This version also runs fully on remote files."
 
 ;; consut dir using zlua 
 (use-package! consult-dir
-    :init
-    (setq consult-dir-default-command #'consult-dir-dired)
-    :config
-    (defvar consult-dir--source-zlua
-      `(:name     "Zlua Dir"
-        :narrow   ?z
-        :category file
-        :face     consult-file
-        :history  file-name-history
-        :enabled  ,(lambda () (getenv "ZLUA_SCRIPT"))
-        :items
-        ,(lambda ()
-           (nreverse (mapcar
-                      (lambda (p) (abbreviate-file-name (file-name-as-directory p)))
-                      ;; REQUIRE export `ZLUA_SCRIPT' in parent-shell
-                      (split-string (shell-command-to-string
-                                     "lua $ZLUA_SCRIPT -l | perl -lane 'print $F[1]'")
-                                    "\n" t)))))
-      "Zlua directory source for `consult-dir'.")
-    (add-to-list 'consult-dir-sources 'consult-dir--source-zlua t))
+  :init
+  (setq consult-dir-default-command #'consult-dir-dired)
+  :config
+  (defvar consult-dir--source-zlua
+    `(:name     "Zlua Dir"
+      :narrow   ?z
+      :category file
+      :face     consult-file
+      :history  file-name-history
+      :enabled  ,(lambda () (getenv "ZLUA_SCRIPT"))
+      :items
+      ,(lambda ()
+         (nreverse (mapcar
+                    (lambda (p) (abbreviate-file-name (file-name-as-directory p)))
+                    ;; REQUIRE export `ZLUA_SCRIPT' in parent-shell
+                    (split-string (shell-command-to-string
+                                   "lua $ZLUA_SCRIPT -l | perl -lane 'print $F[1]'")
+                                  "\n" t)))))
+    "Zlua directory source for `consult-dir'.")
+  (add-to-list 'consult-dir-sources 'consult-dir--source-zlua t))
 
 (after! tramp-sh
   (setq! tramp-default-remote-shell "/bin/zsh"))
