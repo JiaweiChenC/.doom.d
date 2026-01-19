@@ -27,7 +27,7 @@
   (find-file filename)
   (goto-char 0)
   (search-forward needle)
-  (hl-line-highlight)
+  ;; (hl-line-highlight)
   (beginning-of-line)
   (evil-scroll-line-to-center nil)
   ;; find the line at the point if it is on a heading, open the heading

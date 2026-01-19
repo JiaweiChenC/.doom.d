@@ -147,7 +147,6 @@
 (package! ox-pandoc)
 ;; (package! evil-visual-mark-mode
   ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
-;; (package! zotxt)
 ;; (package! minuet)
 ;; (package! find-file-in-project)
 ;; (package! mason)
