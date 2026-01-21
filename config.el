@@ -181,6 +181,9 @@
 ;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
 (setq citar-symbol-separator "  ")
 ;; (setq! citar-org-roam-subdir "paper/")
+(use-package! citar
+  :config
+  (setq! citar-org-roam-note-title-template "${title}"))
 
 (setq org-roam-capture-templates
       '(("n" "note" plain
@@ -626,7 +629,6 @@
     (let ((processing-type org-latex-preview-process-default))
       (org-latex-preview--preview-region processing-type beg end)))
   )
-
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
 
 ;; do not export when archived
@@ -1136,9 +1138,6 @@ and convert it to Org using the pandoc utility."
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
 
-(use-package! mini-echo
-  :config
-  (mini-echo-mode 1))
 
 ;; fix a quickrun bug
 (defun my-quickrun--insert-header-advice (process)
@@ -1299,7 +1298,16 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
   :config
   (mini-echo-mode 1))
 
-;; (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
+(add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
 
-;; continuous scrolling for pdf 
-(add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
+(defvar per-project-compile-history nil)
+
+(define-advice project-compile (:around (&rest args) project-local-history)
+  (let* ((root (project-root (project-current t)))
+         (project-hist (alist-get root per-project-compile-history nil nil #'equal))
+         (compile-history project-hist)
+         (compile-command (and project-hist
+                               (car project-hist))))
+    (unwind-protect
+        (apply args)
+      (setf (alist-get root per-project-compile-history nil nil #'equal) compile-history))))
