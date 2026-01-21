@@ -43,7 +43,7 @@
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen with-editor))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/stepping_task/"
+   '("/Users/jiawei/Projects/gait_init/"
      "/ssh:100.105.242.51:/home/jiawei/projects/SKEL/"
      "/Users/jiawei/Projects/weight_lifting/"
      "/rsync:100.105.242.51:/home/jiawei/projects/SKEL/"

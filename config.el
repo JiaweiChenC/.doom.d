@@ -1311,3 +1311,5 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
     (unwind-protect
         (apply args)
       (setf (alist-get root per-project-compile-history nil nil #'equal) compile-history))))
+
+(add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
