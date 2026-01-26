@@ -1225,6 +1225,73 @@ This version also runs fully on remote files."
 
 (map! :n "*" #'jc/evil-hl-word-under-cursor)
 
+(defvar-local jc/evil-search-count-overlay nil
+  "Overlay used to display [x/total] for Evil searches.")
+
+(defun jc/evil-search--clear-count-overlay ()
+  (when (overlayp jc/evil-search-count-overlay)
+    (delete-overlay jc/evil-search-count-overlay)
+    (setq jc/evil-search-count-overlay nil)))
+
+(defun jc/evil-search--ensure-count-overlay (pos)
+  (if (overlayp jc/evil-search-count-overlay)
+      (move-overlay jc/evil-search-count-overlay pos pos)
+    (setq jc/evil-search-count-overlay (make-overlay pos pos))
+    (overlay-put jc/evil-search-count-overlay 'priority 1002)))
+
+(defun jc/evil-search--count (pattern beg)
+  (when (and pattern beg)
+    (let ((regex (evil-ex-pattern-regex pattern))
+          (case-fold-search (evil-ex-pattern-ignore-case pattern))
+          (current 0)
+          (total 0))
+      (save-match-data
+        (save-excursion
+          (goto-char (point-min))
+          (while (and regex (re-search-forward regex nil t))
+            (setq total (1+ total))
+            (when (= (match-beginning 0) beg)
+              (setq current total)))))
+      (when (> total 0)
+        (list (max current 1) total)))))
+
+(defun jc/evil-search--apply-count (pattern beg end)
+  (if (and pattern beg end)
+      (let* ((counts (jc/evil-search--count pattern beg))
+             (pos (save-excursion (goto-char beg) (line-end-position))))
+        (jc/evil-search--ensure-count-overlay pos)
+        (overlay-put jc/evil-search-count-overlay 'after-string
+                     (when counts
+                       (propertize (format " [%d/%d]" (car counts) (cadr counts))
+                                   'face 'shadow)))
+        (add-hook 'pre-command-hook #'jc/evil-search--cleanup-count-overlay nil t))
+    (jc/evil-search--clear-count-overlay)))
+
+(defun jc/evil-search--cleanup-count-overlay ()
+  (unless (memq this-command
+                '(evil-ex-search-next
+                  evil-ex-search-previous
+                  evil-ex-search-forward
+                  evil-ex-search-backward
+                  evil-ex-search-word-forward
+                  evil-ex-search-word-backward))
+    (jc/evil-search--clear-count-overlay)
+    (remove-hook 'pre-command-hook #'jc/evil-search--cleanup-count-overlay t)))
+
+(defun jc/evil-search--after-update (pattern _offset beg end)
+  (jc/evil-search--apply-count pattern beg end))
+
+(defun jc/evil-search--after-search (&rest _args)
+  (when (and evil-ex-search-pattern (match-beginning 0))
+    (jc/evil-search--apply-count evil-ex-search-pattern
+                                 (match-beginning 0)
+                                 (match-end 0))))
+
+(after! evil
+  (setq evil-search-module 'evil-search)
+  (advice-add 'evil-ex-search-update :after #'jc/evil-search--after-update)
+  (advice-add 'evil-ex-search :after #'jc/evil-search--after-search))
+
 (defun my/projectile-switch-to-buffer (arg)
   "Switch to a project buffer.
 With prefix argument ARG (C-u), include *special* buffers in the list."
