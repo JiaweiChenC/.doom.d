@@ -412,8 +412,6 @@
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
 
-(add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
-
 ;; (setq-default bidi-display-reordering nil)
 
 ;; (setq bidi-inhibit-bpa t
@@ -561,21 +559,6 @@
 ;; attachment
 (setq org-attach-auto-tag nil)
 
-;; (defun insert-attachment-from-dir ()
-;;   "Insert a link to a file from the current heading's attachment
-;;    directory into the :ATTACHMENTS: property."
-;;   (interactive)
-;;   (require 'org-attach)
-;;   (let* ((attach-dir (org-attach-dir t)) ;; Get the attachment dir, create if needed
-;;          (files (when (file-directory-p attach-dir)
-;;                   (directory-files attach-dir nil "^[^.]"))) ;; List non-dotfiles
-;;          (file (completing-read "Choose attachment file: " files nil t))
-;;          (link (concat "attachment:" file))
-;;          (current (org-entry-get (point) "ATTACHMENTS")))
-;;     ;; Update the ATTACHMENTS property
-;;     (org-entry-put (point) "ATTACHMENTS"
-;;                    (string-join (remove "" (list current (format "[[%s][%s]]" link file)))))))
-
 (defun insert-attachment-link-from-dir ()
   "Insert a link to a file from the current heading's attachment directory at point."
   (interactive)
@@ -640,14 +623,6 @@
 ;;   :hook (org-mode . org-phscroll-mode)
 ;;   )
 
-(defun flash-emacs-jump-after ()
-  "Call `flash-emacs-jump` and move forward one char if point moved forward."
-  (interactive)
-  (let ((origin (point)))
-    (flash-emacs-jump)
-    (when (> (point) origin)
-      ;; only move forward if point advanced
-      (forward-char))))
 
 (after! evil
   ;; disable evil surround global mode
@@ -655,7 +630,7 @@
   (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
   )
 
-(load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
+;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
 ;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
 ;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote-test.el")
 ;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
@@ -1138,7 +1113,6 @@ and convert it to Org using the pandoc utility."
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
 
-
 ;; fix a quickrun bug
 (defun my-quickrun--insert-header-advice (process)
   "Insert header to PROCESS buffer with correct default-directory."
@@ -1359,8 +1333,8 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
 
 ;; (add-to-list 'load-path "/Users/jiawei/Projects/Playground/emacs-tramp-rpc/lisp")
-; (require 'tramp-rpc)
-    
+;; (require 'tramp-rpc)
+
 (use-package! mini-echo
   :config
   (mini-echo-mode 1))
