@@ -5,7 +5,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("5382c626e8bd3d37b528793185dab2ad72d1ff55dca42fd40dae0461c4f21a3f"
+   '("c3076fdee603e9768817cfe8dbf6253d5b3cf3bf4602cb32fa2f1df62fe70b1c"
+     "5382c626e8bd3d37b528793185dab2ad72d1ff55dca42fd40dae0461c4f21a3f"
      "a23295788e507947c48684e48a55cc2387b853e440dc75c985e47bbb7ea30630"
      "aad7fd3672aad03901bf91e338cd530b87efc2162697a6bef79d7f8281fd97e3"
      "83a2b638aa06eb69b904275482d2b2e7217d674068227c3a91fd48022d2240ca"
@@ -43,7 +44,9 @@
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen with-editor))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/gait_init/"
+   '("/scpx:100.105.242.51:/home/jiawei/projects/HSMR/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/sam-3d-body/"
+     "/Users/jiawei/Projects/gait_init/" "/Users/jiawei/Projects/stepping_task/"
      "/ssh:100.105.242.51:/home/jiawei/projects/SKEL/"
      "/Users/jiawei/Projects/weight_lifting/"
      "/rsync:100.105.242.51:/home/jiawei/projects/SKEL/"

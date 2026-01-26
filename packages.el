@@ -50,33 +50,34 @@
                                         ;(unpin! t)
 (package! org :recipe
   (:host nil :repo "https://git.tecosaur.net/mirrors/org-mode.git" :remote "mirror" :fork
-   (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
-   :files
-   (:defaults "etc")
-   :build t :pre-build
-   (with-temp-file "org-version.el"
-     (require 'lisp-mnt)
-     (let
-         ((version
-           (with-temp-buffer
-             (insert-file-contents "lisp/org.el")
-             (lm-header "version")))
-          (git-version
-           (string-trim
-            (with-temp-buffer
-              (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
-              (buffer-string)))))
-       (insert
-        (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
-        (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
-        "(provide 'org-version)\n"))))
+         (:host nil :repo "https://git.tecosaur.net/tec/org-mode.git" :branch "dev" :remote "tecosaur")
+         :files
+         (:defaults "etc")
+         :build t :pre-build
+         (with-temp-file "org-version.el"
+           (require 'lisp-mnt)
+           (let
+               ((version
+                 (with-temp-buffer
+                   (insert-file-contents "lisp/org.el")
+                   (lm-header "version")))
+                (git-version
+                 (string-trim
+                  (with-temp-buffer
+                    (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+                    (buffer-string)))))
+             (insert
+              (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+              (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+              "(provide 'org-version)\n"))))
   :pin nil)
+(unpin! org)
 
-(unpin! auctex evil-easymotion dirvish quickrun)
+(unpin! auctex evil-easymotion dirvish quickrun eglot)
 ;; (unpin! persp-mode)
  ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
  ;;         nerd-icons doom-snippets transient)
-(unpin! org diff-hl)
+(unpin! diff-hl)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -94,13 +95,9 @@
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
 (package! modus-themes)
-;; (package! activities)
-;; (package! tabspaces)
-;; (package! bookmark-in-project)
 (package! mini-echo)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
-;; (package! iscroll)
 (package! breadcrumb
   :recipe (:host github :repo "joaotavora/breadcrumb"))
 (package! zoom)
@@ -147,16 +144,9 @@
 (package! ox-pandoc)
 ;; (package! evil-visual-mark-mode
   ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
-;; (package! minuet)
-;; (package! find-file-in-project)
 ;; (package! mason)
 ;; (package! tramp-hlo
   ;; :recipe (:host github :repo "jsadusk/tramp-hlo"))
-;; (package! zlua
-;;   :recipe (:host github
-;;            :repo "Kinneyzhang/zlua"
-;;            :files ("*.el" "z.lua")))
-
 (package! javelin)
 (package! org-sliced-images
   :recipe (:host github :repo "ringawho/org-sliced-images"))
@@ -168,3 +158,10 @@
   :recipe (:host github
            :repo "JiaweiChenC/diff-hl"
            :branch "feature/show-hunk-refine"))
+
+(package! mcp-server
+  :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
+           :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
+
+(package! flash-emacs
+  :recipe (:host github :repo "JiaweiChenC/flash-emacs"))

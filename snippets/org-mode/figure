@@ -4,6 +4,7 @@
 # key: fig
 # condition: t
 # --
+#+attr_org: :width 400
 #+caption: ${1:caption}
 #+attr_latex: ${2::width 1.0\linewidth :float t :placement [t]}
 #+name: fig:${3:label}
