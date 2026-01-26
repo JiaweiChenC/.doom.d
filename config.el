@@ -1332,9 +1332,6 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
   (define-key evil-normal-state-map (kbd "j") #'next-line)
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
 
-;; (add-to-list 'load-path "/Users/jiawei/Projects/Playground/emacs-tramp-rpc/lisp")
-;; (require 'tramp-rpc)
-
 (use-package! mini-echo
   :config
   (mini-echo-mode 1))
