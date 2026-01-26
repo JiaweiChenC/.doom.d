@@ -96,11 +96,11 @@
        :checkers
        syntax              ; tasing you for every semicolon you forget
         ;; +flymake)
-       spell ; tasing you for misspelling mispelling
+       ;; spell  ; tasing you for misspelling mispelling
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
-       ;;llm
+       llm
        tree-sitter
        ;;ansible
        biblio            ; Writes a PhD for you (citation needed)
