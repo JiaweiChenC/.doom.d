@@ -24,7 +24,6 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'ef-rose-pine-dawn
-      ;; (setq doom-theme 'doom-one
       doom-font (font-spec :family "JetBrains Mono" :size 12)
       doom-variable-pitch-font (font-spec :family "DejaVu Sans" :size 13)
       )
@@ -141,8 +140,7 @@
   (setq vertico-resize 'grow-only)
   )
 
-
-(setq org-image-actual-width nil)
+(setq org-image-max-width 1000)
 (after! org
   ;; (setq! org-src-context-mode 1)
   (setq! org-pretty-entities nil)
@@ -619,21 +617,12 @@
 
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
-;; (use-package! phscroll
-;;   :hook (org-mode . org-phscroll-mode)
-;;   )
-
-
 (after! evil
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
   (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
+  (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump)
   )
-
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-remote-test.el")
-;; (load! "/Users/jiawei/Projects/Playground/flash_emacs/flash.emacs/flash-emacs-ts-search.el")
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -674,7 +663,7 @@
       :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
       :fringe-face (intern (format "flycheck-fringe-%s" level)))))
 
-;; eglot setttings
+;; eglot setttings               
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! eglot
@@ -685,12 +674,12 @@
         eglot-ignored-server-capabilities '(:inlayHintProvider)))
 
 
-(after! python
+(after! python                   
   (set-eglot-client! '(python-mode python-ts-mode)
                      ;; `("ty" "server")
                      ;; '("rass" "python")
-                     '("basedpyright-langserver" "--stdio")
                      '("pyright-langserver" "--stdio")
+                     '("basedpyright-langserver" "--stdio")
                      '("pyright" "--stdio")
                      '("pyrefly" "lsp")
                      '("ruff" "server") "ruff-lsp"
@@ -699,46 +688,46 @@
 
 (use-package! citar)
 
-(use-package! claude-code
+(use-package! claude-code        
   :defer t
   :config
   (set-popup-rule! "\\*claude"
-    :side 'right
+    :side 'right                 
     :size 0.33
     :select t))
 
 (after! org
   (set-popup-rule! "\\*Org Babel Results\\*"
-    :size 0.33
+    :size 0.33                   
     :select t))
 
 (use-package! gptel
   :defer t
-  :config
+  :config                        
   (setq gptel-display-buffer-action nil)  ; if user changes this, popup manager will bow out
   (set-popup-rule! "^\\*ChatGPT\\*$"
     :side 'right :size 0.3 :select t :quit t :ttl nil))
 
-(use-package! eat
-  :defer t
+(use-package! eat                
+  :defer t                       
   :config
   (setq! eat-term-name "xterm-256color")
   )
 
-;; map j-k to evil-escape
+;; map j-k to evil-escape        
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"))
 
-(after! vterm
+(after! vterm                    
   (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer))
 
-(after! embark-org
+(after! embark-org               
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
 
 (use-package! sideline-flycheck
   :hook (flycheck-mode . sideline-flycheck-setup))
 
-(use-package! sideline
+(use-package! sideline           
   :init
   (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
         sideline-backends-right-skip-current-line t
@@ -747,7 +736,7 @@
         sideline-backends-right '(sideline-flycheck)
         flycheck-display-errors-function nil
         )
-  :hook (
+  :hook (                        
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
 
@@ -882,7 +871,7 @@
           ;; ensure destination directory exists
           (when-let ((dir (file-name-directory full)))
             (unless (file-exists-p dir) (make-directory dir t)))
-          full)
+          full)    
       (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
 
@@ -919,7 +908,7 @@
 
 (setq! org-startup-with-latex-preview 't)
 
-;; config.el
+;; config.el       
 (use-package! evil-visual-mark-mode
   :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
   :config
@@ -942,7 +931,7 @@
 
 (defun my/breadcrumb-peek ()
   "Enable `breadcrumb-mode` until the next keypress."
-  (interactive)
+  (interactive)    
   (breadcrumb-mode 1)
   (setq my--breadcrumb-peek-armed t)
   ;; Buffer-local hook so it only affects this buffer
@@ -971,7 +960,7 @@
 
 (defun my/project-todo ()
   "Open the TODO.org file for the current project in a popup with a unique name."
-  (interactive)
+  (interactive)    
   (let* ((project-name (projectile-project-name))
          (todo-file my/project-todo-file)
          (buf-name (format "*TODO:%s*" project-name)))
@@ -1049,8 +1038,8 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
 (after! vterm
   (set-popup-rule! "^\\*vterm:.*\\*$"
     :size 0.3
-    :vslot -4
-    :select t
+    :vslot -4           
+    :select t           
     :quit t
     :ttl nil) ;; keep buffer alive when popup closes
   )
@@ -1064,7 +1053,7 @@ One vterm per project root:
 - If it's visible, hide its window(s).
 - If it exists but is hidden, show it.
 - If it doesn't exist yet, create it at the project root."
-  (interactive)
+  (interactive)         
   (let* ((proj-root (or (doom-project-root) default-directory))
          (proj-name (file-name-nondirectory (directory-file-name proj-root)))
          (buf-name (format "*vterm:%s*" proj-name))
@@ -1074,7 +1063,7 @@ One vterm per project root:
         (dolist (win (get-buffer-window-list buf nil t))
           (delete-window win))
       ;; Otherwise create if needed and show it
-      (progn
+      (progn            
         (unless (buffer-live-p buf)
           (let ((default-directory proj-root))
             (setq buf (vterm buf-name)))
@@ -1084,19 +1073,19 @@ One vterm per project root:
         (pop-to-buffer buf)))))
 
 ;; temp fix for rsync dirvish 
-(after! dirvish
+(after! dirvish         
   ;; Just don’t use the magic 'all symbol; restrict to marked files only.
   (setq dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all))))
 
 (defun cc/yank-markdown-as-org ()
   "Yank Markdown text as Org.
-
+                        
 This command will convert Markdown text in the top of the `kill-ring'
 and convert it to Org using the pandoc utility."
-  (interactive)
+  (interactive)         
   (save-excursion
     (with-temp-buffer
-      (yank)
+      (yank)            
       (shell-command-on-region
        (point-min) (point-max)
        "pandoc -f markdown -t org --wrap=preserve" t t)
@@ -1113,7 +1102,7 @@ and convert it to Org using the pandoc utility."
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
 
-;; fix a quickrun bug
+;; fix a quickrun bug   
 (defun my-quickrun--insert-header-advice (process)
   "Insert header to PROCESS buffer with correct default-directory."
   (unless quickrun-output-only
@@ -1149,7 +1138,7 @@ Skip remote (TRAMP) buffers silently."
 
 
 (use-package! projectile
-  :config
+  :config              
   (setq projectile-indexing-method 'alien)
   (defun projectile-find-file-hook-function ()
     "Called by `find-file-hook' when `projectile-mode' is on.
@@ -1164,13 +1153,13 @@ This version also runs fully on remote files."
 
 ;; consut dir using zlua 
 (use-package! consult-dir
-  :init
+  :init                 
   (setq consult-dir-default-command #'consult-dir-dired)
   :config
   (defvar consult-dir--source-zlua
     `(:name     "Zlua Dir"
       :narrow   ?z
-      :category file
+      :category file    
       :face     consult-file
       :history  file-name-history
       :enabled  ,(lambda () (getenv "ZLUA_SCRIPT"))
@@ -1185,7 +1174,7 @@ This version also runs fully on remote files."
     "Zlua directory source for `consult-dir'.")
   (add-to-list 'consult-dir-sources 'consult-dir--source-zlua t))
 
-(after! tramp-sh
+(after! tramp-sh        
   (setq! tramp-default-remote-shell "/bin/zsh"))
 
 
@@ -1193,7 +1182,7 @@ This version also runs fully on remote files."
 (defun jc/evil-hl-word-under-cursor ()
   "Like Vim's *, but only set/search-highlight
     the word under cursor; don't move point."
-  (interactive)
+  (interactive)         
   (save-excursion
     (evil-ex-search-word-forward 1)))
 
@@ -1220,13 +1209,13 @@ This version also runs fully on remote files."
           (current 0)
           (total 0))
       (save-match-data
-        (save-excursion
+        (save-excursion 
           (goto-char (point-min))
           (while (and regex (re-search-forward regex nil t))
             (setq total (1+ total))
             (when (= (match-beginning 0) beg)
               (setq current total)))))
-      (when (> total 0)
+      (when (> total 0) 
         (list (max current 1) total)))))
 
 (defun jc/evil-search--apply-count (pattern beg end)
@@ -1270,7 +1259,7 @@ This version also runs fully on remote files."
   "Switch to a project buffer.
 With prefix argument ARG (C-u), include *special* buffers in the list."
   (interactive "P")
-  (require 'consult)
+  (require 'consult)    
   (let* ((buffers (projectile-project-buffers))
          (filtered (if arg
                        buffers
@@ -1284,24 +1273,24 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
                              :as #'buffer-name)
       :prompt "Switch to buffer: "
       :history 'buffer-name-history
-      :sort nil
+      :sort nil         
       :category 'buffer
       :state (consult--buffer-state)))))
 
-(map! :leader 
+(map! :leader           
       :desc "projectile switch to buffer" 
       "TAB" #'my/projectile-switch-to-buffer)
 
 (use-package! dirvish
-  :config
+  :config               
   (setq! dired-kill-when-opening-new-dired-buffer t)
   )
 
 (use-package! javelin
-  :config
+  :config               
   (global-javelin-minor-mode 1))
 
-(after! consult
+(after! consult         
   (defun my/consult-tmux-session ()
     "Pick a tmux session with Consult and switch/attach to it (by name)."
     (interactive)
@@ -1328,13 +1317,13 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 (setq! diff-refine 'navigation)
 
 ;; map j and k to use next line and previous line of native emacs
-(after! evil
+(after! evil            
   (define-key evil-normal-state-map (kbd "j") #'next-line)
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
 
 (use-package! mini-echo
   :config
-  (mini-echo-mode 1))
+  (mini-echo-mode 1))   
 
 (add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
 
@@ -1348,6 +1337,23 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
                                (car project-hist))))
     (unwind-protect
         (apply args)
-      (setf (alist-get root per-project-compile-history nil nil #'equal) compile-history))))
+      (setf (alist-get root per-project-compile-test nil nil #'equal) compile-history))))
 
 (add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
+
+(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
+(require 'flash-emacs)
+(require 'flash-emacs-remote)
+(require 'flash-emacs-ts)
+
+(setq! flash-emacs-ts-rainbow-enabled 't)
+;; Map C-s to flash-emacs-jump in operator-pending mode
+(evil-define-key 'operator 'global (kbd "s") #'flash-emacs-jump)
+
+;; Optionally, also map it in normal and visual modes
+(evil-define-key 'normal 'global (kbd "s") #'flash-emacs-jump)
+(evil-define-key 'insert 'global (kbd "C-s") #'flash-emacs-jump)
+(evil-define-key 'visual 'global (kbd "-s") #'flash-emacs-jump)
+
+(setq! mouse-highlight nil)
+
