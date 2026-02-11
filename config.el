@@ -68,8 +68,6 @@
 
 ;; (setq org-latex-src-block-backend "listings")
 
-(setq org-roam-directory "~/Documents/roam/note/")
-
 (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
 
 (setq org-agenda-files '("~/org/journal/"))
@@ -156,7 +154,7 @@
     (setq-local paragraph-start "[\f\\|[ \t]*$]")
     (setq-local paragraph-separate "[ \t\f]*$"))
   (setq org-startup-folded 'content)
-  ;; (setq org-image-actual-width '(400))
+  (setq org-image-actual-width '(500))
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
   (org-link-set-parameters "skim"
@@ -334,7 +332,6 @@
   (map! :n "]T" 'tab-bar-switch-to-next-tab)
   (map! :n "[T" 'tab-bar-switch-to-prev-tab)
   )
-
 
 (setq! ess-startup-directory 'default-directory)
 
@@ -906,7 +903,7 @@
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
-(setq! org-startup-with-latex-preview 't)
+;; (setq! org-startup-with-latex-preview 't)
 
 ;; config.el       
 (use-package! evil-visual-mark-mode
@@ -1188,6 +1185,10 @@ This version also runs fully on remote files."
 
 (map! :n "*" #'jc/evil-hl-word-under-cursor)
 
+(defface jc/evil-search-count-face
+  '((t (:foreground "#8aadf4")))
+  "Face for Evil search count overlay.")
+
 (defvar-local jc/evil-search-count-overlay nil
   "Overlay used to display [x/total] for Evil searches.")
 
@@ -1226,7 +1227,7 @@ This version also runs fully on remote files."
         (overlay-put jc/evil-search-count-overlay 'after-string
                      (when counts
                        (propertize (format " [%d/%d]" (car counts) (cadr counts))
-                                   'face 'shadow)))
+                                   'face 'jc/evil-search-count-face)))
         (add-hook 'pre-command-hook #'jc/evil-search--cleanup-count-overlay nil t))
     (jc/evil-search--clear-count-overlay)))
 
@@ -1249,6 +1250,27 @@ This version also runs fully on remote files."
     (jc/evil-search--apply-count evil-ex-search-pattern
                                  (match-beginning 0)
                                  (match-end 0))))
+
+(defvar jc/evil-search--target-buffer nil
+  "Buffer where search count overlay was created.")
+
+(defun jc/evil-search--minibuffer-exit ()
+  "Clear search count overlay when exiting minibuffer."
+  (when jc/evil-search--target-buffer
+    (let ((buf jc/evil-search--target-buffer))
+      (setq jc/evil-search--target-buffer nil)
+      (when (buffer-live-p buf)
+        (let ((ov (buffer-local-value 'jc/evil-search-count-overlay buf)))
+          (when (overlayp ov)
+            (delete-overlay ov)))))))
+
+(add-hook 'minibuffer-exit-hook #'jc/evil-search--minibuffer-exit)
+
+;; Track buffer when applying count
+(advice-add 'jc/evil-search--apply-count :before
+            (lambda (&rest _)
+              (setq jc/evil-search--target-buffer (current-buffer)))
+            '((name . track-buffer)))
 
 (after! evil
   (setq evil-search-module 'evil-search)
@@ -1341,22 +1363,6 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 
 (add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
 
-(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
-(require 'flash-emacs)
-(require 'flash-emacs-remote)
-(require 'flash-emacs-ts)
-(require 'flash-emacs-search)
-
-(setq! flash-emacs-ts-rainbow-enabled 't)
-(setq! flash-emacs-search-mode 't)
-;; Map C-s to flash-emacs-jump in operator-pending mode
-(evil-define-key 'operator 'global (kbd "s") #'flash-emacs-jump)
-
-;; Optionally, also map it in normal and visual modes
-(evil-define-key 'normal 'global (kbd "s") #'flash-emacs-jump)
-(evil-define-key 'insert 'global (kbd "C-s") #'flash-emacs-jump)
-(evil-define-key 'visual 'global (kbd "-s") #'flash-emacs-jump)
-
 (setq! mouse-highlight nil)
 
 (defun jc/evil-ex-search-next ()
@@ -1424,15 +1430,108 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 ;;
 ;; Additionally, project .dir-locals.el files may set buffer-local
 ;; org-roam-directory/org-roam-db-location, which redirects DB operations
-;; to a project-scoped database instead of the global one. Disabling
-;; dir-local variables during DB updates prevents this conflict.
+;; to a project-scoped database instead of the global one.
+;;
+;; These advices ensure:
+;; 1. The GLOBAL org-roam DB is always updated/cleared (with symlink paths)
+;; 2. If the buffer has project-scoped org-roam settings, the PROJECT DB
+;;    is also updated/cleared (with the original truename paths)
 (after! org-roam
-  (defadvice! +org-roam-no-resolve-symlinks-a (fn &rest args)
+  (defvar +org-roam--in-update-file nil
+    "Non-nil when inside `org-roam-db-update-file' advice.
+Prevents `org-roam-db-clear-file' advice from doing its own dual-DB
+handling, since the update-file advice already manages both DBs.")
+
+  (defun +org-roam--truename-to-symlink (file-path)
+    "Convert truename FILE-PATH to its symlink equivalent under `org-roam-directory'.
+If FILE-PATH is already under `org-roam-directory', return it unchanged."
+    (let* ((roam-dir (expand-file-name
+                      (file-name-as-directory (default-value 'org-roam-directory))))
+           (expanded (expand-file-name file-path)))
+      (if (string-prefix-p roam-dir expanded)
+          file-path
+        ;; Search top-level symlinks in org-roam-directory
+        (catch 'found
+          (dolist (entry (directory-files roam-dir t "^[^.]"))
+            (when (file-symlink-p entry)
+              (let ((target (file-name-as-directory (file-truename entry))))
+                (when (string-prefix-p target expanded)
+                  (throw 'found
+                         (expand-file-name
+                          (substring expanded (length target))
+                          (file-name-as-directory entry)))))))
+          file-path))))
+
+  ;; --- Advice for org-roam-db-update-file (insert/update) ---
+  (defadvice! +org-roam-update-file-dual-db-a (fn &optional file-path &rest args)
     :around #'org-roam-db-update-file
-    (let ((find-file-visit-truename nil)
-          (enable-dir-local-variables nil)
-          (enable-local-variables :safe))
-      (apply fn args))))
+    (let* ((+org-roam--in-update-file t)
+           (file-path (or file-path (buffer-file-name (buffer-base-buffer))))
+           ;; Capture project-local values BEFORE overriding
+           (project-roam-dir org-roam-directory)
+           (project-db-loc org-roam-db-location)
+           (global-roam-dir (default-value 'org-roam-directory))
+           (global-db-loc (default-value 'org-roam-db-location))
+           (has-project-p (not (equal (expand-file-name project-roam-dir)
+                                      (expand-file-name global-roam-dir))))
+           (symlink-path (+org-roam--truename-to-symlink file-path))
+           (buf (or (get-file-buffer file-path)
+                    (get-file-buffer symlink-path)))
+           (orig-bfn (when buf (buffer-file-name buf))))
+
+      ;; Step 1: Update PROJECT-LOCAL DB (if applicable)
+      (when has-project-p
+        (condition-case err
+            (let ((org-roam-directory project-roam-dir)
+                  (org-roam-db-location project-db-loc))
+              (apply fn file-path args))
+          (error
+           (lwarn 'org-roam :warning
+                  "Failed to update project DB for %s: %s"
+                  file-path (error-message-string err)))))
+
+      ;; Step 2: Update GLOBAL DB (with symlink path)
+      (let ((find-file-visit-truename nil)
+            (enable-dir-local-variables nil)
+            (enable-local-variables :safe)
+            (org-roam-directory global-roam-dir)
+            (org-roam-db-location global-db-loc))
+        (when (and buf (not (equal orig-bfn symlink-path)))
+          (with-current-buffer buf (setq buffer-file-name symlink-path)))
+        (unwind-protect
+            (apply fn symlink-path args)
+          (when (and buf orig-bfn (buffer-live-p buf)
+                     (not (equal orig-bfn symlink-path)))
+            (with-current-buffer buf (setq buffer-file-name orig-bfn)))))))
+
+  ;; --- Advice for org-roam-db-clear-file (delete/rename) ---
+  (defadvice! +org-roam-clear-file-dual-db-a (fn &optional file)
+    :around #'org-roam-db-clear-file
+    (if +org-roam--in-update-file
+        ;; Inside update-file: the update advice already handles both DBs
+        (funcall fn file)
+      ;; Standalone clear (delete/rename): clear from both DBs
+      (let* ((file (or file (buffer-file-name (buffer-base-buffer))))
+             (project-roam-dir org-roam-directory)
+             (project-db-loc org-roam-db-location)
+             (global-roam-dir (default-value 'org-roam-directory))
+             (global-db-loc (default-value 'org-roam-db-location))
+             (has-project-p (not (equal (expand-file-name project-roam-dir)
+                                        (expand-file-name global-roam-dir))))
+             (symlink-path (+org-roam--truename-to-symlink file)))
+
+        ;; Clear from project DB
+        (when has-project-p
+          (condition-case nil
+              (let ((org-roam-directory project-roam-dir)
+                    (org-roam-db-location project-db-loc))
+                (funcall fn file))
+            (error nil)))
+
+        ;; Clear from global DB (with symlink path)
+        (let ((org-roam-directory global-roam-dir)
+              (org-roam-db-location global-db-loc))
+          (funcall fn symlink-path))))))
 
 (after! org-roam
   (defun jc/org-roam-link-project-org-dirs ()
