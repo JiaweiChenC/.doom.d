@@ -1345,8 +1345,10 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 (require 'flash-emacs)
 (require 'flash-emacs-remote)
 (require 'flash-emacs-ts)
+(require 'flash-emacs-search)
 
 (setq! flash-emacs-ts-rainbow-enabled 't)
+(setq! flash-emacs-search-mode 't)
 ;; Map C-s to flash-emacs-jump in operator-pending mode
 (evil-define-key 'operator 'global (kbd "s") #'flash-emacs-jump)
 
@@ -1357,3 +1359,104 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
 
 (setq! mouse-highlight nil)
 
+(defun jc/evil-ex-search-next ()
+  "Like Vim C-g in /: jump to next match while staying in minibuffer."
+  (interactive)
+  (when (minibufferp)
+    (let ((pattern-string (minibuffer-contents-no-properties)))
+      (when (and pattern-string (> (length pattern-string) 0))
+        (setq evil-ex-search-pattern
+              (evil-ex-make-search-pattern pattern-string))
+        (with-selected-window (minibuffer-selected-window)
+          (evil-ex-search-next 1)
+          ;; Update current-match highlight without moving
+          (when (fboundp 'evil-ex-search-update)
+            (evil-ex-search-update evil-ex-search-pattern
+                                   evil-ex-search-offset
+                                   evil-ex-search-match-beg
+                                   evil-ex-search-match-end)))))))
+
+(defun jc/evil-ex-search-previous ()
+  "Like Vim C-t in /: jump to previous match while staying in minibuffer."
+  (interactive)
+  (when (minibufferp)
+    (let ((pattern-string (minibuffer-contents-no-properties)))
+      (when (and pattern-string (> (length pattern-string) 0))
+        (setq evil-ex-search-pattern
+              (evil-ex-make-search-pattern pattern-string))
+        (with-selected-window (minibuffer-selected-window)
+          (evil-ex-search-previous 1)
+          ;; Update current-match highlight without moving
+          (when (fboundp 'evil-ex-search-update)
+            (evil-ex-search-update evil-ex-search-pattern
+                                   evil-ex-search-offset
+                                   evil-ex-search-match-beg
+                                   evil-ex-search-match-end)))))))
+
+(after! evil
+  (define-key evil-ex-search-keymap (kbd "C-g") #'jc/evil-ex-search-next)
+  (define-key evil-ex-search-keymap (kbd "C-t") #'jc/evil-ex-search-previous))
+
+(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
+(require 'flash-emacs)
+(require 'flash-emacs-remote)
+(require 'flash-emacs-ts)
+(require 'flash-emacs-search)
+
+(setq! flash-emacs-ts-rainbow-enabled 't)
+(setq! flash-emacs-search-mode 't)
+;; ;; Optionally, also map it in normal and visual modes
+(evil-define-key 'normal 'global (kbd "s") #'flash-emacs-jump)
+(evil-define-key 'insert 'global (kbd "C-s") #'flash-emacs-jump)
+(evil-define-key 'visual 'global (kbd "-s") #'flash-emacs-jump)
+
+(setq! link-hint-avy-all-windows 't)
+
+; do not cache all
+;; (setq org-latex-preview-cache 'temp)
+
+(setq org-roam-directory "~/Documents/roam/note/")
+
+;; Doom sets find-file-visit-truename to t, which resolves symlinks in
+;; buffer-file-name. This breaks org-roam for symlinked directories because
+;; org-roam discovers files via symlink paths but stores them via truename
+;; paths, causing the sync to immediately delete symlinked entries.
+;;
+;; Additionally, project .dir-locals.el files may set buffer-local
+;; org-roam-directory/org-roam-db-location, which redirects DB operations
+;; to a project-scoped database instead of the global one. Disabling
+;; dir-local variables during DB updates prevents this conflict.
+(after! org-roam
+  (defadvice! +org-roam-no-resolve-symlinks-a (fn &rest args)
+    :around #'org-roam-db-update-file
+    (let ((find-file-visit-truename nil)
+          (enable-dir-local-variables nil)
+          (enable-local-variables :safe))
+      (apply fn args))))
+
+(after! org-roam
+  (defun jc/org-roam-link-project-org-dirs ()
+    "Symlink all ~/Projects/*/org/ directories into org-roam under note/."
+    (interactive)
+    (let* ((projects-root (expand-file-name "~/Projects/"))
+           (roam-note-dir org-roam-directory))
+
+      ;; Ensure destination exists
+      (unless (file-directory-p roam-note-dir)
+        (make-directory roam-note-dir t))
+
+      ;; Iterate over ~/Projects/*/
+      (dolist (proj (directory-files projects-root t "^[^.]" t))
+        (let ((org-dir (expand-file-name "org" proj)))
+          (when (file-directory-p org-dir)
+            (let* ((proj-name (file-name-nondirectory
+                               (directory-file-name proj)))
+                   (link-path (expand-file-name proj-name roam-note-dir)))
+              (unless (file-exists-p link-path)
+                (make-symbolic-link org-dir link-path t)
+                (message "Linked: %s → %s" org-dir link-path)))))))
+
+      (org-roam-db-sync)
+      (message "Org-roam projects synced.")))
+
+(setq! org-element-use-cache 'nil)
