@@ -1,16 +1,16 @@
-;; (after! org
-;;   (require 'org-sliced-images)
-;;   (org-sliced-images-mode 1)
+(after! org
+  (require 'org-sliced-images)
+  (org-sliced-images-mode 1)
 
-;;   (defun jiawei/org-sliced-images-fix-startup ()
-;;     (when (and org-startup-with-inline-images
-;;                (bound-and-true-p org-sliced-images-mode))
-;;       ;; Org 9.8+ may render startup images via org-link-preview, bypassing org-sliced-images advice.
-;;       (when (fboundp 'org-link-preview)
-;;         (ignore-errors (org-link-preview '(64)))) ; hide previews in accessible buffer
-;;       (ignore-errors (org-display-inline-images)))) ; redraw through advised path
+  (defun jiawei/org-sliced-images-fix-startup ()
+    (when (and org-startup-with-inline-images
+               (bound-and-true-p org-sliced-images-mode))
+      ;; Org 9.8+ may render startup images via org-link-preview, bypassing org-sliced-images advice.
+      (when (fboundp 'org-link-preview)
+        (ignore-errors (org-link-preview '(64)))) ; hide previews in accessible buffer
+      (ignore-errors (org-display-inline-images)))) ; redraw through advised path
 
-;;   (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90))
+  (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90))
 
 (use-package! org-sliced-images
   :after org

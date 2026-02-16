@@ -57,50 +57,6 @@ the buffer is remote; otherwise return it as-is.  Return nil if unset."
         jc/project-root-local))))
 
 ;;---------------------------------------------------------------------------
-;; Multiple remote servers: dir-locals registration
-;;---------------------------------------------------------------------------
-
-;; (defvar jc/remote-project-specs
-;;   '(("/scpx:100.105.242.51:"
-;;      ;; "/home/jiawei/projects/GVHMR/"
-;;      ;; "/home/jiawei/projects/SKEL/"
-;;      ;; "/home/jiawei/projects/HSMR/"
-;;      ))
-;;   "List of remote project specs.
-
-;; Each element is a list: (TRAMP-PREFIX ROOT1 ROOT2 ...), where ROOT*
-;; are host-local directories on that server (no TRAMP prefix).")
-
-;; (defun jc/register-remote-project-roots ()
-;;   "Create dir-locals classes for all `jc/remote-project-specs'.
-
-;; Each root is host-local; we build the full TRAMP directory using the
-;; given prefix, but `jc/project-root-local' stays host-local."
-;;   (dolist (spec jc/remote-project-specs)
-;;     (let ((prefix (car spec))
-;;           (roots  (cdr spec)))
-;;       (dolist (root roots)
-;;         (let* ((remote-root (concat prefix root))
-;;                (class (intern (format "jc-remote-%s" (md5 remote-root))))
-;;                (vars  `((nil . ((jc/project-root-local . ,root))))))
-;;           (dir-locals-set-class-variables class vars)
-;;           (dir-locals-set-directory-class remote-root class))))))
-
-;; ;; Run once at startup; rerun if you change `jc/remote-project-specs`.
-;; (jc/register-remote-project-roots)
-
-;; Example to add another server later:
-;;
-;; (setq jc/remote-project-specs
-;;       '(("/scpx:100.105.242.51:"
-;;          "/home/jiawei/projects/GVHMR/"
-;;          "/home/jiawei/projects/SKEL/"
-;;          "/home/jiawei/projects/HSMR/")
-;;         ("/scpx:other.host:"
-;;          "/home/jiawei/projects/OTHER/")))
-;; (jc/register-remote-project-roots)
-
-;;---------------------------------------------------------------------------
 ;; Doom project integration
 ;;---------------------------------------------------------------------------
 

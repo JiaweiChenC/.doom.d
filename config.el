@@ -614,10 +614,18 @@
 
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
+(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
+(require 'flash-emacs)
+(require 'flash-emacs-remote)
+(require 'flash-emacs-ts)
+(require 'flash-emacs-search)
+(setq! flash-emacs-ts-rainbow-enabled 't)
+
 (after! evil
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
   (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
+  (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
   (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump)
   )
 
@@ -626,6 +634,7 @@
   (better-jumper-set-jump))
 
 (advice-add 'flash-emacs-jump :before #'flash-emacs--set-jump-before-jump)
+
 
 (setq avy-keys (append (number-sequence ?a ?z)))
 
@@ -736,36 +745,6 @@
   :hook (                        
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
-
-;; (use-package! org-inline-pdf
-;;   :hook (org-mode . org-inline-pdf-mode))
-
-;; (defun my/org-toggle-inline-image-at-point ()
-;;   "Toggle inline image (incl. PDF via org-inline-pdf) for the link at point."
-;;   (interactive)
-;;   (let* ((ctx (org-element-context))
-;;          (beg (org-element-property :begin ctx))
-;;          (end (org-element-property :end   ctx)))
-;;     (unless (and beg end) (user-error "No link at point"))
-;;     ;; Ensure PDFs can render inline
-;;     (unless (bound-and-true-p org-inline-pdf-mode)
-;;       (org-inline-pdf-mode 1))
-;;     (let ((has-img
-;;            (seq-some (lambda (ov) (overlay-get ov 'org-image-overlay))
-;;                      (overlays-in beg end))))
-;;       (if has-img
-;;           ;; HIDE: remove overlays in this link region
-;;           (org-remove-inline-images beg end)
-;;         ;; SHOW: render inline just for this link region
-;;         (org-display-inline-images t t beg end)))))
-
-;; (defun my/org-open-pdf-inline-toggle (_file &optional _link)
-;;   (my/org-toggle-inline-image-at-point)
-;;   t) ;; returning non-nil tells Org we handled it
-
-;; (after! org
-;;   (setq org-file-apps (assoc-delete-all "\\.pdf\\'" org-file-apps))
-;;   (add-to-list 'org-file-apps '("\\.pdf\\'" . my/org-open-pdf-inline-toggle)))
 
 (setq! good-scroll-persist-vscroll-window-scroll 'nil)
 
@@ -1403,18 +1382,7 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
   (define-key evil-ex-search-keymap (kbd "C-g") #'jc/evil-ex-search-next)
   (define-key evil-ex-search-keymap (kbd "C-t") #'jc/evil-ex-search-previous))
 
-(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
-(require 'flash-emacs)
-(require 'flash-emacs-remote)
-(require 'flash-emacs-ts)
-(require 'flash-emacs-search)
 
-(setq! flash-emacs-ts-rainbow-enabled 't)
-(setq! flash-emacs-search-mode 't)
-;; ;; Optionally, also map it in normal and visual modes
-(evil-define-key 'normal 'global (kbd "s") #'flash-emacs-jump)
-(evil-define-key 'insert 'global (kbd "C-s") #'flash-emacs-jump)
-(evil-define-key 'visual 'global (kbd "-s") #'flash-emacs-jump)
 
 (setq! link-hint-avy-all-windows 't)
 
@@ -1558,4 +1526,23 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
       (org-roam-db-sync)
       (message "Org-roam projects synced.")))
 
-(setq! org-element-use-cache 'nil)
+;; org-element in-memory cache — keeps org-map-entries and friends fast.
+;; Disk persistence is off: the element cache (one entry per .org file) is
+;; the main contributor to org-persist bloat, and loading a large index
+;; synchronously on the first org-file open causes multi-second stalls.
+;; The in-memory cache rebuilds per-buffer and is nearly instant.
+(setq! org-element-use-cache t
+       org-element-cache-persistent nil)
+
+;; When element-cache persistence is off, org-element-cache-reset still
+;; calls org-persist-unregister on every org-mode buffer init.  That
+;; triggers org-persist--merge-index-with-disk → O(n²) cl-set-difference
+;; on the full persist index.  Skip the persistence codepath entirely
+;; when there's nothing to register or unregister.
+(defadvice! +org-element-cache-reset-no-persist-a (fn &optional all no-persistence)
+  :around #'org-element-cache-reset
+  (funcall fn all (or no-persistence (not org-element-cache-persistent))))
+
+;; Shorten org-persist expiry so remaining data (LaTeX previews, export
+;; caches, etc.) doesn't accumulate indefinitely.  Default is 30 days.
+(setq! org-persist-default-expiry 7)

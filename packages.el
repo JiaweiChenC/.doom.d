@@ -74,9 +74,6 @@
 (unpin! org)
 
 (unpin! auctex evil-easymotion dirvish quickrun eglot)
-;; (unpin! persp-mode)
- ;;         citar-org-roam citar citar-embark ess persp-mode yasnippet
- ;;         nerd-icons doom-snippets transient)
 (unpin! diff-hl)
 (package! htmlize)
 (package! impatient-showdown)
@@ -103,10 +100,6 @@
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-;; (package! ef-themes
-;;   :recipe (:host github :repo "JiaweiChenC/ef-themes"))
-;; (package! ef-themes)
-;; (package! window-stool :recipe (:host github :repo "jaszhe/window-stool" :files ("*.el")))
 (package! exec-path-from-shell)
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
@@ -119,9 +112,6 @@
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
 ;; (package! uv
 ;;   :recipe (:host github :repo "johannes-mueller/uv.el"))
-;; (package! lsp-treemacs)
-;; (package! flash.emacs
-;;   :recipe (:host github :repo "JiaweiChenC/flash.emacs"))
 ;; disable evil snipe
 (package! evil-snipe :disable t)
 ;; (package! evil-surround :disable t)
@@ -134,23 +124,16 @@
 (package! sideline-eglot
   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
   )
-;; (package! org-inline-pdf)
-;; (package! outline-indent)
 ;; (package! atomic-chrome)
-;;(package! reader
-;;  :recipe (:host codeberg
-;;           :repo "divyaranjan/emacs-reader"))
 (package! catppuccin-theme)
 (package! ox-pandoc)
 ;; (package! evil-visual-mark-mode
   ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
-;; (package! mason)
-;; (package! tramp-hlo
-  ;; :recipe (:host github :repo "jsadusk/tramp-hlo"))
+(package! tramp-hlo
+  :recipe (:host github :repo "jsadusk/tramp-hlo"))
 (package! javelin)
 (package! org-sliced-images
   :recipe (:host github :repo "ringawho/org-sliced-images"))
-;; (package! iscroll)
 (package! evil-easymotion
   :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
 
@@ -159,9 +142,12 @@
            :repo "JiaweiChenC/diff-hl"
            :branch "feature/show-hunk-refine"))
 
+(package! flash-emacs
+  :recipe (:host github
+           :repo "JiaweiChenC/flash-emacs"))
+
 (package! mcp-server
   :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
            :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
 
-(package! flash-emacs
-  :recipe (:host github :repo "JiaweiChenC/flash-emacs"))
+(package! msgpack) 

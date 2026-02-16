@@ -152,7 +152,7 @@ formatted as [cite:@target1;@target2;@target3]."
             (search-in-file processed-line org-filename)))
           ;; Kill the TeX buffer after performing the search
           (bury-buffer tex-buffer)
-          (hl-line-make-overlay)
+          ;; (hl-line-make-overlay)
           )
       (message "Associated Org file does not exist: %s" org-filename))))
 
