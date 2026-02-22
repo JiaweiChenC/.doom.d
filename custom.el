@@ -44,7 +44,8 @@
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen with-editor))
  '(safe-local-variable-directories
-   '("/scpx:100.105.242.51:/home/jiawei/projects/gait_init/"
+   '("/Users/jiawei/Projects/virtual_maze_PD/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/gait_init/"
      "/scpx:100.105.242.51:/home/jiawei/projects/HSMR/"
      "/scpx:100.105.242.51:/home/jiawei/projects/sam-3d-body/"
      "/Users/jiawei/Projects/gait_init/" "/Users/jiawei/Projects/stepping_task/"

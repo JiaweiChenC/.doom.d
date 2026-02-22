@@ -150,4 +150,9 @@
   :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
            :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
 
-(package! msgpack) 
+(package! claude-code-ide
+  :recipe (:host github 
+           :repo "manzaltu/claude-code-ide.el"))
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)

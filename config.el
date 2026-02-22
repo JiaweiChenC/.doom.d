@@ -170,7 +170,6 @@
 
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
-;; (setq! citar-bibliography '("/Users/jiawei/Documents/roam/biblibrary/references.bib"))
 (setq citar-bibliography
       (list (expand-file-name "/Users/jiawei/Documents/roam/biblibrary/references.bib")))
 ;; (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
@@ -427,8 +426,8 @@
           (lambda ()
             (face-remap-add-relative 'font-lock-comment-face :slant 'italic)))
 
-(use-package! rainbow-csv
-  :hook (csv-mode . rainbow-csv-mode))
+;; (use-package! rainbow-csv
+;;   :hook (csv-mode . rainbow-csv-mode))
 
 ;; disable visual line mode in csv mode
 (add-hook 'csv-mode-hook
@@ -1078,6 +1077,11 @@ and convert it to Org using the pandoc utility."
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
 
+;; Don't let recentf track remote files — it may probe remote hosts
+;; on startup/save to check file existence, causing freezes.
+(after! recentf
+  (add-to-list 'recentf-exclude tramp-file-name-regexp))
+
 ;; fix a quickrun bug   
 (defun my-quickrun--insert-header-advice (process)
   "Insert header to PROCESS buffer with correct default-directory."
@@ -1148,10 +1152,28 @@ This version also runs fully on remote files."
                                    "lua $ZLUA_SCRIPT -l | perl -lane 'print $F[1]'")
                                   "\n" t)))))
     "Zlua directory source for `consult-dir'.")
-  (add-to-list 'consult-dir-sources 'consult-dir--source-zlua t))
+  (setq consult-dir-sources
+        (list 'consult-dir--source-zlua
+              'consult-dir--source-project
+              'consult-dir--source-default
+              'consult-dir--source-bookmark
+              'consult-dir--source-recentf
+              'consult-dir--source-tramp-ssh
+              'consult-dir--source-tramp-local)))
 
-(after! tramp-sh        
-  (setq! tramp-default-remote-shell "/bin/zsh"))
+
+;; TRAMP's internal command channel needs a fast, dumb shell — not ZSH.
+;; ZSH loads .zshrc/.zprofile (slow), has complex prompts (TRAMP hangs
+;; during prompt detection), and is unnecessary for non-interactive use.
+;; Interactive shells (vterm) already use login-shell via vterm-tramp-shells.
+(after! tramp-sh
+  (setq! tramp-default-remote-shell "/bin/sh"))
+
+;; You already configure ControlMaster in ~/.ssh/config.
+;; When TRAMP also adds its own CM options, they can conflict (different
+;; socket paths, double negotiation), causing hangs.  Let SSH handle it.
+(after! tramp
+  (setq! tramp-use-ssh-controlmaster-options nil))
 
 
 ;; do not move when hl 
@@ -1258,15 +1280,16 @@ This version also runs fully on remote files."
 
 (defun my/projectile-switch-to-buffer (arg)
   "Switch to a project buffer.
-With prefix argument ARG (C-u), include *special* buffers in the list."
+Default: include *special* buffers.
+With prefix argument ARG (C-u), exclude *special* buffers."
   (interactive "P")
-  (require 'consult)    
+  (require 'consult)
   (let* ((buffers (projectile-project-buffers))
          (filtered (if arg
-                       buffers
-                     (cl-remove-if (lambda (b)
-                                     (string-prefix-p "*" (buffer-name b)))
-                                   buffers))))
+                       (cl-remove-if (lambda (b)
+                                       (string-prefix-p "*" (buffer-name b)))
+                                     buffers)
+                     buffers)))
     (switch-to-buffer
      (consult--read
       (consult--buffer-query :sort 'visibility
@@ -1274,7 +1297,7 @@ With prefix argument ARG (C-u), include *special* buffers in the list."
                              :as #'buffer-name)
       :prompt "Switch to buffer: "
       :history 'buffer-name-history
-      :sort nil         
+      :sort nil
       :category 'buffer
       :state (consult--buffer-state)))))
 
@@ -1546,3 +1569,95 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 ;; Shorten org-persist expiry so remaining data (LaTeX previews, export
 ;; caches, etc.) doesn't accumulate indefinitely.  Default is 30 days.
 (setq! org-persist-default-expiry 7)
+
+;; org-persist--merge-index-with-disk is called on EVERY persist read/write.
+;; It re-reads the index file from disk and runs cl-set-difference (O(n²))
+;; to merge with the in-memory index.  With thousands of LaTeX preview
+;; entries this takes seconds and causes visible freezes on buffer revert.
+;; The merge is only needed when multiple Emacs instances share the persist
+;; directory.  For single-Emacs use, skip it entirely after initial load.
+(defvar +org-persist--index-loaded nil
+  "Non-nil after the persist index has been loaded once.")
+(defadvice! +org-persist-skip-merge-a (fn)
+  :around #'org-persist--merge-index-with-disk
+  (if +org-persist--index-loaded
+      nil  ; already loaded, skip the expensive merge
+    (setq +org-persist--index-loaded t)
+    (funcall fn)))
+
+(after! org-roam
+  (setq org-roam-node-display-template
+        #("${doom-hierarchy:*} ${doom-type:30} ${doom-tags:42}" 20 35
+          (face font-lock-keyword-face) 36 51
+          (face (:inherit org-tag :box nil)))))
+
+(defun jc/quickrun-refresh-locals (&rest _)
+  "Reload file-local variables before quickrun."
+  (when buffer-file-name
+    (hack-local-variables)))
+
+(advice-add 'quickrun :before #'jc/quickrun-refresh-locals)
+
+(add-hook 'vterm-mode-hook
+        (lambda () (setq-local line-spacing 0)))
+
+(setq inhibit-compacting-font-caches t)                                             
+
+(setq face-font-rescale-alist '(("Apple Color Emoji" . 0.85)))
+
+(require 'acp)
+(require 'agent-shell)
+
+(use-package! claude-code-ide
+  :commands (claude-code-ide claude-code-ide-menu)
+  :init
+  (map! :leader
+        :desc "Claude Code" "o c" #'claude-code-ide-menu)
+  :config
+  (claude-code-ide-emacs-tools-setup)
+
+  ;; Fix double cursor and pass keybindings to Claude Code terminal
+  (defun my/claude-code-setup-terminal ()
+    "Configure terminal buffer for Claude Code.
+Fixes double cursor by removing evil-refresh-cursor from window hook."
+    (when (string-match-p "\\*claude-code\\[.*\\]\\*" (buffer-name))
+      ;; Disable ALL Evil cursors for this buffer
+      (setq-local evil-normal-state-cursor nil)
+      (setq-local evil-insert-state-cursor nil)
+      (setq-local evil-visual-state-cursor nil)
+      (setq-local evil-motion-state-cursor nil)
+      ;; Hide Emacs cursor (let terminal handle it)
+      (setq-local cursor-type nil)
+      ;; KEY FIX: Remove evil-refresh-cursor from window-configuration-change-hook
+      ;; The 't' argument makes this buffer-local
+      (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t)
+      ;; Use insert-state for key passthrough
+      (evil-insert-state)
+      ;; Rebind ESC to send to terminal
+      (evil-local-set-key 'insert (kbd "<escape>") #'vterm-send-escape)
+      ;; Fix Unicode spinner/icon chars (braille, box-drawing) causing variable line height
+      ;; by mapping them to the primary monospace font instead of a fallback font
+      (let ((font-family (face-attribute 'default :family)))
+        (dolist (range '((#x2800 . #x28FF)   ; Braille patterns (spinner chars)
+                         (#x2500 . #x257F)   ; Box drawing
+                         (#x2580 . #x259F))) ; Block elements
+          (set-fontset-font t range font-family nil 'prepend)))))
+
+  (add-hook 'vterm-mode-hook #'my/claude-code-setup-terminal)
+  (add-hook 'eat-mode-hook #'my/claude-code-setup-terminal))
+
+(defun diego--vterm-font-setup ()
+"Configure font settings specifically for vterm buffers, workaround claude-code."
+
+;; Apply ASCII replacements for vterm specifically
+(let ((tbl (or buffer-display-table (setq buffer-display-table (make-display-table)))))
+(dolist (pair
+        '((#x273B . ?*) ; ✻ TEARDROP-SPOKED ASTERISK
+                (#x273D . ?*) ; ✽ HEAVY TEARDROP-SPOKED ASTERISK
+                (#x2722 . ?+) ; ✢ FOUR TEARDROP-SPOKED ASTERISK
+                (#x2736 . ?+) ; ✶ SIX-POINTED BLACK STAR
+                (#x2733 . ?*) ; ✳ EIGHT SPOKED ASTERISK
+                ))
+(aset tbl (car pair) (vector (cdr pair))))))
+
+(add-hook 'vterm-mode-hook #'diego--vterm-font-setup)
