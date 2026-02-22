@@ -73,7 +73,7 @@
   :pin nil)
 (unpin! org)
 
-(unpin! auctex evil-easymotion dirvish quickrun eglot)
+(unpin! auctex evil-easymotion quickrun eglot)
 (unpin! diff-hl)
 (package! htmlize)
 (package! impatient-showdown)
@@ -91,7 +91,7 @@
 (package! org-download)
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
-(package! modus-themes)
+;; (package! modus-themes)
 (package! mini-echo)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
@@ -114,10 +114,6 @@
 ;;   :recipe (:host github :repo "johannes-mueller/uv.el"))
 ;; disable evil snipe
 (package! evil-snipe :disable t)
-;; (package! evil-surround :disable t)
-;; (package! claude-code-ide
-;;   :recipe (:host github :repo "manzaltu/claude-code-ide.el"))
-;;   :recipe (:host github :repo "stevemolitor/claude-code.el"))
 (package! eat)
 (package! sideline)
 (package! sideline-flycheck)

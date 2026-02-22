@@ -138,3 +138,71 @@ On local files, defer to ORIG-FN."
 
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
+;;---------------------------------------------------------------------------
+;; TRAMP connection guard — fail fast on unreachable hosts
+;;---------------------------------------------------------------------------
+;; TRAMP is fully synchronous: any file operation on a remote path
+;; blocks the entire Emacs event loop during SSH connection setup.
+;; This includes Vertico's minibuffer completion, which triggers
+;; file-name-all-completions → TRAMP connect → 60+ second freeze.
+;;
+;; This advice wraps tramp-maybe-open-connection (the actual function
+;; that initiates SSH).  Before letting TRAMP start its slow connection
+;; process, we run a quick SSH probe with a 3-second timeout:
+;;   - Host reachable  → mark verified, let TRAMP proceed
+;;   - Host unreachable → signal error immediately (no 60s freeze)
+;;   - Already connected or verified → skip check entirely
+
+(defvar jc/tramp--verified-hosts (make-hash-table :test 'equal)
+  "Hosts verified reachable this session.  Keyed by \"user@host\".")
+
+(defun jc/tramp--host-key (vec)
+  "Return a cache key for VEC's user@host."
+  (let ((user (tramp-file-name-user vec))
+        (host (tramp-file-name-host vec)))
+    (if user (format "%s@%s" user host) host)))
+
+(defun jc/tramp--ssh-method-p (method)
+  "Return non-nil if METHOD is an SSH-based TRAMP method."
+  (member method '("ssh" "scp" "scpx" "sshx" "rsync")))
+
+(defun jc/tramp--cm-socket-alive-p (vec)
+  "Return non-nil if an SSH ControlMaster socket is active for VEC."
+  (let* ((user (or (tramp-file-name-user vec) (user-login-name)))
+         (host (tramp-file-name-host vec))
+         (socket (expand-file-name
+                  (format "~/.ssh/sockets/%s@%s:22" user host))))
+    (file-exists-p socket)))
+
+(defadvice! jc/tramp-connection-guard-a (fn vec)
+  "Pre-check SSH reachability before TRAMP tries to connect.
+If the host is unreachable, fail immediately instead of freezing
+Emacs for 60+ seconds."
+  :around #'tramp-maybe-open-connection
+  (let ((method (tramp-file-name-method vec))
+        (key (jc/tramp--host-key vec)))
+    (cond
+     ;; Already connected — proceed immediately
+     ((process-live-p (tramp-get-connection-process vec))
+      (funcall fn vec))
+     ;; Non-SSH method or already verified — proceed
+     ((or (not (jc/tramp--ssh-method-p method))
+          (gethash key jc/tramp--verified-hosts))
+      (funcall fn vec))
+     ;; ControlMaster socket exists — host is reachable, skip check
+     ((jc/tramp--cm-socket-alive-p vec)
+      (puthash key t jc/tramp--verified-hosts)
+      (funcall fn vec))
+     ;; Unknown host — quick SSH probe (3s max)
+     (t
+      (message "Checking SSH to %s..." key)
+      (let ((exit (call-process "ssh" nil nil nil
+                                "-o" "BatchMode=yes"
+                                "-o" "ConnectTimeout=3"
+                                key "echo" "ok")))
+        (if (= exit 0)
+            (progn
+              (puthash key t jc/tramp--verified-hosts)
+              (funcall fn vec))
+          (user-error "Cannot reach %s (SSH exit %d)" key exit)))))))
