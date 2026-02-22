@@ -1651,13 +1651,56 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 
 ;; Apply ASCII replacements for vterm specifically
 (let ((tbl (or buffer-display-table (setq buffer-display-table (make-display-table)))))
-(dolist (pair
-        '((#x273B . ?*) ; ✻ TEARDROP-SPOKED ASTERISK
-                (#x273D . ?*) ; ✽ HEAVY TEARDROP-SPOKED ASTERISK
-                (#x2722 . ?+) ; ✢ FOUR TEARDROP-SPOKED ASTERISK
-                (#x2736 . ?+) ; ✶ SIX-POINTED BLACK STAR
-                (#x2733 . ?*) ; ✳ EIGHT SPOKED ASTERISK
-                ))
+    (dolist (pair
+             '((#x23FA . ?*) ; ⏺ RECORD CIRCLE
+               (#x273B . ?*) ; ✻
+               (#x273D . ?*) ; ✽
+               (#x2722 . ?+) ; ✢
+               (#x2736 . ?+) ; ✶
+               (#x2733 . ?*) ; ✳
+               ))
 (aset tbl (car pair) (vector (cdr pair))))))
 
 (add-hook 'vterm-mode-hook #'diego--vterm-font-setup)
+
+(setq! org-startup-with-link-previews 't)
+(setq! org-startup-with-latex-preview 't)
+
+;; Fix org-startup-with-link-previews for attachment: links relying on
+;; dir-local variables (e.g. org-global-properties, org-attach-use-inheritance).
+;;
+;; The root cause: org-link-preview-region processes the first batch of links
+;; SYNCHRONOUSLY during org-mode activation, before hack-local-variables runs
+;; and applies .dir-locals.el.  So org-attach-dir gets no ATTACH_DIR, all
+;; attachment previews fail silently and their overlays are deleted.
+;;
+;; Fix: re-run link preview in find-file-hook, which fires after
+;; hack-local-variables, so dir-locals are already in effect.
+(defun +org-link-preview-after-local-vars ()
+  (when (and (derived-mode-p 'org-mode)
+             org-startup-with-link-previews)
+    (if (bound-and-true-p org-sliced-images-mode)
+        ;; org-sliced-images advises org-display-inline-images to slice.
+        ;; Clear the org-link-preview overlays first, then redraw via the
+        ;; sliced path so images are correctly sliced AND attachment paths
+        ;; are resolved (dir-locals now in effect).
+        (progn
+          (ignore-errors (org-link-preview '(64)))
+          (ignore-errors (org-display-inline-images nil t)))
+      (org-link-preview '(16)))))
+(add-hook 'find-file-hook #'+org-link-preview-after-local-vars)
+
+;; Also fix SVG rendering: org--create-inline-image passes :scale 1 alongside
+;; :max-width which can conflict for vector images.  Use :width directly.
+(after! ol
+  (defun +org--create-inline-image-svg-fix (orig-fn file width)
+    (if (and (stringp file) (string-match-p "\\.svg\\'" file))
+        (when (and (file-exists-p file) (display-graphic-p))
+          (create-image file 'svg nil
+                        :width (or width
+                                   (when (integerp org-image-max-width)
+                                     org-image-max-width))))
+      (funcall orig-fn file width)))
+  (advice-add 'org--create-inline-image :around #'+org--create-inline-image-svg-fix))
+
+(setq! projectile-indexing-method 'hybrid)
