@@ -10,7 +10,9 @@
         (ignore-errors (org-link-preview '(64)))) ; hide previews in accessible buffer
       (ignore-errors (org-display-inline-images)))) ; redraw through advised path
 
-  (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90))
+  (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90)
+
+  )
 
 (use-package! org-sliced-images
   :after org

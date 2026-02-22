@@ -602,9 +602,9 @@ inside a Jupyter src-block, return nil."
                       (forward-line)                 ; move past #+RESULTS:
                       (org-babel-result-end))))
           (when (and beg end)
-            ;; Remove then re-display images only in [beg, end]
-            ;; (org-link-preview-clear beg end)
-            (org-link-preview-region t t beg end))))))
+            ;; Clear link-preview overlays first, then redisplay via org-sliced-images path
+            (org-link-preview-clear beg end)
+            (org-display-inline-images nil nil beg end))))))
 
   ;; Defer a tick so file writes/links settle, but only for the result region
   (defun my/org-refresh-inline-images-after-babel ()
