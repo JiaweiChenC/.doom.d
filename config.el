@@ -693,14 +693,6 @@
 
 (use-package! citar)
 
-(use-package! claude-code        
-  :defer t
-  :config
-  (set-popup-rule! "\\*claude"
-    :side 'right                 
-    :size 0.33
-    :select t))
-
 (after! org
   (set-popup-rule! "\\*Org Babel Results\\*"
     :size 0.33                   
@@ -881,7 +873,6 @@
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
-;; (setq! org-startup-with-latex-preview 't)
 
 ;; config.el       
 (use-package! evil-visual-mark-mode
@@ -952,11 +943,6 @@
         ;; if you like, keep indicators minimal:
         ;; (setq-local fringe-indicator-alist '((continuation . nil) (truncation . nil)))
         ))))
-
-;; Highest-priority map in Doom (general-override-mode-map)
-;; (map! :map override
-;;       :i "C-j" #'next-line
-;;       :i "C-k" #'previous-line)
 
 ;; map space o p to +dired/dirvish-side-and-follow
 (map! :leader :desc "dirvish side and follow" "o p" #'+dired/dirvish-side-and-follow)
@@ -1614,6 +1600,9 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
   (map! :leader
         :desc "Claude Code" "o c" #'claude-code-ide-menu)
   :config
+
+  (setq! claude-code-ide-show-claude-window-in-ediff nil)
+
   (claude-code-ide-emacs-tools-setup)
 
   ;; Fix double cursor and pass keybindings to Claude Code terminal
