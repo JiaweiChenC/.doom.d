@@ -138,14 +138,6 @@
   (setq vertico-resize 'grow-only)
   )
 
-(after! vertico
-  (defadvice! +vertico-insert-trim-trailing-a ()
-    "Insert candidate trimming trailing whitespace (e.g. org-roam padding)."
-    :override #'vertico-insert
-    (interactive)
-    (when-let (cand (vertico--candidate))
-      (delete-minibuffer-contents)
-      (insert (string-trim-right cand)))))
 
 (setq org-image-max-width 1000)
 (after! org
@@ -311,7 +303,7 @@
 (map! :leader :desc "citar create note" "o C" #'citar-open-files)
 
 ;; map citar open files to space o C
-(map! :leader :desc "citar open files" "o c" #'my/citar-open-pdf)
+(map! :leader :desc "citar open files" "o z" #'my/citar-open-pdf)
 
 (use-package! corfu
   ;; :init
@@ -1579,7 +1571,14 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
   (setq org-roam-node-display-template
         #("${doom-hierarchy:*} ${doom-type:30} ${doom-tags:42}" 20 35
           (face font-lock-keyword-face) 36 51
-          (face (:inherit org-tag :box nil)))))
+          (face (:inherit org-tag :box nil))))
+
+  (defadvice! +org-roam-node-completions-trim-a (fn &rest args)
+    "Trim trailing whitespace from completion keys so Tab doesn't insert padding."
+    :around #'org-roam-node-read--completions
+    (mapcar (lambda (cell)
+              (cons (string-trim-right (car cell)) (cdr cell)))
+            (apply fn args))))
 
 (defun jc/quickrun-refresh-locals (&rest _)
   "Reload file-local variables before quickrun."
@@ -1605,7 +1604,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
         :desc "Claude Code" "o c" #'claude-code-ide-menu)
   :config
 
-  (setq! claude-code-ide-show-claude-window-in-ediff nil)
+  ;; (setq! claude-code-ide-show-claude-window-in-ediff nil)
 
   (claude-code-ide-emacs-tools-setup)
 
@@ -1656,32 +1655,21 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 
 (add-hook 'vterm-mode-hook #'diego--vterm-font-setup)
 
-(setq! org-startup-with-link-previews 't)
-(setq! org-startup-with-latex-preview 't)
+;; Use a single startup pass through org-sliced-images.
+;; Disable Org's startup link-preview path (Org 9.8), then render once after
+;; dir-locals are applied so attachment links resolve correctly.
+;; (setq! org-startup-with-inline-images nil)
+(setq! org-startup-with-link-previews 'nil)
+(setq! org-startup-with-latex-preview 'nil)
 
-;; Fix org-startup-with-link-previews for attachment: links relying on
-;; dir-local variables (e.g. org-global-properties, org-attach-use-inheritance).
-;;
-;; The root cause: org-link-preview-region processes the first batch of links
-;; SYNCHRONOUSLY during org-mode activation, before hack-local-variables runs
-;; and applies .dir-locals.el.  So org-attach-dir gets no ATTACH_DIR, all
-;; attachment previews fail silently and their overlays are deleted.
-;;
-;; Fix: re-run link preview in find-file-hook, which fires after
-;; hack-local-variables, so dir-locals are already in effect.
-(defun +org-link-preview-after-local-vars ()
-  (when (and (derived-mode-p 'org-mode)
-             org-startup-with-link-previews)
-    (if (bound-and-true-p org-sliced-images-mode)
-        ;; org-sliced-images advises org-display-inline-images to slice.
-        ;; Clear the org-link-preview overlays first, then redraw via the
-        ;; sliced path so images are correctly sliced AND attachment paths
-        ;; are resolved (dir-locals now in effect).
-        (progn
-          (ignore-errors (org-link-preview '(64)))
-          (ignore-errors (org-display-inline-images nil t)))
-      (org-link-preview '(16)))))
-(add-hook 'find-file-hook #'+org-link-preview-after-local-vars)
+;; (defun +org-sliced-images-startup-once ()
+;;   (when (and (derived-mode-p 'org-mode)
+;;              (display-graphic-p)
+;;              (bound-and-true-p org-sliced-images-mode))
+;;     (ignore-errors (org-display-inline-images nil nil))))
+
+;; (remove-hook 'find-file-hook #'+org-link-preview-after-local-vars)
+;; (add-hook 'hack-local-variables-hook #'+org-sliced-images-startup-once)
 
 ;; Also fix SVG rendering: org--create-inline-image passes :scale 1 alongside
 ;; :max-width which can conflict for vector images.  Use :width directly.
