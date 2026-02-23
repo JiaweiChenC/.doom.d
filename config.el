@@ -138,6 +138,15 @@
   (setq vertico-resize 'grow-only)
   )
 
+(after! vertico
+  (defadvice! +vertico-insert-trim-trailing-a ()
+    "Insert candidate trimming trailing whitespace (e.g. org-roam padding)."
+    :override #'vertico-insert
+    (interactive)
+    (when-let (cand (vertico--candidate))
+      (delete-minibuffer-contents)
+      (insert (string-trim-right cand)))))
+
 (setq org-image-max-width 1000)
 (after! org
   ;; (setq! org-src-context-mode 1)
@@ -1062,11 +1071,6 @@ and convert it to Org using the pandoc utility."
 ;; tramp trick
 (load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
-
-;; Don't let recentf track remote files — it may probe remote hosts
-;; on startup/save to check file existence, causing freezes.
-(after! recentf
-  (add-to-list 'recentf-exclude tramp-file-name-regexp))
 
 ;; fix a quickrun bug   
 (defun my-quickrun--insert-header-advice (process)
