@@ -5,7 +5,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("ea4dd126d72d30805c083421a50544e235176d9698c8c541b824b60912275ba1"
+   '("a50b8f26f4f7fc0bb5f5a5422cec4d964cc4eb4a1ddff5ba7b1383e15a7e70e0"
+     "6b506ae956ec2942bd90acdcc72ccbdc0ca0e26149f1659e9c53c9439291a84d"
+     "d56a9fa4b46c249961ce6891f3f86d7936cb283088e6a83ffe848d295b037163"
+     "ea4dd126d72d30805c083421a50544e235176d9698c8c541b824b60912275ba1"
      "c3076fdee603e9768817cfe8dbf6253d5b3cf3bf4602cb32fa2f1df62fe70b1c"
      "5382c626e8bd3d37b528793185dab2ad72d1ff55dca42fd40dae0461c4f21a3f"
      "a23295788e507947c48684e48a55cc2387b853e440dc75c985e47bbb7ea30630"
@@ -90,6 +93,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(mini-echo-status-local ((t (:foreground "gold3")))))
+ '(mini-echo-status-local ((t (:foreground "gold3"))))
+ '(org-done ((t (:foreground "gray70")))))
 
 ;; (put 'scroll-left 'disabled nil)

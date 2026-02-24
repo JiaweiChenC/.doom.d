@@ -110,8 +110,6 @@
 (unpin! evil-nerd-commenter)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
-;; (package! uv
-;;   :recipe (:host github :repo "johannes-mueller/uv.el"))
 ;; disable evil snipe
 (package! evil-snipe :disable t)
 (package! eat)
@@ -120,7 +118,6 @@
 (package! sideline-eglot
   :recipe (:host github :repo "emacs-sideline/sideline-eglot")
   )
-;; (package! atomic-chrome)
 (package! catppuccin-theme)
 (package! ox-pandoc)
 ;; (package! evil-visual-mark-mode

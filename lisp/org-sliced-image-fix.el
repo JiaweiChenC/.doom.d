@@ -1,18 +1,6 @@
 (after! org
   (require 'org-sliced-images)
-  (org-sliced-images-mode 1)
-
-  (defun jiawei/org-sliced-images-fix-startup ()
-    (when (and org-startup-with-inline-images
-               (bound-and-true-p org-sliced-images-mode))
-      ;; Org 9.8+ may render startup images via org-link-preview, bypassing org-sliced-images advice.
-      (when (fboundp 'org-link-preview)
-        (ignore-errors (org-link-preview '(64)))) ; hide previews in accessible buffer
-      (ignore-errors (org-display-inline-images)))) ; redraw through advised path
-
-  (add-hook 'org-mode-hook #'jiawei/org-sliced-images-fix-startup 90)
-
-  )
+  (org-sliced-images-mode 1))
 
 (use-package! org-sliced-images
   :after org
@@ -89,3 +77,15 @@
 ;;          (when toggling-off
 ;;            (jw/osi--delete-blank-overlays beg end)))))))
 
+;; Also fix SVG rendering: org--create-inline-image passes :scale 1 alongside
+;; :max-width which can conflict for vector images.  Use :width directly.
+(after! ol
+  (defun +org--create-inline-image-svg-fix (orig-fn file width)
+    (if (and (stringp file) (string-match-p "\\.svg\\'" file))
+        (when (and (file-exists-p file) (display-graphic-p))
+          (create-image file 'svg nil
+                        :width (or width
+                                   (when (integerp org-image-max-width)
+                                     org-image-max-width))))
+      (funcall orig-fn file width)))
+  (advice-add 'org--create-inline-image :around #'+org--create-inline-image-svg-fix))

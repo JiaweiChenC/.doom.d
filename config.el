@@ -57,6 +57,8 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+;;; Core UI and editing behavior
+
 (after! cdlatex
   (add-to-list 'cdlatex-math-modify-alist '( ?s "\\boldsymbol"  nil  t t nil ))
   (add-to-list 'cdlatex-math-modify-alist '( ?n "\\mathbb"      nil  t t nil )))
@@ -111,6 +113,8 @@
                "r" #'org-roam-node-find
                "R" #'org-roam-capture))
 
+;;; Secrets and local overrides
+
 (when (file-exists-p "~/.emacs.d/.secret.el")
   (load "~/.emacs.d/.secret.el"))
 
@@ -139,6 +143,8 @@
   )
 
 
+;;; Org, citation, and roam
+
 (setq org-image-max-width 1000)
 (after! org
   ;; (setq! org-src-context-mode 1)
@@ -166,8 +172,6 @@
 
 
 (setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
-;; (setq citar-org-roam-capture-template-key "z")
-
 
 ;; citar configuration
 (setq! org-cite-csl-styles-dir "~/Zotero/styles")
@@ -175,7 +179,6 @@
       (list (expand-file-name "/Users/jiawei/Documents/roam/biblibrary/references.bib")))
 ;; (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
 ;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
-(setq citar-symbol-separator "  ")
 ;; (setq! citar-org-roam-subdir "paper/")
 (use-package! citar
   :config
@@ -188,6 +191,8 @@
                             "#+title: ${title}\n#+created: %<%Y-%m-%d>")
          :unnarrowed t
          :empty-lines 1)))
+
+;;; AI tools and assistants
 
 (use-package! copilot
   ;; :hook (prog-mode . copilot-mode)
@@ -203,6 +208,8 @@
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
   (setq copilot-idle-delay 0.5)
   )
+
+;;; Window/frame and shell helpers
 
 ;; open warp terminal in current directory
 (defvar last-warp-dir nil
@@ -263,6 +270,8 @@
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
 
 
+;;; macOS integration
+
 (defun +macos/find-file-with-default-program ()
   "Select a file in Emacs and open it using the default program on your Mac."
   (interactive)
@@ -304,6 +313,8 @@
 
 ;; map citar open files to space o C
 (map! :leader :desc "citar open files" "o z" #'my/citar-open-pdf)
+
+;;; Completion and tab UI
 
 (use-package! corfu
   ;; :init
@@ -376,8 +387,6 @@
 
 (map! :n "s-;" #'skim-next-page)
 (map! :n "s-'" #'skim-prev-page)
-(setq org-image-actual-width nil)
-
 (setq! org-highlight-latex-and-related '(native latex script entities))
 
 (setq tex-fontify-script 'nil)
@@ -395,8 +404,6 @@
   :config
   (setq! org-appear-autolinks t)
   )
-
-(setq! org-image-actual-width nil)
 
 (setq! TeX-command-extra-options "-shell-escape")
 
@@ -538,6 +545,8 @@
   (setq! org-modern-tag nil)
   )
 
+;;; Org Babel and Jupyter
+
 (with-eval-after-load 'ob-jupyter
   (org-babel-jupyter-aliases-from-kernelspecs)
   )
@@ -621,6 +630,8 @@
 (require 'flash-emacs-search)
 (setq! flash-emacs-ts-rainbow-enabled 't)
 
+;;; Evil navigation and jump behavior
+
 (after! evil
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
@@ -628,6 +639,53 @@
   (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
   (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump)
   )
+
+(defcustom jc/evil-mark-jump-timeout 0.5
+  "Seconds to wait for a mark key before opening consult marks."
+  :type 'number
+  :group 'evil)
+
+(defconst jc/evil-marker-excluded-chars '(27)
+  "Character codes that should not be used as Evil markers.")
+
+(defun jc/evil-marker-char-allowed-p (char)
+  "Return non-nil when CHAR is allowed as an Evil marker."
+  (not (memq char jc/evil-marker-excluded-chars)))
+
+(defun jc/evil-set-marker-filter (orig-fn char &optional pos advance)
+  "Skip setting Evil markers for excluded CHAR values."
+  (if (jc/evil-marker-char-allowed-p char)
+      (funcall orig-fn char pos advance)
+    (message "Ignoring mark for key: ESC")))
+
+(defun jc/evil-clear-excluded-markers ()
+  "Remove excluded markers from Evil marker stores."
+  (setq evil-markers-alist
+        (seq-remove (lambda (entry)
+                      (memq (car entry) jc/evil-marker-excluded-chars))
+                    evil-markers-alist))
+  (when (boundp 'evil-visual-mark-overlay-alist)
+    (setq evil-visual-mark-overlay-alist
+          (seq-remove (lambda (entry)
+                        (memq (car (car entry)) jc/evil-marker-excluded-chars))
+                      evil-visual-mark-overlay-alist))))
+
+(defun jc/evil-goto-mark-line-or-consult ()
+  "Jump to an Evil mark, or open mark list after timeout."
+  (interactive)
+  (let ((event (read-event "Mark: " nil jc/evil-mark-jump-timeout)))
+    (if event
+        (if (characterp event)
+            (evil-goto-mark-line event)
+          (setq unread-command-events (list event)))
+      (if (fboundp 'evil-collection-consult-mark)
+          (call-interactively #'evil-collection-consult-mark)
+        (message "`evil-collection-consult-mark` is not available")))))
+
+(after! evil
+  (advice-add 'evil-set-marker :around #'jc/evil-set-marker-filter)
+  (jc/evil-clear-excluded-markers)
+  (define-key evil-motion-state-map (kbd "'") #'jc/evil-goto-mark-line-or-consult))
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -651,6 +709,8 @@
   :select t
   :quit t
   :ttl nil)
+
+;;; Project and coding tooling
 
 (use-package! apheleia
   :config
@@ -691,8 +751,6 @@
                      '("ruff" "server") "ruff-lsp"
                      "jedi-language-server"
                      "pylsp" "pyls"))
-
-(use-package! citar)
 
 (after! org
   (set-popup-rule! "\\*Org Babel Results\\*"
@@ -739,6 +797,8 @@
          ))            ; display the backend name
 
 (setq! good-scroll-persist-vscroll-window-scroll 'nil)
+
+;;; Org export and file association tuning
 
 (setq! org-journal-time-format ""
        org-journal-time-prefix "** TODO ")
@@ -843,16 +903,6 @@
       (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
 
-;; (use-package! atomic-chrome
-;;   :config
-;;   (setq atomic-chrome-url-major-mode-alist
-;;       '(("github\\.com" . gfm-mode)
-;;         ("redmine" . textile-mode)
-;;         ("overleaf.com" . LaTeX-mode)
-;;         ))
-;;   (setq! atomic-chrome-buffer-open-style 'full)
-;;   
-
 (setq! org-attach-dir-relative 't)
 
 ;; ;; Put this in your config.el
@@ -874,6 +924,8 @@
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
+
+;;; Local packages and popup helpers
 
 ;; config.el       
 (use-package! evil-visual-mark-mode
@@ -1089,6 +1141,8 @@ and convert it to Org using the pandoc utility."
   (advice-add 'quickrun--insert-header :after #'my-quickrun--insert-header-advice))
 
 
+;;; Core command overrides
+
 (defun lsp! ()
   "Dispatch to call the currently used lsp client entrypoint.
 Skip remote (TRAMP) buffers silently."
@@ -1101,7 +1155,6 @@ Skip remote (TRAMP) buffers silently."
 
 (use-package! projectile
   :config              
-  (setq projectile-indexing-method 'alien)
   (defun projectile-find-file-hook-function ()
     "Called by `find-file-hook' when `projectile-mode' is on.
 This version also runs fully on remote files."
@@ -1113,7 +1166,10 @@ This version also runs fully on remote files."
     (projectile-track-known-projects-find-file-hook)
     (projectile-visit-project-tags-table)))
 
-;; consut dir using zlua 
+;;; Projectile and Consult
+
+;; Consult config
+;; consult-dir with zlua source
 (use-package! consult-dir
   :init                 
   (setq consult-dir-default-command #'consult-dir-dired)
@@ -1143,6 +1199,59 @@ This version also runs fully on remote files."
               'consult-dir--source-tramp-ssh
               'consult-dir--source-tramp-local)))
 
+(defun my/projectile-switch-to-buffer (arg)
+  "Switch to a project buffer.
+Default: include *special* buffers.
+With prefix argument ARG (C-u), exclude *special* buffers."
+  (interactive "P")
+  (require 'consult)
+  (let* ((buffers (projectile-project-buffers))
+         (filtered (if arg
+                       (cl-remove-if (lambda (b)
+                                       (string-prefix-p "*" (buffer-name b)))
+                                     buffers)
+                     buffers)))
+    (switch-to-buffer
+     (consult--read
+      (consult--buffer-query :sort 'visibility
+                             :predicate (lambda (buf) (memq buf filtered))
+                             :as #'buffer-name)
+      :prompt "Switch to buffer: "
+      :history 'buffer-name-history
+      :sort nil
+      :category 'buffer
+      :state (consult--buffer-state)))))
+
+(map! :leader
+      :desc "projectile switch to buffer"
+      "TAB" #'my/projectile-switch-to-buffer)
+
+(after! consult
+  (defun my/consult-tmux-session ()
+    "Pick a tmux session with Consult and switch/attach to it (by name)."
+    (interactive)
+    (require 'consult)
+    (let* ((sessions (+tmux-list-sessions))
+           (cands
+            (mapcar (lambda (s)
+                      (let* ((name (plist-get (cdr s) :name))
+                             (attached (plist-get (cdr s) :attached))
+                             (label (format "%s%s" name (if attached "  (attached)" ""))))
+                        (cons label name)))
+                    sessions))
+           (choice (consult--read (mapcar #'car cands)
+                                  :prompt "tmux session: "
+                                  :sort nil
+                                  :require-match t)))
+      (when choice
+        (let ((name (cdr (assoc choice cands))))
+          (condition-case _
+              (+tmux (format "switch-client -t %s" (shell-quote-argument name)))
+            (error
+             (+tmux (format "attach-session -t %s" (shell-quote-argument name))))))))))
+
+
+;;; TRAMP optimizations
 
 ;; TRAMP's internal command channel needs a fast, dumb shell — not ZSH.
 ;; ZSH loads .zshrc/.zprofile (slow), has complex prompts (TRAMP hangs
@@ -1157,6 +1266,8 @@ This version also runs fully on remote files."
 (after! tramp
   (setq! tramp-use-ssh-controlmaster-options nil))
 
+
+;;; Evil search enhancements
 
 ;; do not move when hl 
 (defun jc/evil-hl-word-under-cursor ()
@@ -1260,32 +1371,7 @@ This version also runs fully on remote files."
   (advice-add 'evil-ex-search-update :after #'jc/evil-search--after-update)
   (advice-add 'evil-ex-search :after #'jc/evil-search--after-search))
 
-(defun my/projectile-switch-to-buffer (arg)
-  "Switch to a project buffer.
-Default: include *special* buffers.
-With prefix argument ARG (C-u), exclude *special* buffers."
-  (interactive "P")
-  (require 'consult)
-  (let* ((buffers (projectile-project-buffers))
-         (filtered (if arg
-                       (cl-remove-if (lambda (b)
-                                       (string-prefix-p "*" (buffer-name b)))
-                                     buffers)
-                     buffers)))
-    (switch-to-buffer
-     (consult--read
-      (consult--buffer-query :sort 'visibility
-                             :predicate (lambda (buf) (memq buf filtered))
-                             :as #'buffer-name)
-      :prompt "Switch to buffer: "
-      :history 'buffer-name-history
-      :sort nil
-      :category 'buffer
-      :state (consult--buffer-state)))))
-
-(map! :leader           
-      :desc "projectile switch to buffer" 
-      "TAB" #'my/projectile-switch-to-buffer)
+;;; Misc UX tweaks
 
 (use-package! dirvish
   :config               
@@ -1295,30 +1381,6 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 (use-package! javelin
   :config               
   (global-javelin-minor-mode 1))
-
-(after! consult         
-  (defun my/consult-tmux-session ()
-    "Pick a tmux session with Consult and switch/attach to it (by name)."
-    (interactive)
-    (require 'consult)
-    (let* ((sessions (+tmux-list-sessions))
-           (cands
-            (mapcar (lambda (s)
-                      (let* ((name (plist-get (cdr s) :name))
-                             (attached (plist-get (cdr s) :attached))
-                             (label (format "%s%s" name (if attached "  (attached)" ""))))
-                        (cons label name)))
-                    sessions))
-           (choice (consult--read (mapcar #'car cands)
-                                  :prompt "tmux session: "
-                                  :sort nil
-                                  :require-match t)))
-      (when choice
-        (let ((name (cdr (assoc choice cands))))
-          (condition-case _
-              (+tmux (format "switch-client -t %s" (shell-quote-argument name)))
-            (error
-             (+tmux (format "attach-session -t %s" (shell-quote-argument name))))))))))
 
 (setq! diff-refine 'navigation)
 
@@ -1391,8 +1453,8 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 
 (setq! link-hint-avy-all-windows 't)
 
-; do not cache all
-;; (setq org-latex-preview-cache 'temp)
+
+;;; Org-roam directory and dual DB sync
 
 (setq org-roam-directory "~/Documents/roam/note/")
 
@@ -1531,6 +1593,8 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
       (org-roam-db-sync)
       (message "Org-roam projects synced.")))
 
+;;; Org cache and persist performance
+
 ;; org-element in-memory cache — keeps org-map-entries and friends fast.
 ;; Disk persistence is off: the element cache (one entry per .org file) is
 ;; the main contributor to org-persist bloat, and loading a large index
@@ -1594,6 +1658,8 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 (setq face-font-rescale-alist '(("Apple Color Emoji" . 0.85)))
 
+;;; Claude Code and terminal integration
+
 (require 'acp)
 (require 'agent-shell)
 
@@ -1638,6 +1704,8 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
   (add-hook 'vterm-mode-hook #'my/claude-code-setup-terminal)
   (add-hook 'eat-mode-hook #'my/claude-code-setup-terminal))
 
+;;; vterm font fallback and startup behavior
+
 (defun diego--vterm-font-setup ()
 "Configure font settings specifically for vterm buffers, workaround claude-code."
 
@@ -1662,26 +1730,5 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 (setq! org-startup-with-link-previews 'nil)
 (setq! org-startup-with-latex-preview 'nil)
 
-;; (defun +org-sliced-images-startup-once ()
-;;   (when (and (derived-mode-p 'org-mode)
-;;              (display-graphic-p)
-;;              (bound-and-true-p org-sliced-images-mode))
-;;     (ignore-errors (org-display-inline-images nil nil))))
-
-;; (remove-hook 'find-file-hook #'+org-link-preview-after-local-vars)
-;; (add-hook 'hack-local-variables-hook #'+org-sliced-images-startup-once)
-
-;; Also fix SVG rendering: org--create-inline-image passes :scale 1 alongside
-;; :max-width which can conflict for vector images.  Use :width directly.
-(after! ol
-  (defun +org--create-inline-image-svg-fix (orig-fn file width)
-    (if (and (stringp file) (string-match-p "\\.svg\\'" file))
-        (when (and (file-exists-p file) (display-graphic-p))
-          (create-image file 'svg nil
-                        :width (or width
-                                   (when (integerp org-image-max-width)
-                                     org-image-max-width))))
-      (funcall orig-fn file width)))
-  (advice-add 'org--create-inline-image :around #'+org--create-inline-image-svg-fix))
-
+;; this is to include extra files in the indexing using .projectile file
 (setq! projectile-indexing-method 'hybrid)
