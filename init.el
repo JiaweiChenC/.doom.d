@@ -186,7 +186,7 @@
         +roam2
         +journal
         +dragndrop
-        +jupyter
+        ;; +jupyter
         ;; +present
         )
        ;;php               ; perl's insecure younger brother

@@ -571,7 +571,8 @@
          (files (when (file-directory-p attach-dir)
                   (directory-files attach-dir nil "^[^.]"))) ;; List non-dotfiles
          (file (completing-read "Choose attachment file: " files nil t))
-         (link (format "[[attachment:%s][%s]]" file file)))
+         (link-name (read-string "Link name: " file))
+         (link (format "[[attachment:%s][%s]]" file link-name)))
     (insert link)))
 
 ;; map to space m a i
