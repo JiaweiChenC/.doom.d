@@ -147,20 +147,18 @@
 
 (setq org-image-max-width 1000)
 (after! org
-  ;; (setq! org-src-context-mode 1)
-  (setq! org-pretty-entities nil)
+  (setopt org-pretty-entities nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
-  ;; (setq! org-download-method 'directory)
+  ;; (setopt org-download-method 'directory)
   ;; (add-to-list 'completion-at-point-functions #'cape-file)
   (defadvice! recover-paragraph-seperate ()
     "Recover org paragraph mark position."
     :after 'org-setup-filling
     (setq-local paragraph-start "[\f\\|[ \t]*$]")
     (setq-local paragraph-separate "[ \t\f]*$"))
-  (setq org-startup-folded 'content)
   (setq org-image-actual-width '(500))
   (org-link-set-parameters "zotero"
                            :follow (lambda (url arg) (browse-url (format "zotero:%s" url) arg)))
@@ -171,18 +169,18 @@
   )
 
 
-(setq! org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
+(setopt org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
 
 ;; citar configuration
-(setq! org-cite-csl-styles-dir "~/Zotero/styles")
+(setopt org-cite-csl-styles-dir "~/Zotero/styles")
 (setq citar-bibliography
       (list (expand-file-name "/Users/jiawei/Documents/roam/biblibrary/references.bib")))
-;; (setq! citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
-;; (setq! citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
-;; (setq! citar-org-roam-subdir "paper/")
+;; (setopt citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
+;; (setopt citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
+;; (setopt citar-org-roam-subdir "paper/")
 (use-package! citar
   :config
-  (setq! citar-org-roam-note-title-template "${title}"))
+  (setopt citar-org-roam-note-title-template "${title}"))
 
 (setq org-roam-capture-templates
       '(("n" "note" plain
@@ -242,7 +240,7 @@
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
 
-(setq! quickrun-timeout-seconds 1000000)
+(setopt quickrun-timeout-seconds 1000000)
 
 ;; paste image
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
@@ -320,7 +318,7 @@
   ;; :init
   ;; (corfu-global-mode)
   :config
-  (setq! corfu-popupinfo-max-height 1)
+  (setopt corfu-popupinfo-max-height 1)
   (setq corfu-auto nil
         corfu-quit-no-match 'separator
         corfu-quit-at-boundary 'separator
@@ -344,7 +342,7 @@
   (map! :n "[T" 'tab-bar-switch-to-prev-tab)
   )
 
-(setq! ess-startup-directory 'default-directory)
+(setopt ess-startup-directory 'default-directory)
 
 (defun my/move-buffer-to-new-frame ()
   "Move the current buffer to a new frame and delete it from the current frame."
@@ -365,7 +363,7 @@
   '(progn
      (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))))
 
-(setq! dired-mouse-drag-files 'move)
+(setopt dired-mouse-drag-files 'move)
 
 (add-hook 'doom-load-theme-hook
           (lambda ()
@@ -387,7 +385,7 @@
 
 (map! :n "s-;" #'skim-next-page)
 (map! :n "s-'" #'skim-prev-page)
-(setq! org-highlight-latex-and-related '(native latex script entities))
+(setopt org-highlight-latex-and-related '(native latex script entities))
 
 (setq tex-fontify-script 'nil)
 
@@ -396,20 +394,20 @@
 ;; bind space b return to embard open bookmark external
 (map! :leader :desc "open bookmark external" "e m" #'embark-bookmark-open-externally)
 
-(setq! org-modern-table nil)
-(setq! org-modern-block-fringe nil)
+(setopt org-modern-table nil)
+(setopt org-modern-block-fringe nil)
 
 (use-package! org-appear
   :hook (org-mode . org-appear-mode)
   :config
-  (setq! org-appear-autolinks t)
+  (setopt org-appear-autolinks t)
   )
 
-(setq! TeX-command-extra-options "-shell-escape")
+(setopt TeX-command-extra-options "-shell-escape")
 
-(setq! org-export-expand-links 'nil)
+(setopt org-export-expand-links 'nil)
 
-(setq! vterm-timer-delay 0.01)
+(setopt vterm-timer-delay 0.01)
 
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
@@ -421,7 +419,7 @@
 ;;       large-hscroll-threshold 1000
 ;;       syntax-wholeline-max 1000)
 
-;; (setq! org-preview-html-viewer 'xwidget)
+;; (setopt org-preview-html-viewer 'xwidget)
 
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
 (setq TeX-view-program-list
@@ -479,7 +477,7 @@
       "<return>" nil
       "<return>" #'zot-open-pdf)
 
-(setq! evil-kill-on-visual-paste nil)
+(setopt evil-kill-on-visual-paste nil)
 
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
@@ -487,7 +485,7 @@
 ;; (use-package! phscroll
 ;;   :hook (org-mode . org-phscroll-mode))
 
-(setq! visual-fill-column-width 100)
+(setopt visual-fill-column-width 100)
 
 ;;; Define a flag variable for the startup option (buffer-local by Org parsing)
 (defvar org-visual-fill-startup nil
@@ -531,34 +529,40 @@
               (hoagie-org-narrow-to-narrow-tag))))
 
 
-(setq! doom-big-font-increment 2)
+(setopt doom-big-font-increment 2)
 
 (map! :n "C-;" #'send-scroll-up-to-other-window)
 (map! :n "C-'" #'send-scroll-down-to-other-window)
 
 (use-package! org-modern-indent
   :hook (org-mode . org-modern-indent-mode))
+(after! org
+  ;; Don't auto-enable org-indent-mode when opening Org buffers
+  (setq org-startup-indented 't))
+
+;;   ;; Hard-disable it even if something else toggles it on
+;;   (add-hook 'org-mode-hook (lambda () (org-indent-mode -1))))
 
 (use-package! org-modern
   :defer t
   :init
-  (setq! org-modern-tag nil)
+  (setopt org-modern-tag nil)
   )
 
-;;; Org Babel and Jupyter
+;; ;;; Org Babel and Jupyter
 
-(with-eval-after-load 'ob-jupyter
-  (org-babel-jupyter-aliases-from-kernelspecs)
-  )
+;; (with-eval-after-load 'ob-jupyter
+;;   (org-babel-jupyter-aliases-from-kernelspecs)
+;;   )
 
-;; hack to make jupyter work with images
-;; https://github.com/emacs-jupyter/jupyter/issues/558
-(defun skip-undo (orig-fun &rest args)
-  "Execute ORIG-FUN with ARGS without recording undo information."
-  (let ((buffer-undo-list t)) ; Temporarily disable undo recording
-    (apply orig-fun args)))
+;; ;; hack to make jupyter work with images
+;; ;; https://github.com/emacs-jupyter/jupyter/issues/558
+;; (defun skip-undo (orig-fun &rest args)
+;;   "Execute ORIG-FUN with ARGS without recording undo information."
+;;   (let ((buffer-undo-list t)) ; Temporarily disable undo recording
+;;     (apply orig-fun args)))
 
-(advice-add 'jupyter-generate-request :around #'skip-undo)
+;; (advice-add 'jupyter-generate-request :around #'skip-undo)
 
 ;; attachment
 (setq org-attach-auto-tag nil)
@@ -579,7 +583,7 @@
 (map! :leader :desc "insert attachment from dir" "m a i" #'insert-attachment-link-from-dir)
 
 ;; make copilot ignore .eld file
-(setq! copilot-max-char-warning-disabled t)
+(setopt copilot-max-char-warning-disabled t)
 
 (map! :after evil-org
       :map evil-org-mode-map
@@ -590,7 +594,7 @@
 (after! org
   (add-to-list 'org-default-properties "HEADER-ARGS"))
 
-(setq! envrc-remote t)
+(setopt envrc-remote t)
 
 (use-package! org-latex-preview
   :hook (org-mode . org-latex-preview-mode)
@@ -620,7 +624,7 @@
 (map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
 
 ;; do not export when archived
-(setq! org-export-with-archived-trees nil)
+(setopt org-export-with-archived-trees nil)
 
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
@@ -629,7 +633,7 @@
 (require 'flash-emacs-remote)
 (require 'flash-emacs-ts)
 (require 'flash-emacs-search)
-(setq! flash-emacs-ts-rainbow-enabled 't)
+(setopt flash-emacs-ts-rainbow-enabled 't)
 
 ;;; Evil navigation and jump behavior
 
@@ -671,6 +675,114 @@
                         (memq (car (car entry)) jc/evil-marker-excluded-chars))
                       evil-visual-mark-overlay-alist))))
 
+(defun jc/evil-consult-marks--all-marks ()
+  "Collect all evil markers: local (current buffer) + persisted global (A-Z).
+Loads both local and global markers from disk so persisted marks are visible
+even before they have been lazily accessed. Returns an alist sorted with
+local marks first, global marks last, alphabetical within each group."
+  (when (fboundp 'night/load-markers)
+    (night/load-markers :global-p nil)
+    (night/load-markers :global-p t))
+  (let* (;; Only show user-set marks: a-z (97-122), A-Z (65-90), 0-9 (48-57).
+         ;; Evil silently manages [ ] ^ . < > ' " for internal bookkeeping;
+         ;; exclude those the same way the persist system does.
+         (user-mark-p (lambda (e)
+                        (let ((c (car e)))
+                          (or (<= ?a c ?z) (<= ?A c ?Z) (<= ?0 c ?9)))))
+         (local (cl-remove-if
+                 (lambda (e)
+                   (or (evil-global-marker-p (car e))
+                       (not (funcall user-mark-p e))
+                       (not (markerp (cdr-safe e)))))
+                 evil-markers-alist))
+         (global (cl-remove-if-not
+                  (lambda (e)
+                    (and (funcall user-mark-p e)
+                         (evil-global-marker-p (car e))
+                         (markerp (cdr-safe e))
+                         (marker-buffer (cdr e))))
+                  (default-value 'evil-markers-alist))))
+    (sort (append local global)
+          (lambda (a b)
+            (let ((ag (evil-global-marker-p (car a)))
+                  (bg (evil-global-marker-p (car b))))
+              (cond
+               ((and ag (not bg)) nil)   ; global after local
+               ((and (not ag) bg) t)     ; local before global
+               (t (< (car a) (car b)))))))))
+
+(defun jc/evil-consult-marks--candidates (marks)
+  "Build consult candidates from MARKS alist of (char . marker).
+Global marks (A-Z) include the file name in the label."
+  (consult--forbid-minibuffer)
+  (let (candidates)
+    (save-excursion
+      (pcase-dolist (`(,char . ,marker) marks)
+        (when-let* ((pos (marker-position marker))
+                    (buf (marker-buffer marker))
+                    ((buffer-live-p buf))
+                    ((not (minibufferp buf))))
+          (with-current-buffer buf
+            (when (consult--in-range-p pos)
+              (goto-char pos)
+              (let* ((line (line-number-at-pos pos consult-line-numbers-widen))
+                     (is-global (evil-global-marker-p char))
+                     (display-name (if (buffer-file-name buf)
+                                       (abbreviate-file-name (buffer-file-name buf))
+                                     (buffer-name buf)))
+                     (label (if is-global
+                                (format "[%s] %s" (char-to-string char) display-name)
+                              (format "[%s]" (char-to-string char))))
+                     (prefix (consult--format-file-line-match label line ""))
+                     (cand (concat prefix (consult--line-with-mark marker)
+                                   (consult--tofu-encode marker))))
+                (put-text-property 0 (length prefix) 'consult-strip t cand)
+                (put-text-property 0 (length cand) 'consult-location (cons marker line) cand)
+                (push cand candidates)))))))
+    (unless candidates
+      (user-error "No evil marks found"))
+    (nreverse (delete-dups candidates))))
+
+(defun jc/evil-consult-marks ()
+  "Browse all evil marks (local a-z + persisted global A-Z) with consult.
+Pressing a mark's letter directly jumps to it without needing Enter.
+Global marks are loaded from disk and shown with their file path."
+  (interactive)
+  (let* ((marks (jc/evil-consult-marks--all-marks))
+         (cands (jc/evil-consult-marks--candidates marks))
+         ;; selected is set by the keymap lambdas via closure
+         (selected nil)
+         (keymap (let ((km (make-sparse-keymap)))
+                   ;; Any printable key that isn't a bound mark letter aborts.
+                   (define-key km [remap self-insert-command]
+                     (lambda () (interactive) (abort-minibuffers)))
+                   ;; Mark letter keys jump directly (take priority over remap).
+                   (pcase-dolist (`(,char . ,marker) marks)
+                     (let ((marker marker))
+                       (define-key km (char-to-string char)
+                         (lambda ()
+                           (interactive)
+                           (setq selected marker)
+                           (abort-minibuffers)))))
+                   km)))
+    (condition-case nil
+        (consult--read
+         cands
+         :prompt "Go to evil mark: "
+         :category 'consult-location
+         :sort nil
+         :require-match t
+         :lookup #'consult--lookup-location
+         :history '(:input consult--line-history)
+         :add-history (thing-at-point 'symbol)
+         :state (consult--jump-state)
+         :keymap keymap)
+      ;; abort-minibuffers signals quit; consult's unwind-protect has already
+      ;; restored the preview position, so we just jump to the stored marker.
+      (quit
+       (when selected
+         (consult--jump selected))))))
+
 (defun jc/evil-goto-mark-line-or-consult ()
   "Jump to an Evil mark, or open mark list after timeout."
   (interactive)
@@ -679,12 +791,60 @@
         (if (characterp event)
             (evil-goto-mark-line event)
           (setq unread-command-events (list event)))
-      (if (fboundp 'evil-collection-consult-mark)
-          (call-interactively #'evil-collection-consult-mark)
-        (message "`evil-collection-consult-mark` is not available")))))
+      (jc/evil-consult-marks))))
+
+(defun jc/evil-persist-delete-chars-from-file (file-name chars)
+  "Remove CHARS (list of char codes) from evil markers persist FILE-NAME."
+  (when (and file-name (file-exists-p file-name))
+    (condition-case err
+        (let* ((data (with-temp-buffer
+                       (insert-file-contents file-name)
+                       (read (current-buffer))))
+               (filtered (cl-remove-if (lambda (entry)
+                                         (and (integerp (car entry))
+                                              (memq (car entry) chars)))
+                                       data)))
+          ;; If only the version header remains, the file is empty — delete it
+          (if (= (length filtered) 1)
+              (delete-file file-name)
+            (with-temp-file file-name
+              (let ((print-level nil) (print-length nil))
+                (prin1 filtered (current-buffer))))))
+      (error
+       (message "jc: failed to update marker file %s: %s"
+                file-name (error-message-string err))))))
+
+(defun jc/evil-delmarks-sync-persist (orig-fn marks &optional force)
+  "Around advice on `evil-delete-marks': remove deleted marks from persist files."
+  ;; Only act when the persist system is loaded
+  (if (not (and (boundp 'night-evil-markers-file-version)
+                (fboundp 'night/evil-marker-file-name)
+                (fboundp 'evil--parse-delmarks)))
+      (funcall orig-fn marks force)
+    (let ((local-before (mapcar #'car evil-markers-alist)))
+      (funcall orig-fn marks force)
+      (let* ((mark-chars (remove ?\s (append marks nil)))
+             (chars-to-delete
+              (cond
+               ((and force mark-chars) nil) ; invalid input — evil did nothing
+               (mark-chars (evil--parse-delmarks mark-chars))
+               (force ; :delmarks! — detect what was actually removed
+                (cl-set-difference local-before (mapcar #'car evil-markers-alist))))))
+        (when chars-to-delete
+          (let ((local-chars (cl-remove-if #'evil-global-marker-p chars-to-delete))
+                (global-chars (cl-remove-if-not #'evil-global-marker-p chars-to-delete)))
+            (when (and local-chars buffer-file-name)
+              (jc/evil-persist-delete-chars-from-file
+               (night/evil-marker-file-name buffer-file-name)
+               local-chars))
+            (when global-chars
+              (jc/evil-persist-delete-chars-from-file
+               night-evil-global-markers-file
+               global-chars))))))))
 
 (after! evil
   (advice-add 'evil-set-marker :around #'jc/evil-set-marker-filter)
+  (advice-add 'evil-delete-marks :around #'jc/evil-delmarks-sync-persist)
   (jc/evil-clear-excluded-markers)
   (define-key evil-motion-state-map (kbd "'") #'jc/evil-goto-mark-line-or-consult))
 
@@ -768,7 +928,7 @@
 (use-package! eat                
   :defer t                       
   :config
-  (setq! eat-term-name "xterm-256color")
+  (setopt eat-term-name "xterm-256color")
   )
 
 ;; map j-k to evil-escape        
@@ -797,11 +957,11 @@
          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
          ))            ; display the backend name
 
-(setq! good-scroll-persist-vscroll-window-scroll 'nil)
+(setopt good-scroll-persist-vscroll-window-scroll 'nil)
 
 ;;; Org export and file association tuning
 
-(setq! org-journal-time-format ""
+(setopt org-journal-time-format ""
        org-journal-time-prefix "** TODO ")
 
 (map! :leader
@@ -811,7 +971,7 @@
         (interactive)
         (projectile-find-file-in-directory (expand-file-name "src/" (projectile-project-root)))))
 
-(setq! uniquify-buffer-name-style 'post-forward)
+(setopt uniquify-buffer-name-style 'post-forward)
 
 (after! ox-latex
   (add-to-list 'org-latex-classes
@@ -843,7 +1003,7 @@
   (defun my/org-roam-slugify (s)
     (org-roam-node-slug (org-roam-node-create :title s)))
 
-  ;; Compute relative path from the node’s title
+  ;; Compute relative path from the node's title
   ;; Example: "abc@paper" -> "paper/abc.org"
   ;;          "abc"       -> "abc.org"
   (defun my/org-roam-file-from-title (node)
@@ -864,7 +1024,7 @@
           (format "%s/%s.org" sub-slug base-slug)
         (format "%s.org" base-slug))))
 
-  ;; Clean title so "#+title:" doesn’t keep the "@paper"
+  ;; Clean title so "#+title:" doesn't keep the "@paper"
   (defun my/org-roam-clean-title (node)
     (let* ((raw (org-roam-node-title node))
            (base (car (split-string raw "@"))))
@@ -876,7 +1036,7 @@
                               "#+title: ${my/org-roam-clean-title}\n")
            :unnarrowed t))))
 
-(setq! org-latex-pdf-process
+(setopt org-latex-pdf-process
        '("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f -synctex=1 -shell-escape"))
 
 ;; Put this once in your init.el
@@ -904,15 +1064,15 @@
       (funcall orig-fn ext subtreep pub-dir))))
 (advice-add 'org-export-output-file-name :around #'my/org-export-output-file-name)
 
-(setq! org-attach-dir-relative 't)
+(setopt org-attach-dir-relative 't)
 
 ;; ;; Put this in your config.el
-(with-eval-after-load 'org
-  (dolist (pair '(("jupyter-R"     . r)
-                  ("jupyter-r"     . r)    ; or `. r` if you use r-mode
-                  ("jupyter-python" . python)
-                  ("jupyter-julia"  . julia)))
-    (add-to-list 'org-src-lang-modes pair)))
+;; (with-eval-after-load 'org
+;;   (dolist (pair '(("jupyter-R"     . r)
+;;                   ("jupyter-r"     . r)    ; or `. r` if you use r-mode
+;;                   ("jupyter-python" . python)
+;;                   ("jupyter-julia"  . julia)))
+;;     (add-to-list 'org-src-lang-modes pair)))
 
 (defun my/org-roam-find-global-node ()
   "Temporarily use the global org-roam directory and find a node."
@@ -929,10 +1089,10 @@
 ;;; Local packages and popup helpers
 
 ;; config.el       
-(use-package! evil-visual-mark-mode
-  :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
-  :config
-  (evil-visual-mark-mode 1))
+;; (use-package! evil-visual-mark-mode
+;;   :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
+;;   :config
+;;   (evil-visual-mark-mode 1))
 
 
 (use-package! evil-marker-persist
@@ -1089,7 +1249,7 @@ One vterm per project root:
 
 ;; temp fix for rsync dirvish 
 (after! dirvish         
-  ;; Just don’t use the magic 'all symbol; restrict to marked files only.
+  ;; Just don't use the magic 'all symbol; restrict to marked files only.
   (setq dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all))))
 
 (defun cc/yank-markdown-as-org ()
@@ -1171,6 +1331,7 @@ This version also runs fully on remote files."
 
 ;; Consult config
 ;; consult-dir with zlua source
+(exec-path-from-shell-copy-env "ZLUA_SCRIPT")
 (use-package! consult-dir
   :init                 
   (setq consult-dir-default-command #'consult-dir-dired)
@@ -1259,13 +1420,13 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 ;; during prompt detection), and is unnecessary for non-interactive use.
 ;; Interactive shells (vterm) already use login-shell via vterm-tramp-shells.
 (after! tramp-sh
-  (setq! tramp-default-remote-shell "/bin/sh"))
+  (setopt tramp-default-remote-shell "/bin/sh"))
 
 ;; You already configure ControlMaster in ~/.ssh/config.
 ;; When TRAMP also adds its own CM options, they can conflict (different
 ;; socket paths, double negotiation), causing hangs.  Let SSH handle it.
 (after! tramp
-  (setq! tramp-use-ssh-controlmaster-options nil))
+  (setopt tramp-use-ssh-controlmaster-options nil))
 
 
 ;;; Evil search enhancements
@@ -1376,14 +1537,14 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 
 (use-package! dirvish
   :config               
-  (setq! dired-kill-when-opening-new-dired-buffer t)
+  (setopt dired-kill-when-opening-new-dired-buffer t)
   )
 
 (use-package! javelin
   :config               
   (global-javelin-minor-mode 1))
 
-(setq! diff-refine 'navigation)
+(setopt diff-refine 'navigation)
 
 ;; map j and k to use next line and previous line of native emacs
 (after! evil            
@@ -1410,7 +1571,7 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 
 (add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
 
-(setq! mouse-highlight nil)
+(setopt mouse-highlight nil)
 
 (defun jc/evil-ex-search-next ()
   "Like Vim C-g in /: jump to next match while staying in minibuffer."
@@ -1452,7 +1613,7 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 
 
 
-(setq! link-hint-avy-all-windows 't)
+(setopt link-hint-avy-all-windows 't)
 
 
 ;;; Org-roam directory and dual DB sync
@@ -1601,7 +1762,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 ;; the main contributor to org-persist bloat, and loading a large index
 ;; synchronously on the first org-file open causes multi-second stalls.
 ;; The in-memory cache rebuilds per-buffer and is nearly instant.
-(setq! org-element-use-cache t
+(setopt org-element-use-cache t
        org-element-cache-persistent nil)
 
 ;; When element-cache persistence is off, org-element-cache-reset still
@@ -1615,7 +1776,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 ;; Shorten org-persist expiry so remaining data (LaTeX previews, export
 ;; caches, etc.) doesn't accumulate indefinitely.  Default is 30 days.
-(setq! org-persist-default-expiry 7)
+(setopt org-persist-default-expiry 7)
 
 ;; org-persist--merge-index-with-disk is called on EVERY persist read/write.
 ;; It re-reads the index file from disk and runs cl-set-difference (O(n²))
@@ -1671,7 +1832,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
         :desc "Claude Code" "o c" #'claude-code-ide-menu)
   :config
 
-  ;; (setq! claude-code-ide-show-claude-window-in-ediff nil)
+  ;; (setopt claude-code-ide-show-claude-window-in-ediff nil)
 
   (claude-code-ide-emacs-tools-setup)
 
@@ -1727,9 +1888,11 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 ;; Use a single startup pass through org-sliced-images.
 ;; Disable Org's startup link-preview path (Org 9.8), then render once after
 ;; dir-locals are applied so attachment links resolve correctly.
-;; (setq! org-startup-with-inline-images nil)
-(setq! org-startup-with-link-previews 'nil)
-(setq! org-startup-with-latex-preview 'nil)
+;; (setopt org-startup-with-inline-images nil)
+(setopt org-startup-with-link-previews 'nil)
+(setopt org-startup-with-latex-preview 'nil)
 
 ;; this is to include extra files in the indexing using .projectile file
-(setq! projectile-indexing-method 'hybrid)
+(setopt projectile-indexing-method 'hybrid)
+
+(add-to-list 'load-path "/Users/jiawei/Projects/Playground/r_sliced/org-sliced-images")
