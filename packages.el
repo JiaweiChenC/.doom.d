@@ -72,8 +72,7 @@
               "(provide 'org-version)\n"))))
   :pin nil)
 (unpin! org)
-
-(unpin! auctex evil-easymotion quickrun eglot)
+(unpin! auctex evil-easymotion quickrun eglot citar)
 (unpin! diff-hl)
 (package! htmlize)
 (package! impatient-showdown)
@@ -84,14 +83,12 @@
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
 (package! copilot
-  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
+  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el" "dist")))
 (package! flycheck-popup-tip :disable t)
-;; (package! evil-nerd-commenter :disable t)
 (package! code-cells)
 (package! org-download)
 (package! org-appear
   :recipe (:host github :repo "awth13/org-appear" :branch "org-9.7-fixes"))
-;; (package! modus-themes)
 (package! mini-echo)
 (package! org-modern-indent
   :recipe (:host github :repo "jdtsmith/org-modern-indent"))
@@ -116,36 +113,30 @@
 (package! sideline)
 (package! sideline-flycheck)
 (package! sideline-eglot
-  :recipe (:host github :repo "emacs-sideline/sideline-eglot")
-  )
+  :recipe (:host github :repo "emacs-sideline/sideline-eglot"))
 (package! catppuccin-theme)
 (package! ox-pandoc)
-;; (package! evil-visual-mark-mode
-  ;; :recipe (:host github :repo "JiaweiChenC/evil-visual-mark-mode"))
-(package! tramp-hlo
-  :recipe (:host github :repo "jsadusk/tramp-hlo"))
-(package! javelin)
-(package! org-sliced-images
-  :recipe (:host github :repo "ringawho/org-sliced-images"))
 (package! evil-easymotion
   :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
-
 (package! diff-hl
   :recipe (:host github
            :repo "JiaweiChenC/diff-hl"
            :branch "feature/show-hunk-refine"))
-
 (package! flash-emacs
   :recipe (:host github
            :repo "JiaweiChenC/flash-emacs"))
-
 (package! mcp-server
   :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
            :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
-
 (package! claude-code-ide
   :recipe (:host github 
            :repo "manzaltu/claude-code-ide.el"))
 (package! shell-maker)
 (package! acp)
 (package! agent-shell)
+(package! web-server)
+(package! msgpack)
+(package! tramp-rpc
+:recipe (:host github :repo "ArthurHeymans/emacs-tramp-rpc"))
+(package! arrow
+  :recipe (:host github :repo "vmargb/arrow.el"))

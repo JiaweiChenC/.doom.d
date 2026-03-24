@@ -111,7 +111,8 @@
                "D" #'org-journal-new-date-entry
                "i" #'org-roam-node-insert
                "r" #'org-roam-node-find
-               "R" #'org-roam-capture))
+               "R" #'org-roam-capture
+               "m" #'my/org-roam-move-node))
 
 ;;; Secrets and local overrides
 
@@ -1889,10 +1890,75 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 ;; Disable Org's startup link-preview path (Org 9.8), then render once after
 ;; dir-locals are applied so attachment links resolve correctly.
 ;; (setopt org-startup-with-inline-images nil)
-(setopt org-startup-with-link-previews 'nil)
-(setopt org-startup-with-latex-preview 'nil)
+(setopt org-startup-with-link-previews 't)
+(setopt org-startup-with-latex-preview 't)
 
 ;; this is to include extra files in the indexing using .projectile file
 (setopt projectile-indexing-method 'hybrid)
 
-(add-to-list 'load-path "/Users/jiawei/Projects/Playground/r_sliced/org-sliced-images")
+;; (add-to-list 'load-path "/Users/jiawei/Projects/Playground/r_sliced/org-sliced-images")
+
+;; (after! markdown-mode
+;;   (setopt markdown-fontify-code-blocks-natively nil))
+
+(use-package! msgpack
+  :defer t
+  )
+
+(use-package! tramp-rpc
+  :defer t
+  :after tramp
+  :init
+  )
+
+(add-hook 'dired-mode-hook
+          (defun jc/dired-remote-lightweight-mode ()
+            (when (file-remote-p default-directory)
+              (when (bound-and-true-p diff-hl-dired-mode)
+                (diff-hl-dired-mode -1)))))
+
+(after! agent-shell
+  (setq agent-shell-preferred-agent-config
+        (agent-shell-opencode-make-agent-config))
+  (setq agent-shell-opencode-default-model-id "openai/gpt-5.4")
+  (setq agent-shell-opencode-default-session-mode-id "build"))
+
+;; store agent shell under ./emacs.d instead of per project
+(defun my/agent-shell-dot-subdir (subdir)
+  (let* ((cwd (string-remove-suffix "/" (agent-shell-cwd)))
+         (sanitized (replace-regexp-in-string "/" "-" (string-remove-prefix "/" cwd))))
+    (expand-file-name subdir (locate-user-emacs-file (concat "agent-shell/" sanitized)))))
+
+(setopt agent-shell-dot-subdir-function #'my/agent-shell-dot-subdir)
+
+(after! vterm
+  (defun jc/vterm--shell-dir-from-default-directory (dir)
+    "Convert DIR into a path suitable for sending to a shell in vterm.
+If DIR is remote via TRAMP, strip the TRAMP prefix (including rpc hop)
+and return only the localname on the remote host."
+    (if (file-remote-p dir)
+        (let ((vec (tramp-dissect-file-name dir)))
+          (tramp-file-name-localname vec))
+      dir))
+
+  (defun jc/vterm-cd-to-buffer-above ()
+    "In vterm, cd to the directory of the buffer in the window above."
+    (interactive)
+    (unless (derived-mode-p 'vterm-mode)
+      (user-error "Run this inside vterm"))
+    (let* ((above-win (windmove-find-other-window 'up))
+           (raw-dir
+            (when above-win
+              (with-current-buffer (window-buffer above-win)
+                default-directory)))
+           (dir
+            (when raw-dir
+              (jc/vterm--shell-dir-from-default-directory raw-dir))))
+      (unless dir
+        (user-error "No window above with a usable default-directory"))
+      (vterm-send-string
+       (concat "cd " (shell-quote-argument (expand-file-name dir))))
+      (vterm-send-return)))
+  )
+
+(map! :leader :desc "quickrun" "m j" #'jc/vterm-cd-to-buffer-above)
