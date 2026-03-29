@@ -92,16 +92,6 @@
                            #'projectile-project-root)
     (advice-add #'projectile-project-root :around #'jc/projectile-project-root-remote)))
 
-;; (defun jc/project-root-integration-disable ()
-;;   "Disable remote project root overrides for Doom and Projectile."
-;;   (interactive)
-;;   (when (advice-member-p #'jc/doom-project-root-from-dir-locals
-;;                          #'doom-project-root)
-;;     (advice-remove #'doom-project-root #'jc/doom-project-root-from-dir-locals))
-;;   (when (advice-member-p #'jc/projectile-project-root-remote
-;;                          #'projectile-project-root)
-;;     (advice-remove #'projectile-project-root #'jc/projectile-project-root-remote)))
-
 ;; ;;---------------------------------------------------------------------------
 ;; ;; Projectile integration
 ;; ;;---------------------------------------------------------------------------
@@ -192,31 +182,91 @@ On local files, defer to ORIG-FN."
 
 
 (after! vterm
+  (defun my/vterm-normalize-point-for-command (pos)
+    "Map POS onto a real command-buffer position for vterm operations."
+    (let* ((prompt (or (ignore-errors (vterm--get-prompt-point)) (point-min)))
+           (eol (or (ignore-errors (vterm--get-end-of-line pos)) pos))
+           (pos (max prompt (min pos eol))))
+      (if (get-text-property pos 'vterm-line-wrap)
+          (min (1+ pos) eol)
+        pos)))
+
+  (defun my/vterm-wrap-between-p (a b)
+    "Return non-nil if a wrapped fake newline lies between A and B."
+    (let ((start (min a b))
+          (end (max a b))
+          found)
+      (while (and (not found) (<= start end))
+        (setq found (get-text-property start 'vterm-line-wrap)
+              start (1+ start)))
+      found))
+
+  (defun my/vterm-remote-goto-char-safe (pos)
+    "Move to POS one terminal step at a time for remote vterm buffers."
+    (when (and vterm--term
+               (file-remote-p default-directory)
+               (vterm-cursor-in-command-buffer-p)
+               (vterm-cursor-in-command-buffer-p pos))
+      (let ((inhibit-redisplay t))
+        (vterm-reset-cursor-point)
+        (let ((steps-left (+ 8 (abs (- pos (point))))))
+          (while (and (> steps-left 0)
+                      (/= (point) pos))
+            (vterm-send-key (if (< pos (point)) "<left>" "<right>") nil nil nil t)
+            (setq steps-left (1- steps-left))))
+        (= (point) pos))))
+
+  (defun my/vterm-remote-insert ()
+    "Enter insert state in remote vterm without visible cursor desync."
+    (interactive)
+    (let* ((target (my/vterm-normalize-point-for-command (point)))
+           (cursor (or (ignore-errors (vterm--get-cursor-point)) target))
+           (wrap-sensitive (or (get-text-property (max (point-min) (1- target)) 'vterm-line-wrap)
+                               (get-text-property target 'vterm-line-wrap)
+                               (my/vterm-wrap-between-p cursor target))))
+      (let ((inhibit-redisplay t))
+        (unless (= target cursor)
+          (or (and wrap-sensitive
+                   (my/vterm-remote-goto-char-safe target))
+              (vterm-goto-char target)))
+        (evil-insert-state))
+      (goto-char (or (ignore-errors (vterm--get-cursor-point)) target))))
+
+  (defun my/vterm-remote-evil-fixes ()
+    "Apply targeted Evil fixes for remote vterm buffers."
+    (when (and (file-remote-p default-directory)
+               (bound-and-true-p evil-local-mode))
+      (evil-local-set-key 'normal (kbd "i") #'my/vterm-remote-insert)))
+
   (defun my/vterm--remote-goto-char (pos)
     "Move remote vterm cursor to POS, waiting for PTY updates."
     (when (and vterm--term
                (file-remote-p default-directory)
                (vterm-cursor-in-command-buffer-p)
                (vterm-cursor-in-command-buffer-p pos))
-      (vterm-reset-cursor-point)
-      (let ((proc (get-buffer-process (current-buffer)))
-            (steps-left (+ 8 (abs (- pos (point))))))
-        (while (and (> steps-left 0)
-                    (/= (point) pos))
-          (let* ((distance (abs (- pos (point))))
-                 (key (if (< pos (point)) "<left>" "<right>"))
-                 (burst (min 16 (max 1 distance))))
-            (dotimes (_ burst)
-              (vterm-send-key key))
-            (when proc
-              (accept-process-output proc 0.03)))
-          (setq steps-left (1- steps-left)))
-        (= (point) pos))))
+      (let ((inhibit-redisplay t))
+        (vterm-reset-cursor-point)
+        (let ((proc (get-buffer-process (current-buffer)))
+              (steps-left (+ 8 (abs (- pos (point))))))
+          (while (and (> steps-left 0)
+                      (/= (point) pos))
+            (let* ((distance (abs (- pos (point))))
+                   (key (if (< pos (point)) "<left>" "<right>"))
+                   (burst (min 16 (max 1 distance))))
+              (dotimes (_ burst)
+                (vterm-send-key key))
+              (when proc
+                (accept-process-output proc 0.03)))
+            (setq steps-left (1- steps-left)))
+          (= (point) pos)))))
 
   (defun my/vterm-goto-char-around (orig pos)
-    "Fallback to a latency-tolerant cursor move for remote vterm buffers."
-    (or (funcall orig pos)
-        (my/vterm--remote-goto-char pos)))
+    "Suppress display updates during remote vterm cursor sync to avoid jumping."
+    (if (and vterm--term (file-remote-p default-directory))
+        (let ((inhibit-redisplay t))
+          (or (funcall orig pos)
+              (my/vterm--remote-goto-char pos)))
+      (funcall orig pos)))
 
   (defun my/vterm-delete-region-around (orig start end)
     "Batch remote deletes to reduce round trips in vterm."
@@ -243,6 +293,7 @@ On local files, defer to ORIG-FN."
     (setq-local evil-move-cursor-back nil)
     (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t))
 
+  (add-hook 'vterm-mode-hook #'my/vterm-remote-evil-fixes)
   (advice-add 'vterm-goto-char :around #'my/vterm-goto-char-around)
   (advice-add 'vterm-delete-region :around #'my/vterm-delete-region-around)
   (add-hook 'vterm-mode-hook #'my/vterm-fix-evil-cursor-jump))
