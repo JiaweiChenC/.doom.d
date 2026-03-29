@@ -15,46 +15,57 @@
 ;; Basic TRAMP tweaks
 ;;---------------------------------------------------------------------------
 
-(setq! tramp-verbose 2)
+(setopt tramp-verbose 2)
 
 ;; Don't let VC wander into TRAMP paths.
-(setq vc-ignore-dir-regexp
-      (format "\\(%s\\)\\|\\(%s\\)"
-              vc-ignore-dir-regexp
-              tramp-file-name-regexp))
+(defvar jc/vc-ignore-dir-regexp-base vc-ignore-dir-regexp
+  "Baseline `vc-ignore-dir-regexp' without TRAMP override.")
 
-;;---------------------------------------------------------------------------
-;; diff-hl: disable on remote
-;;---------------------------------------------------------------------------
+(defun jc/vc-ignore-tramp-enable ()
+  "Add TRAMP paths to `vc-ignore-dir-regexp'."
+  (interactive)
+  (setq vc-ignore-dir-regexp
+        (format "\\(%s\\)\\|\\(%s\\)"
+                jc/vc-ignore-dir-regexp-base
+                tramp-file-name-regexp)))
 
-(after! diff-hl
-  (defun jc/diff-hl-disable-on-remote ()
-    "Disable diff-hl in remote TRAMP buffers."
-    (when (file-remote-p default-directory)
-      (diff-hl-mode -1)
-      (diff-hl-flydiff-mode -1)))
-  ;; In case something else turns it on, we turn it back off for remote.
-  (add-hook 'find-file-hook #'jc/diff-hl-disable-on-remote))
+(defun jc/vc-ignore-tramp-disable ()
+  "Restore baseline `vc-ignore-dir-regexp' without TRAMP override."
+  (interactive)
+  (setq vc-ignore-dir-regexp jc/vc-ignore-dir-regexp-base))
+
+(jc/vc-ignore-tramp-enable)
 
 ;;---------------------------------------------------------------------------
 ;; Project root abstraction
 ;;---------------------------------------------------------------------------
 
 (defvar-local jc/project-root-local nil
-  "Host-local project root for this buffer, e.g. \"/home/jiawei/projects/SKEL/\".
-No TRAMP prefix; that is reconstructed from `default-directory' when needed.")
+  "Host-local project root for this buffer, without any TRAMP prefix.")
 
 (defun jc/project-root ()
-  "Return full project root path for the current buffer.
+  "Return the current buffer's explicit project root, if any."
+  (when (stringp jc/project-root-local)
+    (if-let ((prefix (or (and (boundp 'jc/vterm-origin-prefix)
+                              (stringp jc/vterm-origin-prefix)
+                              jc/vterm-origin-prefix)
+                         (file-remote-p default-directory))))
+        (concat prefix jc/project-root-local)
+      jc/project-root-local)))
 
-If `jc/project-root-local' is set, combine it with the TRAMP prefix when
-the buffer is remote; otherwise return it as-is.  Return nil if unset."
-  (when (and (boundp 'jc/project-root-local)
-             (stringp jc/project-root-local))
-    (let ((prefix (file-remote-p default-directory)))
-      (if prefix
-          (concat prefix jc/project-root-local)
-        jc/project-root-local))))
+(defun jc/project-root-for-dir (&optional dir)
+  "Return the explicit project root for DIR, including non-file buffers."
+  (let* ((dir (file-name-as-directory (or dir default-directory)))
+         (current-dir (and (stringp default-directory)
+                           (file-name-as-directory default-directory))))
+    (or (and current-dir
+             (string-equal dir current-dir)
+             (jc/project-root))
+        (with-temp-buffer
+          (setq default-directory dir)
+          (ignore-errors
+            (hack-dir-local-variables-non-file-buffer))
+          (jc/project-root)))))
 
 ;;---------------------------------------------------------------------------
 ;; Doom project integration
@@ -62,35 +73,59 @@ the buffer is remote; otherwise return it as-is.  Return nil if unset."
 
 (defun jc/doom-project-root-from-dir-locals (orig-fun &optional dir &rest _)
   "Use `jc/project-root' for remote DIR when applicable; fall back to ORIG-FUN."
-  (let* ((dir  (or dir default-directory))
-         (root (jc/project-root)))
+  (let* ((dir (or dir default-directory))
+         (root (jc/project-root-for-dir dir)))
     (if (and root
              (file-remote-p dir)
-             ;; Only override when DIR is really under our remote root.
              (string-prefix-p (file-name-as-directory root)
                               (file-name-as-directory dir)))
         root
       (funcall orig-fun dir))))
 
-(advice-add #'doom-project-root :around #'jc/doom-project-root-from-dir-locals)
+(defun jc/project-root-integration-enable ()
+  "Enable remote project root overrides for Doom and Projectile."
+  (interactive)
+  (unless (advice-member-p #'jc/doom-project-root-from-dir-locals
+                           #'doom-project-root)
+    (advice-add #'doom-project-root :around #'jc/doom-project-root-from-dir-locals))
+  (unless (advice-member-p #'jc/projectile-project-root-remote
+                           #'projectile-project-root)
+    (advice-add #'projectile-project-root :around #'jc/projectile-project-root-remote)))
 
-;;---------------------------------------------------------------------------
-;; Projectile integration
-;;---------------------------------------------------------------------------
+;; (defun jc/project-root-integration-disable ()
+;;   "Disable remote project root overrides for Doom and Projectile."
+;;   (interactive)
+;;   (when (advice-member-p #'jc/doom-project-root-from-dir-locals
+;;                          #'doom-project-root)
+;;     (advice-remove #'doom-project-root #'jc/doom-project-root-from-dir-locals))
+;;   (when (advice-member-p #'jc/projectile-project-root-remote
+;;                          #'projectile-project-root)
+;;     (advice-remove #'projectile-project-root #'jc/projectile-project-root-remote)))
+
+;; ;;---------------------------------------------------------------------------
+;; ;; Projectile integration
+;; ;;---------------------------------------------------------------------------
 
 (defun jc/projectile-project-root-remote (orig-fn &optional dir)
-  "Use `jc/project-root' for remote buffers, fall back to ORIG-FN otherwise."
-  (let* ((dir  (or dir default-directory))
-         (root (jc/project-root)))
+  "Use `jc/project-root' for remote buffers; otherwise defer to ORIG-FN."
+  (let* ((dir (or dir default-directory))
+         (root (jc/project-root-for-dir dir)))
     (if (file-remote-p dir)
-        ;; Remote: try our explicit root, fall back to DIR itself.
-        (or root
-            ;; Last-resort: treat current dir as root, no upward scan.
-            (file-name-as-directory dir))
-      ;; Local: normal Projectile behaviour.
+        (or root (funcall orig-fn dir))
       (funcall orig-fn dir))))
 
-(advice-add #'projectile-project-root :around #'jc/projectile-project-root-remote)
+(jc/project-root-integration-enable)
+
+(after! projectile
+  (defun jc/projectile-find-file-remote-vterm-a (orig-fn &rest args)
+    "Use the preserved remote project root in vterm buffers."
+    (if (and (derived-mode-p 'vterm-mode)
+             (file-remote-p default-directory)
+             (jc/project-root))
+        (let ((default-directory (jc/project-root)))
+          (projectile--find-file (car args)))
+      (apply orig-fn args)))
+  (advice-add #'projectile-find-file :around #'jc/projectile-find-file-remote-vterm-a))
 
 ;;---------------------------------------------------------------------------
 ;; dumb-jump integration
@@ -98,111 +133,116 @@ the buffer is remote; otherwise return it as-is.  Return nil if unset."
 
 (after! dumb-jump
   (defun jc/dumb-jump-project-root-remote (orig-fn &rest args)
-    "Avoid heavy project root detection on TRAMP.
+    "Use `jc/project-root' on TRAMP when set.
 
-On remote files, use `jc/project-root' if set, otherwise `default-directory'.
+On remote files, use `jc/project-root' if set, otherwise defer to ORIG-FN.
 On local files, defer to ORIG-FN."
     (if (file-remote-p default-directory)
-        ;; REMOTE: do NOT call ORIG-FN (which uses locate-dominating-file).
+        ;; REMOTE: no current-directory fallback.
         (or (jc/project-root)
-            (file-name-as-directory
-             (directory-file-name default-directory)))
+            (apply orig-fn args))
       ;; LOCAL: normal behavior.
       (apply orig-fn args)))
   (advice-add #'dumb-jump-get-project-root
               :around #'jc/dumb-jump-project-root-remote))
 
-;;---------------------------------------------------------------------------
-;; mini-echo integration
-;;---------------------------------------------------------------------------
-
-;; (defun jc/mini-echo-project-root ()
-;;   "Project root for mini-echo, consistent with `jc/project-root' / Doom."
-;;   (or
-;;    ;; Explicit override for remote/local via jc/project-root-local.
-;;    (jc/project-root)
-;;    ;; Doom's project root (already advised to use jc/project-root on remote).
-;;    (when (fboundp 'doom-project-root)
-;;      (doom-project-root))
-;;    ;; Last fallback: just use the current directory.
-;;    (file-name-as-directory
-;;     (directory-file-name default-directory))))
-
-;; (setq mini-echo-project-detection #'jc/mini-echo-project-root)
-
-;; add scpx login in to vterm tramp shells 
+;; Avoid vterm's login-shell autodetection for custom TRAMP methods.
+;; That code runs `getent passwd $LOGNAME` over TRAMP to discover the shell,
+;; which can trigger `tramp-own-remote-path` lookups and fail noisily before
+;; the connection is fully ready. Use the remote shell we already configured
+;; for TRAMP instead.
 (after! vterm
-  (add-to-list 'vterm-tramp-shells '("scpx" login-shell) t)
-  (add-to-list 'vterm-tramp-shells '("rpc" login-shell) t)
-  )
+  (dolist (method '("ssh" "scp" "scpx" "rpc"))
+    (setf (alist-get method vterm-tramp-shells nil nil #'equal)
+          '("/usr/bin/zsh"))))
+
+(after! vterm
+  (defun jc/vterm-preserve-remote-prefix-a (orig path)
+    "Keep the originating TRAMP prefix for remote vterm buffers."
+    (or
+     (when (and (boundp 'jc/vterm-origin-prefix)
+                (stringp jc/vterm-origin-prefix)
+                path
+               (string-match "^[^@]+@[^:]+:\\(.*\\)$" path))
+       (let ((dir (match-string 1 path)))
+         (when (and dir (file-directory-p (concat jc/vterm-origin-prefix dir)))
+           (file-name-as-directory (concat jc/vterm-origin-prefix dir)))))
+     (funcall orig path)))
+  (advice-add #'vterm--get-directory :around #'jc/vterm-preserve-remote-prefix-a))
 
 (after! tramp
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+  ;; Avoid login-shell PATH probing on remote connections. It is noisy and
+  ;; unnecessary for this setup because the common executable directories are
+  ;; already listed explicitly.
+  (setq tramp-remote-path
+        (delete 'tramp-own-remote-path (copy-sequence tramp-remote-path))))
 
-;;---------------------------------------------------------------------------
-;; TRAMP connection guard — fail fast on unreachable hosts
-;;---------------------------------------------------------------------------
-;; TRAMP is fully synchronous: any file operation on a remote path
-;; blocks the entire Emacs event loop during SSH connection setup.
-;; This includes Vertico's minibuffer completion, which triggers
-;; file-name-all-completions → TRAMP connect → 60+ second freeze.
-;;
-;; This advice wraps tramp-maybe-open-connection (the actual function
-;; that initiates SSH).  Before letting TRAMP start its slow connection
-;; process, we run a quick SSH probe with a 3-second timeout:
-;;   - Host reachable  → mark verified, let TRAMP proceed
-;;   - Host unreachable → signal error immediately (no 60s freeze)
-;;   - Already connected or verified → skip check entirely
+(after! tramp-rpc
+  ;; The rpc backend has its own login-shell PATH probe. Disable it too so
+  ;; remote vterm buffers do not trigger benign but repeated path warnings.
+  (setq tramp-rpc-remote-path
+        (delete 'tramp-rpc-own-remote-path (copy-sequence tramp-rpc-remote-path))))
 
-(defvar jc/tramp--verified-hosts (make-hash-table :test 'equal)
-  "Hosts verified reachable this session.  Keyed by \"user@host\".")
+;; ;; enable delete via dired on remote files
+(defun my/dired-remote-trash-only ()
+  (when (and (derived-mode-p 'dired-mode)
+             (file-remote-p default-directory))
+    (setq-local delete-by-moving-to-trash 'nil)))
+(add-hook 'dired-mode-hook #'my/dired-remote-trash-only)
 
-(defun jc/tramp--host-key (vec)
-  "Return a cache key for VEC's user@host."
-  (let ((user (tramp-file-name-user vec))
-        (host (tramp-file-name-host vec)))
-    (if user (format "%s@%s" user host) host)))
 
-(defun jc/tramp--ssh-method-p (method)
-  "Return non-nil if METHOD is an SSH-based TRAMP method."
-  (member method '("ssh" "scp" "scpx" "sshx" "rsync")))
+(after! vterm
+  (defun my/vterm--remote-goto-char (pos)
+    "Move remote vterm cursor to POS, waiting for PTY updates."
+    (when (and vterm--term
+               (file-remote-p default-directory)
+               (vterm-cursor-in-command-buffer-p)
+               (vterm-cursor-in-command-buffer-p pos))
+      (vterm-reset-cursor-point)
+      (let ((proc (get-buffer-process (current-buffer)))
+            (steps-left (+ 8 (abs (- pos (point))))))
+        (while (and (> steps-left 0)
+                    (/= (point) pos))
+          (let* ((distance (abs (- pos (point))))
+                 (key (if (< pos (point)) "<left>" "<right>"))
+                 (burst (min 16 (max 1 distance))))
+            (dotimes (_ burst)
+              (vterm-send-key key))
+            (when proc
+              (accept-process-output proc 0.03)))
+          (setq steps-left (1- steps-left)))
+        (= (point) pos))))
 
-(defun jc/tramp--cm-socket-alive-p (vec)
-  "Return non-nil if an SSH ControlMaster socket is active for VEC."
-  (let* ((user (or (tramp-file-name-user vec) (user-login-name)))
-         (host (tramp-file-name-host vec))
-         (socket (expand-file-name
-                  (format "~/.ssh/sockets/%s@%s:22" user host))))
-    (file-exists-p socket)))
+  (defun my/vterm-goto-char-around (orig pos)
+    "Fallback to a latency-tolerant cursor move for remote vterm buffers."
+    (or (funcall orig pos)
+        (my/vterm--remote-goto-char pos)))
 
-(defadvice! jc/tramp-connection-guard-a (fn vec)
-  "Pre-check SSH reachability before TRAMP tries to connect.
-If the host is unreachable, fail immediately instead of freezing
-Emacs for 60+ seconds."
-  :around #'tramp-maybe-open-connection
-  (let ((method (tramp-file-name-method vec))
-        (key (jc/tramp--host-key vec)))
-    (cond
-     ;; Already connected — proceed immediately
-     ((process-live-p (tramp-get-connection-process vec))
-      (funcall fn vec))
-     ;; Non-SSH method or already verified — proceed
-     ((or (not (jc/tramp--ssh-method-p method))
-          (gethash key jc/tramp--verified-hosts))
-      (funcall fn vec))
-     ;; ControlMaster socket exists — host is reachable, skip check
-     ((jc/tramp--cm-socket-alive-p vec)
-      (puthash key t jc/tramp--verified-hosts)
-      (funcall fn vec))
-     ;; Unknown host — quick SSH probe (3s max)
-     (t
-      (message "Checking SSH to %s..." key)
-      (let ((exit (call-process "ssh" nil nil nil
-                                "-o" "BatchMode=yes"
-                                "-o" "ConnectTimeout=3"
-                                key "echo" "ok")))
-        (if (= exit 0)
-            (progn
-              (puthash key t jc/tramp--verified-hosts)
-              (funcall fn vec))
-          (user-error "Cannot reach %s (SSH exit %d)" key exit)))))))
+  (defun my/vterm-delete-region-around (orig start end)
+    "Batch remote deletes to reduce round trips in vterm."
+    (if (and vterm--term
+             (file-remote-p default-directory))
+        (save-excursion
+          (when (get-text-property start 'vterm-line-wrap)
+            (setq start (1+ start)))
+          (let ((count (length (filter-buffer-substring start end))))
+            (if (vterm-goto-char start)
+                (let ((proc (get-buffer-process (current-buffer))))
+                  (while (> count 0)
+                    (let ((burst (min 16 count)))
+                      (dotimes (_ burst)
+                        (vterm-send-key "<delete>"))
+                      (when proc
+                        (accept-process-output proc 0.03))
+                      (setq count (- count burst)))))
+              (let ((inhibit-read-only nil))
+                (vterm--delete-region start end)))))
+      (funcall orig start end)))
+
+  (defun my/vterm-fix-evil-cursor-jump ()
+    (setq-local evil-move-cursor-back nil)
+    (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t))
+
+  (advice-add 'vterm-goto-char :around #'my/vterm-goto-char-around)
+  (advice-add 'vterm-delete-region :around #'my/vterm-delete-region-around)
+  (add-hook 'vterm-mode-hook #'my/vterm-fix-evil-cursor-jump))

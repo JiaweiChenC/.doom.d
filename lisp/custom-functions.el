@@ -33,48 +33,71 @@
 ;;    ;; Default message when not in applicable mode
 ;;    (t (message "Not in an Org, Dired, or Image buffer!"))))
 
-(defun my/copy-image-to-clipboard ()
-  "Copy the image at point or current image buffer to the clipboard on macOS.
-Supports Org mode (including attachment links), Dired, and image buffers."
-  (interactive)
+(defun my/image-file-at-point-or-buffer ()
+  "Return the image file for the current Org, Dired, or image buffer."
   (cond
-   ;; Org mode: handle file and attachment links
    ((derived-mode-p 'org-mode)
     (let* ((context (org-element-context))
            (type (org-element-property :type context))
-           (path (org-element-property :path context))
-           (full-path
-            (cond
-             ;; Handle attachment: links
-             ((and (string= type "attachment") path)
-              (ignore-errors (org-attach-expand path)))
-             ;; Handle file: links
-             ((and (string= type "file") path)
-              (expand-file-name path))
-             (t nil))))
-      (if (and full-path (file-exists-p full-path))
-          (shell-command
-           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" full-path))
-        (message "No valid image file at point!"))))
-
-   ;; Dired mode
+           (path (org-element-property :path context)))
+      (cond
+       ((and (string= type "attachment") path)
+        (ignore-errors (org-attach-expand path)))
+       ((and (string= type "file") path)
+        (expand-file-name path))
+       (t nil))))
    ((derived-mode-p 'dired-mode)
-    (let ((file-path (dired-get-file-for-visit)))
-      (if (file-exists-p file-path)
-          (shell-command
-           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" file-path))
-        (message "Selected file does not exist!"))))
-
-   ;; Image mode
+    (dired-get-file-for-visit))
    ((eq major-mode 'image-mode)
-    (let ((image-file (buffer-file-name)))
-      (if (and image-file (file-exists-p image-file))
-          (shell-command
-           (format "osascript -e 'set the clipboard to (read (POSIX file \"%s\") as JPEG picture)'" image-file))
-        (message "No file associated with this buffer!"))))
+    (buffer-file-name))
+   (t nil)))
 
-   (t
-    (message "Not in an Org, Dired, or Image buffer!"))))
+(defun my/macos-image-class (file)
+  "Return the AppleScript image class for FILE."
+  (pcase (downcase (or (file-name-extension file) ""))
+    ((or "jpg" "jpeg") "JPEG picture")
+    ("png" "PNG picture")
+    ((or "tif" "tiff") "TIFF picture")
+    ("gif" "GIF picture")
+    ("bmp" "BMP picture")
+    (_ nil)))
+
+(defun my/copy-image-file-to-clipboard (file)
+  "Copy FILE to the macOS clipboard.
+If FILE is remote, fetch a local temporary copy first."
+  (let* ((image-class (my/macos-image-class file))
+         (remote-p (file-remote-p file))
+         (local-file (or (file-local-copy file) file)))
+    (unless image-class
+      (user-error "Unsupported image type: %s" file))
+    (unless (file-exists-p local-file)
+      (user-error "Image file does not exist: %s" file))
+    (unwind-protect
+        (with-temp-buffer
+          (let ((status
+                 (call-process
+                  "osascript" nil t nil
+                  "-e"
+                  (format
+                   "set the clipboard to (read (POSIX file %S) as %s)"
+                   local-file image-class))))
+            (if (zerop status)
+                (message "Copied image to clipboard: %s" file)
+              (user-error "Failed to copy image: %s"
+                          (string-trim (buffer-string))))))
+      (when (and remote-p
+                 local-file
+                 (not (equal local-file file))
+                 (file-exists-p local-file))
+        (ignore-errors (delete-file local-file))))))
+
+(defun my/copy-image-to-clipboard ()
+  "Copy the image at point or current image buffer to the macOS clipboard.
+Supports local files and TRAMP files from Org, Dired, and image buffers."
+  (interactive)
+  (if-let ((file (my/image-file-at-point-or-buffer)))
+      (my/copy-image-file-to-clipboard file)
+    (message "No valid image file in this Org, Dired, or Image buffer!")))
 
 (map! :leader :desc "copy image file at point to clipboard" "y p" #'my/copy-image-to-clipboard)
 
@@ -142,6 +165,113 @@ Supports Org mode (including attachment links), Dired, and image buffers."
       :desc "Open project file externally"
       "e e" #'open-project-file-externally)
 
+(defvar last-warp-dir nil
+  "Directory where the last Warp Terminal was opened.")
+
+(defun open-warp--split-host-port (host)
+  "Return (HOST . PORT) parsed from TRAMP HOST value.
+TRAMP encodes explicit ports as HOST#PORT."
+  (if (and host (string-match "\\`\\(.*\\)#\\([0-9]+\\)\\'" host))
+      (cons (match-string 1 host) (match-string 2 host))
+    (cons host nil)))
+
+(defun open-warp--window-open-p ()
+  "Return non-nil when Warp currently has at least one window."
+  (let ((count
+         (string-to-number
+          (string-trim
+           (with-temp-buffer
+             (if (zerop (call-process "osascript" nil t nil
+                                      "-e" "tell application \"System Events\""
+                                      "-e" "if exists process \"Warp\" then"
+                                      "-e" "tell process \"Warp\""
+                                      "-e" "return (count of windows)"
+                                      "-e" "end tell"
+                                      "-e" "else"
+                                      "-e" "return 0"
+                                      "-e" "end if"
+                                      "-e" "end tell"))
+                 (buffer-string)
+               "0"))))))
+    (> count 0)))
+
+(defun open-warp--open-uri-session (action path)
+  "Open Warp ACTION (new_tab/new_window) at local PATH via URI scheme."
+  (call-process "open" nil 0 nil
+                (format "warp://action/%s?path=%s"
+                        action
+                        (url-hexify-string (expand-file-name path)))))
+
+(defun open-warp--send-command (command)
+  "Send COMMAND to the active Warp session and run it."
+  (call-process "osascript" nil 0 nil
+                "-e" "on run argv"
+                "-e" "set cmd to item 1 of argv"
+                "-e" "tell application \"Warp\" to activate"
+                "-e" "tell application \"System Events\""
+                "-e" "repeat 80 times"
+                "-e" "if exists process \"Warp\" then exit repeat"
+                "-e" "delay 0.05"
+                "-e" "end repeat"
+                "-e" "if not (exists process \"Warp\") then return"
+                "-e" "tell process \"Warp\""
+                "-e" "set frontmost to true"
+                "-e" "repeat 80 times"
+                "-e" "if (count of windows) > 0 then exit repeat"
+                "-e" "delay 0.05"
+                "-e" "end repeat"
+                "-e" "if (count of windows) = 0 then return"
+                "-e" "delay 0.15"
+                "-e" "keystroke cmd"
+                "-e" "delay 0.05"
+                "-e" "key code 36"
+                "-e" "end tell"
+                "-e" "end tell"
+                "-e" "end run"
+                "--" command))
+
+(defun open-warp--remote-shell-command (dir)
+  "Build an SSH command that opens remote DIR in a login shell."
+  (let* ((method (file-remote-p dir 'method))
+         (host-and-port (open-warp--split-host-port (file-remote-p dir 'host)))
+         (host (car host-and-port))
+         (port (cdr host-and-port))
+         (user (file-remote-p dir 'user))
+         (remote-dir (file-remote-p dir 'localname))
+         (target (if user (format "%s@%s" user host) host))
+         (port-arg (if port
+                       (format " -p %s" port)
+                     "")))
+    (unless (member method '("rpc" "ssh" "scp" "sftp"))
+      (user-error "Warp remote open only supports TRAMP rpc/ssh/scp/sftp methods"))
+    (format "ssh%s -t %s %s"
+            port-arg
+            (shell-quote-argument target)
+            (shell-quote-argument
+             (format "cd %s && exec ${SHELL:-/bin/bash} -l"
+                     (shell-quote-argument remote-dir))))))
+
+(defun open-warp--run-remote-command (command &optional force-new-window)
+  "Open Warp and execute COMMAND.
+When FORCE-NEW-WINDOW is non-nil, create a new Warp window first."
+  (open-warp--open-uri-session (if force-new-window "new_window" "new_tab")
+                               (or (getenv "HOME") "~"))
+  (open-warp--send-command command))
+
+(defun open-warp-terminal-in-dir ()
+  "Open Warp Terminal in `default-directory', including TRAMP paths."
+  (interactive)
+  (let ((dir default-directory)
+        (window-open (open-warp--window-open-p)))
+    (setq last-warp-dir dir)
+    (if (file-remote-p dir)
+        (open-warp--run-remote-command (open-warp--remote-shell-command dir)
+                                       (not window-open))
+      (open-warp--open-uri-session (if window-open "new_tab" "new_window")
+                                   (expand-file-name dir)))))
+
+(map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
+
 ;; (defun update-breadcrumb-mode-based-on-window-count ()
 ;;   "Toggle breadcrumb-mode based on the number of visible windows."
 ;;   (let ((more-than-one-window (> (length (window-list)) 1)))
@@ -168,105 +298,105 @@ the node has an Org ID."
 
 
 
-(setq org-babel-default-header-args:jupyter-python
-      '((:results . "both")
-        ;; This seems to lead to buffer specific sessions!
-        (:session . (lambda () (file-name-nondirectory (buffer-file-name))))
-        (:kernel . "python3")
-        (:pandoc . "t")
-        (:exports . "both")
-        (:cache .   "no")
-        (:noweb . "no")
-        (:hlines . "no")
-        (:tangle . "no")
-        (:eval . "never-export")))
+;; (setq org-babel-default-header-args:jupyter-python
+;;       '((:results . "both")
+;;         ;; This seems to lead to buffer specific sessions!
+;;         (:session . (lambda () (file-name-nondirectory (buffer-file-name))))
+;;         (:kernel . "python3")
+;;         (:pandoc . "t")
+;;         (:exports . "both")
+;;         (:cache .   "no")
+;;         (:noweb . "no")
+;;         (:hlines . "no")
+;;         (:tangle . "no")
+;;         (:eval . "never-export")))
 
-(defun scimax-jupyter-jump-to-error ()
-  "In a src block, jump to the line indicated as an error in the results.
-In a SyntaxError, there is not a traceback with a line number, so
-we handle it separately. It doesn't seem like it should be that
-way, but it is."
-  (interactive)
-  (let* ((cp (point))
-         (location (org-babel-where-is-src-block-result))
-         (case-fold-search t))
+;; (defun scimax-jupyter-jump-to-error ()
+;;   "In a src block, jump to the line indicated as an error in the results.
+;; In a SyntaxError, there is not a traceback with a line number, so
+;; we handle it separately. It doesn't seem like it should be that
+;; way, but it is."
+;;   (interactive)
+;;   (let* ((cp (point))
+;;          (location (org-babel-where-is-src-block-result))
+;;          (case-fold-search t))
 
-    (when (and location
-               (goto-char location)
-               (looking-at org-babel-result-regexp))
-      (cond
-       ;; Check for SyntaxError
-       ((string-match "SyntaxError:" (buffer-substring location (org-babel-result-end)))
-        (re-search-forward (rx (zero-or-more " ") "^") nil (org-babel-result-end))
-        (previous-line)
-        (let ((pattern (string-trim-left
-                        (buffer-substring-no-properties
-                         (line-beginning-position) (line-end-position)))))
-          (goto-char cp)
-          (goto-char (org-element-property :begin (org-element-context)))
-          (unless
-              (search-forward pattern (org-element-property :end (org-element-context)) t)
-            (message "No SyntaxError found like %s" pattern))))
+;;     (when (and location
+;;                (goto-char location)
+;;                (looking-at org-babel-result-regexp))
+;;       (cond
+;;        ;; Check for SyntaxError
+;;        ((string-match "SyntaxError:" (buffer-substring location (org-babel-result-end)))
+;;         (re-search-forward (rx (zero-or-more " ") "^") nil (org-babel-result-end))
+;;         (previous-line)
+;;         (let ((pattern (string-trim-left
+;;                         (buffer-substring-no-properties
+;;                          (line-beginning-position) (line-end-position)))))
+;;           (goto-char cp)
+;;           (goto-char (org-element-property :begin (org-element-context)))
+;;           (unless
+;;               (search-forward pattern (org-element-property :end (org-element-context)) t)
+;;             (message "No SyntaxError found like %s" pattern))))
 
-       ;; search for something like --> 21
-       (t
-        (goto-char location)
-        (re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
-        (save-match-data
-          (goto-char cp)
-          (goto-char (org-element-property :begin (org-element-context))))
-        (forward-line (string-to-number (match-string-no-properties 1))))))))
+;;        ;; search for something like --> 21
+;;        (t
+;;         (goto-char location)
+;;         (re-search-forward "-*> \\([[:digit:]]*\\)" (org-babel-result-end))
+;;         (save-match-data
+;;           (goto-char cp)
+;;           (goto-char (org-element-property :begin (org-element-context))))
+;;         (forward-line (string-to-number (match-string-no-properties 1))))))))
 
-(setq org-babel-default-header-args:jupyter-R
-      '((:results . "value")
-        (:session . "jupyter-R")
-        (:kernel . "ir")
-        (:pandoc . "t")
-        (:exports . "both")
-        (:cache .   "no")
-        (:noweb . "no")
-        (:hlines . "no")
-        (:tangle . "no")
-        (:eval . "never-export")))
+;; (setq org-babel-default-header-args:jupyter-R
+;;       '((:results . "value")
+;;         (:session . "jupyter-R")
+;;         (:kernel . "ir")
+;;         (:pandoc . "t")
+;;         (:exports . "both")
+;;         (:cache .   "no")
+;;         (:noweb . "no")
+;;         (:hlines . "no")
+;;         (:tangle . "no")
+;;         (:eval . "never-export")))
 
-(defun scimax-jupyter-ansi ()
-  "Replaces ansi-codes in exceptions with colored text.
-I thought emacs-jupyter did this automatically, but it may only
-happen in the REPL. Without this, the tracebacks are very long
-and basically unreadable.
+;; (defun scimax-jupyter-ansi ()
+;;   "Replaces ansi-codes in exceptions with colored text.
+;; I thought emacs-jupyter did this automatically, but it may only
+;; happen in the REPL. Without this, the tracebacks are very long
+;; and basically unreadable.
 
-We also add some font properties to click on goto-error.
+;; We also add some font properties to click on goto-error.
 
-This should only apply to jupyter-lang blocks."
-  (when (string-match "^jupyter" (car (or (org-babel-get-src-block-info t) '(""))))
-    (let* ((r (org-babel-where-is-src-block-result))
-           (result (when r
-                     (save-excursion
-                       (goto-char r)
-                       (org-element-context)))))
-      (when result
-        (ansi-color-apply-on-region (org-element-property :begin result)
-                                    (org-element-property :end result))
+;; This should only apply to jupyter-lang blocks."
+;;   (when (string-match "^jupyter" (car (or (org-babel-get-src-block-info t) '(""))))
+;;     (let* ((r (org-babel-where-is-src-block-result))
+;;            (result (when r
+;;                      (save-excursion
+;;                        (goto-char r)
+;;                        (org-element-context)))))
+;;       (when result
+;;         (ansi-color-apply-on-region (org-element-property :begin result)
+;;                                     (org-element-property :end result))
 
-        ;; Let's fontify "# [goto error]" to it is clickable
-        (save-excursion
-          (goto-char r)
-          (when (search-forward "# [goto error]" (org-element-property :end result) t)
-            (add-text-properties
-             (match-beginning 0) (match-end 0)
-             (list 'help-echo "Click to jump to error."
-                   'mouse-face 'highlight
-                   'local-map (let ((map (copy-keymap help-mode-map)))
-                                (define-key map [mouse-1] (lambda ()
-                                                            (interactive)
-                                                            (search-backward "#+BEGIN_SRC")
-                                                            (scimax-jupyter-jump-to-error)))
-                                map))))))
+;;         ;; Let's fontify "# [goto error]" to it is clickable
+;;         (save-excursion
+;;           (goto-char r)
+;;           (when (search-forward "# [goto error]" (org-element-property :end result) t)
+;;             (add-text-properties
+;;              (match-beginning 0) (match-end 0)
+;;              (list 'help-echo "Click to jump to error."
+;;                    'mouse-face 'highlight
+;;                    'local-map (let ((map (copy-keymap help-mode-map)))
+;;                                 (define-key map [mouse-1] (lambda ()
+;;                                                             (interactive)
+;;                                                             (search-backward "#+BEGIN_SRC")
+;;                                                             (scimax-jupyter-jump-to-error)))
+;;                                 map))))))
 
-      t)))
+;;       t)))
 
 
-(add-to-list 'org-babel-after-execute-hook 'scimax-jupyter-ansi t)
+;; (add-to-list 'org-babel-after-execute-hook 'scimax-jupyter-ansi t)
 
 
 ;; attachment customization
@@ -539,8 +669,9 @@ inside a Jupyter src-block, return nil."
        (push 'invalid jupyter-org--src-block-cache)))
     nil))
 
-(advice-add 'jupyter-org--set-src-block-cache
-            :override #'my/jupyter-org--set-src-block-cache)
+(with-eval-after-load 'jupyter-org
+  (advice-add 'jupyter-org--set-src-block-cache
+              :override #'my/jupyter-org--set-src-block-cache))
 
 ;;;###autoload
 
@@ -675,3 +806,103 @@ PDF is named after the Org file. Respects file-level :DIR:/ :ATTACH_DIR: and org
               (file-error (copy-file src dst t t t))))
           (message "Exported PDF → %s" dst)
           dst)))))
+
+;;; === org-roam node mover ===
+
+(defun my/org-roam--collect-ids ()
+  "Return list of all :ID: values in the current org buffer."
+  (save-excursion
+    (goto-char (point-min))
+    (let (ids)
+      (while (re-search-forward "^[ \t]*:ID:[ \t]+\\(.+\\)$" nil t)
+        (push (string-trim (match-string 1)) ids))
+      (nreverse ids))))
+
+(defun my/org-roam--id-subpath (id)
+  "Convert org UUID to its attach subdirectory path.
+E.g. \"fccda702-...\" → \"fc/cda702-...\""
+  (format "%s/%s" (substring id 0 2) (substring id 2)))
+
+(defun my/org-roam--attach-root-for-dir (directory)
+  "Return the absolute org-attach-id-dir that would apply to DIRECTORY.
+Achieves this by applying dir-locals to a temp buffer rooted at DIRECTORY,
+then reading the resulting buffer-local org-attach-id-dir."
+  (require 'org-attach)
+  (let ((dir (file-name-as-directory (expand-file-name directory))))
+    (with-temp-buffer
+      (setq default-directory dir)
+      (setq-local org-attach-id-dir (default-value 'org-attach-id-dir))
+      (ignore-errors (hack-dir-local-variables-non-file-buffer))
+      (expand-file-name org-attach-id-dir dir))))
+
+(defun my/org-roam-move-node ()
+  "Move the current org-roam node file and its ID-based attachments to another directory.
+Prompts for a destination directory, then:
+  1. Moves the .org file
+  2. Moves all attachment directories whose IDs appear in the file
+  3. Updates the org-roam database"
+  (interactive)
+  (require 'org-attach)
+  (require 'org-roam)
+  (unless (buffer-file-name)
+    (user-error "Not visiting a file"))
+
+  (let* (;; Source
+         (src-file        (expand-file-name (buffer-file-name)))
+         (src-dir         (file-name-directory src-file))
+         (src-base        (file-name-nondirectory src-file))
+         (src-attach-root (expand-file-name org-attach-id-dir src-dir))
+         (node-ids        (my/org-roam--collect-ids))
+         ;; Destination
+         (dest-dir        (expand-file-name
+                           (read-directory-name
+                            (format "Move \"%s\" to directory: " src-base)
+                            (default-value 'org-roam-directory))))
+         (dest-file       (expand-file-name src-base dest-dir))
+         (dest-attach-root (my/org-roam--attach-root-for-dir dest-dir))
+         ;; Compute (src-attach-dir . dest-attach-dir) pairs, filtered to existing dirs
+         (attach-moves
+          (seq-filter (lambda (pair) (file-directory-p (car pair)))
+                      (mapcar (lambda (id)
+                                (let ((sub (my/org-roam--id-subpath id)))
+                                  (cons (expand-file-name sub src-attach-root)
+                                        (expand-file-name sub dest-attach-root))))
+                              node-ids))))
+
+    ;; Guard: dest file already exists
+    (when (file-exists-p dest-file)
+      (unless (yes-or-no-p (format "Destination already exists:\n  %s\nOverwrite? " dest-file))
+        (user-error "Aborted")))
+
+    ;; Confirmation
+    (unless (yes-or-no-p
+             (format "Move org-roam node:\n  %s\n  → %s\n\nAttach root:\n  %s\n  → %s\n\nAttach dirs to move: %d of %d node ID(s)\nProceed? "
+                     src-file dest-file
+                     src-attach-root dest-attach-root
+                     (length attach-moves) (length node-ids)))
+      (user-error "Aborted"))
+
+    ;; 1. Move the org file
+    (make-directory dest-dir t)
+    (rename-file src-file dest-file t)
+
+    ;; 2. Move each existing attachment directory
+    (dolist (pair attach-moves)
+      (let ((src (car pair))
+            (dst (cdr pair)))
+        (make-directory (file-name-directory dst) t)
+        (if (file-exists-p dst)
+            ;; destination dir already exists: merge contents then remove source
+            (progn
+              (copy-directory src dst t t t)
+              (delete-directory src t))
+          (rename-file src dst))))
+
+    ;; 3. Transition current buffer to the new path and update org-roam DB
+    (set-visited-file-name dest-file t t)
+    (set-buffer-modified-p nil)
+    (ignore-errors (org-roam-db-clear-file src-file))
+    (org-roam-db-update-file)
+
+    (message "Moved to: %s  (%d attach dir(s) moved)"
+             dest-file (length attach-moves))))

@@ -5,7 +5,9 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("a50b8f26f4f7fc0bb5f5a5422cec4d964cc4eb4a1ddff5ba7b1383e15a7e70e0"
+   '("ebbc015ad76f2a0baa4ad72ec5ae89ce69db6009abe34e10a25af30981b68945"
+     "a79d491aadc80712cc1f44c69ea15c8b6c73a0bf3e5dc305367a990fb2311060"
+     "a50b8f26f4f7fc0bb5f5a5422cec4d964cc4eb4a1ddff5ba7b1383e15a7e70e0"
      "6b506ae956ec2942bd90acdcc72ccbdc0ca0e26149f1659e9c53c9439291a84d"
      "d56a9fa4b46c249961ce6891f3f86d7936cb283088e6a83ffe848d295b037163"
      "ea4dd126d72d30805c083421a50544e235176d9698c8c541b824b60912275ba1"
@@ -44,11 +46,22 @@
      "69a25b1d88aad37bb3a7c311a4a648772fa794a8ab4c1fa69b9455112e536449"
      "a8347c492511ecc002df26d2b268f1342d84af50c43901e0d88dd678134729d8"
      "cfc1e49eec0d57e2f70ef3a6db3b543bbb2edcf16a9f164231afcc4d1263f9fb" default))
- '(org-agenda-files '("/Users/jiawei/org/journal/20260201"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20260301"))
  '(package-selected-packages
-   '(cond-let llama magit-section tomlparse uuidgen with-editor))
+   '(cond-let llama magit-section tomlparse uuidgen web-server with-editor))
  '(safe-local-variable-directories
-   '("/Users/jiawei/Projects/virtual_maze_PD/"
+   '("/rpc:100.105.242.51:/home/jiawei/projects/gait_init/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/HSMR/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/sam-3d-body/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/GVHMR_skel/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/GENMO/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/sam-body4d/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/hpe/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/hpe/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/Depth-Anything-3/"
+     "/Users/jiawei/Projects/hpe/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/sam-body4d/"
+     "/Users/jiawei/Projects/virtual_maze_PD/"
      "/scpx:100.105.242.51:/home/jiawei/projects/gait_init/"
      "/scpx:100.105.242.51:/home/jiawei/projects/HSMR/"
      "/scpx:100.105.242.51:/home/jiawei/projects/sam-3d-body/"
@@ -58,8 +71,10 @@
      "/rsync:100.105.242.51:/home/jiawei/projects/SKEL/"
      "/scpx:100.105.242.51:/home/jiawei/projects/SKEL/"
      "/ssh:100.105.242.51:/home/jiawei/projects/GVHMR/"
+     "/rpc:100.105.242.51:/home/jiawei/projects/GVHMR/"
      "/rsync:100.105.242.51:/home/jiawei/projects/GVHMR/"
      "/scpx:100.105.242.51:/home/jiawei/projects/GVHMR/"
+     "/scpx:100.105.242.51:/home/jiawei/projects/GLAMR/"
      "/ssh:100.105.242.51:/home/jiawei/projects/HSMR/"
      "/Users/jiawei/Projects/virtual_maze_PD/paper/"
      "/Users/jiawei/Projects/Bio_model/"
@@ -68,6 +83,11 @@
      "/Users/jiawei/Projects/virtual_maze_multi_session/"
      "/Users/jiawei/Documents/roam/" "/Users/jiawei/Projects/courses/"
      "/Users/jiawei/.doom.d/" "~/.emacs.d/"))
+ '(safe-local-variable-values
+   '((eglot-server-programs
+      ((python-mode python-ts-mode) "/home/jiawei/.local/bin/ty" "server"))
+     (jc/project-root-local . "/home/jiawei/projects/GLAMR/")
+     (jc/project-root-local . "/home/jiawei/projects/GVHMR/")))
  '(warning-suppress-log-types
    '((uuid network-interface-info) (org latex-preview hyperref)))
  '(zoom-size '(0.8 . 0.8)))

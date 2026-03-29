@@ -66,11 +66,7 @@
 (after! texmathp
   (add-to-list 'texmathp-tex-commands '("tikzpicture" env-on)))
 
-;; (modify-all-frames-parameters '((inhibit-double-buffering . t)))
-
-;; (setq org-latex-src-block-backend "listings")
-
-(remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
+;; (remove-hook 'doom-first-buffer-hook #'global-hl-line-mode)
 
 (setq org-agenda-files '("~/org/journal/"))
 (setq org-journal-enable-agenda-integration t)
@@ -176,9 +172,6 @@
 (setopt org-cite-csl-styles-dir "~/Zotero/styles")
 (setq citar-bibliography
       (list (expand-file-name "/Users/jiawei/Documents/roam/biblibrary/references.bib")))
-;; (setopt citar-library-paths '("/Users/jiawei/Documents/roam/paper/"))
-;; (setopt citar-notes-paths '("/Users/jiawei/Documents/roam/paper/"))
-;; (setopt citar-org-roam-subdir "paper/")
 (use-package! citar
   :config
   (setopt citar-org-roam-note-title-template "${title}"))
@@ -194,7 +187,8 @@
 ;;; AI tools and assistants
 
 (use-package! copilot
-  ;; :hook (prog-mode . copilot-mode)
+  :init
+  :hook (prog-mode . copilot-mode)
   :bind (("<backtab>" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
          ("<tab>" . 'copilot-accept-completion)
@@ -210,10 +204,7 @@
 
 ;;; Window/frame and shell helpers
 
-;; open warp terminal in current directory
-(defvar last-warp-dir nil
-  "Directory where the last Warp Terminal was opened.")
-
+(load! (expand-file-name "layout-buffer-consult" "~/.doom.d/lisp/"))
 
 ;; set the default frame
 (add-to-list 'default-frame-alist '(undecorated-round . t))
@@ -254,20 +245,6 @@
                           nil nil org-download-screenshot-basename)
            nil)))
     (org-download-clipboard file)))
-
-;; warp terminal
-(defun open-warp-terminal-in-dir ()
-  "Open Warp Terminal in the current directory if not already open."
-  (interactive)
-  (let ((dir default-directory))
-    (if (equal dir last-warp-dir)
-        (shell-command "osascript -e 'tell application \"Warp\" to activate'")
-      (progn
-        (setq last-warp-dir dir)
-        (shell-command (concat "open -a Warp " dir))))))
-;; map space o w to open warp terminal in current directory
-(map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
-
 
 ;;; macOS integration
 
@@ -602,6 +579,7 @@
   :config
   ;; Increase preview width
   (plist-put org-latex-preview-appearance-options :page-width 0.8)
+  (plist-put org-latex-preview-appearance-options :zoom 1.1)
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
   (setq org-latex-preview-mode-ignored-commands
@@ -645,209 +623,6 @@
   (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
   (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump)
   )
-
-(defcustom jc/evil-mark-jump-timeout 0.5
-  "Seconds to wait for a mark key before opening consult marks."
-  :type 'number
-  :group 'evil)
-
-(defconst jc/evil-marker-excluded-chars '(27)
-  "Character codes that should not be used as Evil markers.")
-
-(defun jc/evil-marker-char-allowed-p (char)
-  "Return non-nil when CHAR is allowed as an Evil marker."
-  (not (memq char jc/evil-marker-excluded-chars)))
-
-(defun jc/evil-set-marker-filter (orig-fn char &optional pos advance)
-  "Skip setting Evil markers for excluded CHAR values."
-  (if (jc/evil-marker-char-allowed-p char)
-      (funcall orig-fn char pos advance)
-    (message "Ignoring mark for key: ESC")))
-
-(defun jc/evil-clear-excluded-markers ()
-  "Remove excluded markers from Evil marker stores."
-  (setq evil-markers-alist
-        (seq-remove (lambda (entry)
-                      (memq (car entry) jc/evil-marker-excluded-chars))
-                    evil-markers-alist))
-  (when (boundp 'evil-visual-mark-overlay-alist)
-    (setq evil-visual-mark-overlay-alist
-          (seq-remove (lambda (entry)
-                        (memq (car (car entry)) jc/evil-marker-excluded-chars))
-                      evil-visual-mark-overlay-alist))))
-
-(defun jc/evil-consult-marks--all-marks ()
-  "Collect all evil markers: local (current buffer) + persisted global (A-Z).
-Loads both local and global markers from disk so persisted marks are visible
-even before they have been lazily accessed. Returns an alist sorted with
-local marks first, global marks last, alphabetical within each group."
-  (when (fboundp 'night/load-markers)
-    (night/load-markers :global-p nil)
-    (night/load-markers :global-p t))
-  (let* (;; Only show user-set marks: a-z (97-122), A-Z (65-90), 0-9 (48-57).
-         ;; Evil silently manages [ ] ^ . < > ' " for internal bookkeeping;
-         ;; exclude those the same way the persist system does.
-         (user-mark-p (lambda (e)
-                        (let ((c (car e)))
-                          (or (<= ?a c ?z) (<= ?A c ?Z) (<= ?0 c ?9)))))
-         (local (cl-remove-if
-                 (lambda (e)
-                   (or (evil-global-marker-p (car e))
-                       (not (funcall user-mark-p e))
-                       (not (markerp (cdr-safe e)))))
-                 evil-markers-alist))
-         (global (cl-remove-if-not
-                  (lambda (e)
-                    (and (funcall user-mark-p e)
-                         (evil-global-marker-p (car e))
-                         (markerp (cdr-safe e))
-                         (marker-buffer (cdr e))))
-                  (default-value 'evil-markers-alist))))
-    (sort (append local global)
-          (lambda (a b)
-            (let ((ag (evil-global-marker-p (car a)))
-                  (bg (evil-global-marker-p (car b))))
-              (cond
-               ((and ag (not bg)) nil)   ; global after local
-               ((and (not ag) bg) t)     ; local before global
-               (t (< (car a) (car b)))))))))
-
-(defun jc/evil-consult-marks--candidates (marks)
-  "Build consult candidates from MARKS alist of (char . marker).
-Global marks (A-Z) include the file name in the label."
-  (consult--forbid-minibuffer)
-  (let (candidates)
-    (save-excursion
-      (pcase-dolist (`(,char . ,marker) marks)
-        (when-let* ((pos (marker-position marker))
-                    (buf (marker-buffer marker))
-                    ((buffer-live-p buf))
-                    ((not (minibufferp buf))))
-          (with-current-buffer buf
-            (when (consult--in-range-p pos)
-              (goto-char pos)
-              (let* ((line (line-number-at-pos pos consult-line-numbers-widen))
-                     (is-global (evil-global-marker-p char))
-                     (display-name (if (buffer-file-name buf)
-                                       (abbreviate-file-name (buffer-file-name buf))
-                                     (buffer-name buf)))
-                     (label (if is-global
-                                (format "[%s] %s" (char-to-string char) display-name)
-                              (format "[%s]" (char-to-string char))))
-                     (prefix (consult--format-file-line-match label line ""))
-                     (cand (concat prefix (consult--line-with-mark marker)
-                                   (consult--tofu-encode marker))))
-                (put-text-property 0 (length prefix) 'consult-strip t cand)
-                (put-text-property 0 (length cand) 'consult-location (cons marker line) cand)
-                (push cand candidates)))))))
-    (unless candidates
-      (user-error "No evil marks found"))
-    (nreverse (delete-dups candidates))))
-
-(defun jc/evil-consult-marks ()
-  "Browse all evil marks (local a-z + persisted global A-Z) with consult.
-Pressing a mark's letter directly jumps to it without needing Enter.
-Global marks are loaded from disk and shown with their file path."
-  (interactive)
-  (let* ((marks (jc/evil-consult-marks--all-marks))
-         (cands (jc/evil-consult-marks--candidates marks))
-         ;; selected is set by the keymap lambdas via closure
-         (selected nil)
-         (keymap (let ((km (make-sparse-keymap)))
-                   ;; Any printable key that isn't a bound mark letter aborts.
-                   (define-key km [remap self-insert-command]
-                     (lambda () (interactive) (abort-minibuffers)))
-                   ;; Mark letter keys jump directly (take priority over remap).
-                   (pcase-dolist (`(,char . ,marker) marks)
-                     (let ((marker marker))
-                       (define-key km (char-to-string char)
-                         (lambda ()
-                           (interactive)
-                           (setq selected marker)
-                           (abort-minibuffers)))))
-                   km)))
-    (condition-case nil
-        (consult--read
-         cands
-         :prompt "Go to evil mark: "
-         :category 'consult-location
-         :sort nil
-         :require-match t
-         :lookup #'consult--lookup-location
-         :history '(:input consult--line-history)
-         :add-history (thing-at-point 'symbol)
-         :state (consult--jump-state)
-         :keymap keymap)
-      ;; abort-minibuffers signals quit; consult's unwind-protect has already
-      ;; restored the preview position, so we just jump to the stored marker.
-      (quit
-       (when selected
-         (consult--jump selected))))))
-
-(defun jc/evil-goto-mark-line-or-consult ()
-  "Jump to an Evil mark, or open mark list after timeout."
-  (interactive)
-  (let ((event (read-event "Mark: " nil jc/evil-mark-jump-timeout)))
-    (if event
-        (if (characterp event)
-            (evil-goto-mark-line event)
-          (setq unread-command-events (list event)))
-      (jc/evil-consult-marks))))
-
-(defun jc/evil-persist-delete-chars-from-file (file-name chars)
-  "Remove CHARS (list of char codes) from evil markers persist FILE-NAME."
-  (when (and file-name (file-exists-p file-name))
-    (condition-case err
-        (let* ((data (with-temp-buffer
-                       (insert-file-contents file-name)
-                       (read (current-buffer))))
-               (filtered (cl-remove-if (lambda (entry)
-                                         (and (integerp (car entry))
-                                              (memq (car entry) chars)))
-                                       data)))
-          ;; If only the version header remains, the file is empty — delete it
-          (if (= (length filtered) 1)
-              (delete-file file-name)
-            (with-temp-file file-name
-              (let ((print-level nil) (print-length nil))
-                (prin1 filtered (current-buffer))))))
-      (error
-       (message "jc: failed to update marker file %s: %s"
-                file-name (error-message-string err))))))
-
-(defun jc/evil-delmarks-sync-persist (orig-fn marks &optional force)
-  "Around advice on `evil-delete-marks': remove deleted marks from persist files."
-  ;; Only act when the persist system is loaded
-  (if (not (and (boundp 'night-evil-markers-file-version)
-                (fboundp 'night/evil-marker-file-name)
-                (fboundp 'evil--parse-delmarks)))
-      (funcall orig-fn marks force)
-    (let ((local-before (mapcar #'car evil-markers-alist)))
-      (funcall orig-fn marks force)
-      (let* ((mark-chars (remove ?\s (append marks nil)))
-             (chars-to-delete
-              (cond
-               ((and force mark-chars) nil) ; invalid input — evil did nothing
-               (mark-chars (evil--parse-delmarks mark-chars))
-               (force ; :delmarks! — detect what was actually removed
-                (cl-set-difference local-before (mapcar #'car evil-markers-alist))))))
-        (when chars-to-delete
-          (let ((local-chars (cl-remove-if #'evil-global-marker-p chars-to-delete))
-                (global-chars (cl-remove-if-not #'evil-global-marker-p chars-to-delete)))
-            (when (and local-chars buffer-file-name)
-              (jc/evil-persist-delete-chars-from-file
-               (night/evil-marker-file-name buffer-file-name)
-               local-chars))
-            (when global-chars
-              (jc/evil-persist-delete-chars-from-file
-               night-evil-global-markers-file
-               global-chars))))))))
-
-(after! evil
-  (advice-add 'evil-set-marker :around #'jc/evil-set-marker-filter)
-  (advice-add 'evil-delete-marks :around #'jc/evil-delmarks-sync-persist)
-  (jc/evil-clear-excluded-markers)
-  (define-key evil-motion-state-map (kbd "'") #'jc/evil-goto-mark-line-or-consult))
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
   "Set a jump point before running `flash-emacs-jump`."
@@ -936,8 +711,14 @@ Global marks are loaded from disk and shown with their file path."
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"))
 
-(after! vterm                    
-  (add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer))
+(defun jc/vterm-apply-dir-locals-maybe ()
+  "Apply dir-locals for local vterm buffers only."
+  (unless (file-remote-p default-directory)
+    (hack-dir-local-variables-non-file-buffer)))
+
+(after! vterm
+  (remove-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
+  (add-hook 'vterm-mode-hook #'jc/vterm-apply-dir-locals-maybe))
 
 (after! embark-org               
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
@@ -1087,19 +868,6 @@ Global marks are loaded from disk and shown with their file path."
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
 
-;;; Local packages and popup helpers
-
-;; config.el       
-;; (use-package! evil-visual-mark-mode
-;;   :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
-;;   :config
-;;   (evil-visual-mark-mode 1))
-
-
-(use-package! evil-marker-persist
-  :load-path "/Users/jiawei/Projects/Playground/evil-visual-mark-mode"
-  )
-
 ;;; Peek breadcrumb until next keypress
 (defvar-local my--breadcrumb-peek-armed nil)
 
@@ -1164,7 +932,6 @@ Global marks are loaded from disk and shown with their file path."
 
 ;; Put this in your config.el
 ;; (add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
-(add-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
 
 ;; dirvish bug
 ;; Fix Dirvish yank under Emacs 31 where built-in `all` clashes
@@ -1230,7 +997,10 @@ One vterm per project root:
 - If it exists but is hidden, show it.
 - If it doesn't exist yet, create it at the project root."
   (interactive)         
-  (let* ((proj-root (or (doom-project-root) default-directory))
+  (let* ((proj-root (or (and (fboundp 'jc/project-root-for-dir)
+                             (jc/project-root-for-dir default-directory))
+                        (doom-project-root default-directory)
+                        default-directory))
          (proj-name (file-name-nondirectory (directory-file-name proj-root)))
          (buf-name (format "*vterm:%s*" proj-name))
          (buf      (get-buffer buf-name)))
@@ -1245,7 +1015,16 @@ One vterm per project root:
             (setq buf (vterm buf-name)))
           ;; make Doom treat it like a normal/real buffer
           (with-current-buffer buf
-            (setq-local doom-real-buffer-p t)))
+            (setq-local jc/vterm-origin-prefix (file-remote-p proj-root))
+            (setq-local jc/project-root-local
+                        (when (file-remote-p proj-root)
+                          (file-name-as-directory
+                           (tramp-file-name-localname
+                            (tramp-dissect-file-name proj-root)))))
+            (setq-local doom-real-buffer-p (not (file-remote-p default-directory)))))
+        (with-current-buffer buf
+          (when (fboundp 'jc/vterm-use-shell-vi)
+            (jc/vterm-use-shell-vi)))
         (pop-to-buffer buf)))))
 
 ;; temp fix for rsync dirvish 
@@ -1274,8 +1053,6 @@ and convert it to Org using the pandoc utility."
                                         ; map [ F to ns-previous-frame]
 (map! :n "[ F" #'ns-prev-frame)
 
-;; tramp trick
-(load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 (setq enable-remote-dir-locals t)
 
 ;; fix a quickrun bug   
@@ -1332,7 +1109,6 @@ This version also runs fully on remote files."
 
 ;; Consult config
 ;; consult-dir with zlua source
-(exec-path-from-shell-copy-env "ZLUA_SCRIPT")
 (use-package! consult-dir
   :init                 
   (setq consult-dir-default-command #'consult-dir-dired)
@@ -1354,11 +1130,10 @@ This version also runs fully on remote files."
                                   "\n" t)))))
     "Zlua directory source for `consult-dir'.")
   (setq consult-dir-sources
-        (list 'consult-dir--source-zlua
+        (list 'consult-dir--source-recentf
               'consult-dir--source-project
               'consult-dir--source-default
               'consult-dir--source-bookmark
-              'consult-dir--source-recentf
               'consult-dir--source-tramp-ssh
               'consult-dir--source-tramp-local)))
 
@@ -1415,7 +1190,7 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 
 
 ;;; TRAMP optimizations
-
+(load! (expand-file-name "tramp_optim.el" "~/.doom.d/lisp/"))
 ;; TRAMP's internal command channel needs a fast, dumb shell — not ZSH.
 ;; ZSH loads .zshrc/.zprofile (slow), has complex prompts (TRAMP hangs
 ;; during prompt detection), and is unnecessary for non-interactive use.
@@ -1428,7 +1203,6 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 ;; socket paths, double negotiation), causing hangs.  Let SSH handle it.
 (after! tramp
   (setopt tramp-use-ssh-controlmaster-options nil))
-
 
 ;;; Evil search enhancements
 
@@ -1540,10 +1314,6 @@ With prefix argument ARG (C-u), exclude *special* buffers."
   :config               
   (setopt dired-kill-when-opening-new-dired-buffer t)
   )
-
-(use-package! javelin
-  :config               
-  (global-javelin-minor-mode 1))
 
 (setopt diff-refine 'navigation)
 
@@ -1795,17 +1565,52 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
     (funcall fn)))
 
 (after! org-roam
+  (cl-defmethod org-roam-node-jc-type ((node org-roam-node))
+    "Return node type robustly across global and project Org-roam roots."
+    (when-let* ((file (org-roam-node-file node))
+                (file (expand-file-name file)))
+      (let* ((roots (seq-uniq
+                     (delq nil
+                           (mapcar (lambda (path)
+                                     (when path
+                                       (file-name-as-directory
+                                        (expand-file-name path))))
+                                   (list (bound-and-true-p org-roam-directory)
+                                         (default-value 'org-roam-directory)
+                                         (and (boundp 'org-roam-db-location)
+                                              (file-name-directory org-roam-db-location))
+                                         (file-name-directory
+                                          (default-value 'org-roam-db-location)))))
+                     #'string=))
+             (root (car (sort (cl-remove-if-not
+                               (lambda (dir) (string-prefix-p dir file))
+                               roots)
+                              (lambda (a b) (> (length a) (length b))))))
+             (relative-dir (when root
+                             (file-name-directory (file-relative-name file root)))))
+        (cond
+         (relative-dir
+          (directory-file-name relative-dir))
+         ((string-match "/org/\\(.+\\)/[^/]+\\'" file)
+          (match-string 1 file))
+         (t nil)))))
+
+  (add-to-list 'org-roam-node-template-prefixes '("jc-type" . "@"))
+
   (setq org-roam-node-display-template
-        #("${doom-hierarchy:*} ${doom-type:30} ${doom-tags:42}" 20 35
-          (face font-lock-keyword-face) 36 51
-          (face (:inherit org-tag :box nil))))
+        (concat
+         "${doom-hierarchy:*} "
+         (propertize "${jc-type:30}" 'face 'font-lock-keyword-face)
+         " "
+         (propertize "${doom-tags:42}" 'face '(:inherit org-tag :box nil))))
 
   (defadvice! +org-roam-node-completions-trim-a (fn &rest args)
     "Trim trailing whitespace from completion keys so Tab doesn't insert padding."
     :around #'org-roam-node-read--completions
     (mapcar (lambda (cell)
               (cons (string-trim-right (car cell)) (cdr cell)))
-            (apply fn args))))
+            (apply fn args)))
+  )
 
 (defun jc/quickrun-refresh-locals (&rest _)
   "Reload file-local variables before quickrun."
@@ -1823,8 +1628,8 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 ;;; Claude Code and terminal integration
 
-(require 'acp)
-(require 'agent-shell)
+;; (require 'acp)
+;; (require 'agent-shell)
 
 (use-package! claude-code-ide
   :commands (claude-code-ide claude-code-ide-menu)
@@ -1886,20 +1691,11 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
 
 (add-hook 'vterm-mode-hook #'diego--vterm-font-setup)
 
-;; Use a single startup pass through org-sliced-images.
-;; Disable Org's startup link-preview path (Org 9.8), then render once after
-;; dir-locals are applied so attachment links resolve correctly.
-;; (setopt org-startup-with-inline-images nil)
 (setopt org-startup-with-link-previews 't)
 (setopt org-startup-with-latex-preview 't)
 
 ;; this is to include extra files in the indexing using .projectile file
 (setopt projectile-indexing-method 'hybrid)
-
-;; (add-to-list 'load-path "/Users/jiawei/Projects/Playground/r_sliced/org-sliced-images")
-
-;; (after! markdown-mode
-;;   (setopt markdown-fontify-code-blocks-natively nil))
 
 (use-package! msgpack
   :defer t
@@ -1961,4 +1757,24 @@ and return only the localname on the remote host."
       (vterm-send-return)))
   )
 
-(map! :leader :desc "quickrun" "m j" #'jc/vterm-cd-to-buffer-above)
+;; (map! :map vterm-mode-map
+;;       :leader
+;;       :desc "quickrun"
+;;       "m j" #'jc/vterm-cd-to-buffer-above)
+
+;; (use-package! arrow
+;;   :load-path "/Users/jiawei/Projects/Playground/arrow.el"
+;;   :after evil
+;;   :config
+;;   (setq arrow-enable-evil-integration t
+;;         arrow-evil-enable-extra-mappings t
+;;         arrow-visual-marker t
+;;         arrow-visual-marker-position 'left))
+(use-package! arrow
+  :after evil
+  :load-path "/Users/jiawei/Projects/Playground/arrow.el"
+  :config
+  (require 'arrow-evil)
+  (setq arrow-enable-evil-integration t
+        arrow-evil-enable-extra-mappings t)
+  (arrow-evil-mode 1))

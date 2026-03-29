@@ -138,5 +138,5 @@
 (package! msgpack)
 (package! tramp-rpc
 :recipe (:host github :repo "ArthurHeymans/emacs-tramp-rpc"))
-(package! arrow
-  :recipe (:host github :repo "vmargb/arrow.el"))
+;; (package! arrow
+;;   :recipe (:host github :repo "vmargb/arrow.el"))
