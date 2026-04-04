@@ -17,16 +17,34 @@
 
 (setopt tramp-verbose 2)
 
-(after! projectile
-  (defun jc/projectile-find-file-remote-vterm-a (orig-fn &rest args)
-    "Use the preserved remote project root in vterm buffers."
-    (if (and (derived-mode-p 'vterm-mode)
-             (file-remote-p default-directory)
-             (jc/project-root))
-        (let ((default-directory (jc/project-root)))
-          (projectile--find-file (car args)))
-      (apply orig-fn args)))
-  (advice-add #'projectile-find-file :around #'jc/projectile-find-file-remote-vterm-a))
+;; (defvar jc/vc-ignore-dir-regexp-base vc-ignore-dir-regexp
+;;   "Baseline `vc-ignore-dir-regexp' without TRAMP override.")
+
+;; (defun jc/vc-ignore-tramp-enable ()
+;;   "Add TRAMP paths to `vc-ignore-dir-regexp'."
+;;   (interactive)
+;;   (setq vc-ignore-dir-regexp
+;;         (format "\\(%s\\)\\|\\(%s\\)"
+;;                 jc/vc-ignore-dir-regexp-base
+;;                 tramp-file-name-regexp)))
+
+;; (defun jc/vc-ignore-tramp-disable ()
+;;   "Restore baseline `vc-ignore-dir-regexp' without TRAMP override."
+;;   (interactive)
+;;   (setq vc-ignore-dir-regexp jc/vc-ignore-dir-regexp-base))
+
+;; (jc/vc-ignore-tramp-enable)
+
+;; (after! projectile
+;;   (defun jc/projectile-find-file-remote-vterm-a (orig-fn &rest args)
+;;     "Use the preserved remote project root in vterm buffers."
+;;     (if (and (derived-mode-p 'vterm-mode)
+;;              (file-remote-p default-directory)
+;;              (jc/project-root))
+;;         (let ((default-directory (jc/project-root)))
+;;           (projectile--find-file (car args)))
+;;       (apply orig-fn args)))
+;;   (advice-add #'projectile-find-file :around #'jc/projectile-find-file-remote-vterm-a))
 
 (after! vterm
   (dolist (method '("ssh" "scp" "scpx" "rpc"))
