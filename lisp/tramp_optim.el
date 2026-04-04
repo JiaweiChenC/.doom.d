@@ -86,22 +86,22 @@
 (add-hook 'dired-mode-hook #'my/dired-remote-trash-only)
 
 
-(after! vterm
-  (defun my/vterm-disable-evil ()
-    "Use raw terminal input in `vterm' buffers."
-    (setq-local evil-normal-state-cursor nil)
-    (setq-local evil-insert-state-cursor nil)
-    (setq-local evil-visual-state-cursor nil)
-    (setq-local evil-motion-state-cursor nil)
-    (setq-local evil-emacs-state-cursor nil)
-    (when (bound-and-true-p evil-local-mode)
-      (evil-emacs-state))
-    (setq-local cursor-type nil))
+;; (after! vterm
+;;   (defun my/vterm-disable-evil ()
+;;     "Use raw terminal input in `vterm' buffers."
+;;     (setq-local evil-normal-state-cursor nil)
+;;     (setq-local evil-insert-state-cursor nil)
+;;     (setq-local evil-visual-state-cursor nil)
+;;     (setq-local evil-motion-state-cursor nil)
+;;     (setq-local evil-emacs-state-cursor nil)
+;;     (when (bound-and-true-p evil-local-mode)
+;;       (evil-emacs-state))
+;;     (setq-local cursor-type nil))
 
-  (defun my/vterm-fix-evil-cursor-jump ()
-    (setq-local evil-move-cursor-back nil)
-    (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t))
+;;   (defun my/vterm-fix-evil-cursor-jump ()
+;;     (setq-local evil-move-cursor-back nil)
+;;     (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t))
 
-  (evil-set-initial-state 'vterm-mode 'emacs)
-  (add-hook 'vterm-mode-hook #'my/vterm-disable-evil)
-  )
+;;   (evil-set-initial-state 'vterm-mode 'emacs)
+;;   (add-hook 'vterm-mode-hook #'my/vterm-disable-evil)
+;;   )

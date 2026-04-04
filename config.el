@@ -804,7 +804,24 @@ Falls back to ORIG-FN for local paths."
 
 (after! vterm
   (remove-hook 'vterm-mode-hook #'hack-dir-local-variables-non-file-buffer)
-  (add-hook 'vterm-mode-hook #'jc/vterm-apply-dir-locals-maybe))
+  (add-hook 'vterm-mode-hook #'jc/vterm-apply-dir-locals-maybe)
+
+  (defun jc/vterm-preserve-shell-cursor-shape ()
+    "Let `vterm' keep owning cursor shape in this buffer."
+    ;; Keep Doom's Emacs-state color, but don't let Evil continuously force a
+    ;; cursor shape in `vterm'.
+    (setq-local evil-emacs-state-cursor #'+evil-emacs-cursor-fn)
+    (add-hook 'evil-emacs-state-entry-hook #'jc/vterm-emacs-state-line-cursor nil t))
+
+  (defun jc/vterm-emacs-state-line-cursor ()
+    "Default the cursor to a line when entering Emacs state in `vterm'."
+    ;; Switching from Evil normal state can leave a box cursor behind.  Reset it
+    ;; once on entry; after that, the shell's own cursor-shape escapes can take
+    ;; over again.
+    (when (derived-mode-p 'vterm-mode)
+      (setq-local cursor-type 'bar)))
+
+  (add-hook 'vterm-mode-hook #'jc/vterm-preserve-shell-cursor-shape))
 
 (after! embark-org               
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
@@ -1732,8 +1749,8 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 (advice-add 'quickrun :before #'jc/quickrun-refresh-locals)
 
-(add-hook 'vterm-mode-hook
-        (lambda () (setq-local line-spacing 0)))
+;; (add-hook 'vterm-mode-hook
+;;         (lambda () (setq-local line-spacing 0)))
 
 (setq inhibit-compacting-font-caches t)                                             
 
