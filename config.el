@@ -600,7 +600,93 @@
     (let ((processing-type org-latex-preview-process-default))
       (org-latex-preview--preview-region processing-type beg end)))
   )
-(map! :leader :desc "macos open with default programe" "o m" #'+macos/open-in-default-program)
+(defvar my/remote-open-extra-env
+  '(("100.105.242.51" . (("DISPLAY" . ":0")
+                          ("WAYLAND_DISPLAY" . "wayland-0"))))
+  "Extra GUI environment variables for remote `xdg-open' calls.
+Each entry is keyed by the TRAMP host name.")
+
+(defun my/open-target-at-point-or-default-directory ()
+  "Return the file at point in Dired, or the current buffer target.
+Falls back to `default-directory' when the current buffer has no file."
+  (if (derived-mode-p 'dired-mode)
+      (dired-get-file-for-visit)
+    (or (buffer-file-name)
+        default-directory
+        (user-error "No file or directory is associated with this buffer"))))
+
+(defun my/remote-open--env-exports (path)
+  "Build shell export statements for PATH's remote host."
+  (mapconcat
+   (lambda (binding)
+     (format "export %s=%s;" (car binding) (shell-quote-argument (cdr binding))))
+   (alist-get (file-remote-p path 'host) my/remote-open-extra-env nil nil #'string=)
+   " "))
+
+(defun my/remote-open-with-default-program (path)
+  "Open remote PATH on the remote desktop using `xdg-open'."
+  (let* ((default-directory (if (file-directory-p path)
+                                (file-name-as-directory path)
+                              (file-name-directory path)))
+         (target (shell-quote-argument (file-local-name path)))
+         (buffer (generate-new-buffer " *my remote open*"))
+         (script
+          (format
+           (concat
+            "uid=$(id -u); "
+            "runtime_dir=${XDG_RUNTIME_DIR:-/run/user/$uid}; "
+            "export XDG_RUNTIME_DIR=\"$runtime_dir\"; "
+            "export DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-unix:path=$runtime_dir/bus}; "
+            "%s"
+            "if command -v xdg-open >/dev/null 2>&1; then "
+            "  setsid -f xdg-open %s >/dev/null 2>&1; "
+            "elif command -v gio >/dev/null 2>&1; then "
+            "  setsid -f gio open %s >/dev/null 2>&1; "
+            "else "
+            "  printf 'Missing xdg-open or gio\\n' >&2; exit 127; "
+            "fi")
+           (my/remote-open--env-exports path)
+           target
+           target))
+         (process
+          (start-file-process-shell-command
+           "my-remote-open"
+           buffer
+           (format "sh -lc %s" (shell-quote-argument script)))))
+    (set-process-query-on-exit-flag process nil)
+    (set-process-sentinel
+     process
+     (lambda (proc _event)
+       (let ((proc-buffer (process-buffer proc)))
+         (unless (process-live-p proc)
+           (unwind-protect
+               (unless (zerop (process-exit-status proc))
+                 (message "Remote open failed: %s"
+                          (string-trim
+                           (if (buffer-live-p proc-buffer)
+                               (with-current-buffer proc-buffer
+                                 (buffer-string))
+                             ""))))
+             (when (buffer-live-p proc-buffer)
+               (kill-buffer proc-buffer)))))))
+    (message "Opening %s on %s"
+             (file-local-name path)
+             (file-remote-p path 'host))))
+
+(defun my/+macos-open-with-remote-a (orig-fn &optional app-name path)
+  "Use remote desktop openers for TRAMP PATHs.
+Falls back to ORIG-FN for local paths."
+  (let ((target (or path (my/open-target-at-point-or-default-directory))))
+    (if (file-remote-p target)
+        (my/remote-open-with-default-program target)
+      (funcall orig-fn app-name path))))
+
+(advice-remove '+macos-open-with #'my/+macos-open-with-remote-a)
+(advice-add '+macos-open-with :around #'my/+macos-open-with-remote-a)
+
+(map! :leader
+      :desc "open current dir" "o o" #'+macos/reveal-in-finder
+      :desc "open in default program" "o m" #'+macos/open-in-default-program)
 
 ;; do not export when archived
 (setopt org-export-with-archived-trees nil)
@@ -983,8 +1069,19 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
     :size 0.3
     :vslot -4           
     :select t           
-    :quit t
+    :quit nil
     :ttl nil) ;; keep buffer alive when popup closes
+  (defun my/vterm-popup-send-escape ()
+    "Send ESC to vterm even when the buffer is managed as a popup."
+    (when (and (bound-and-true-p +popup-buffer-mode)
+               (derived-mode-p 'vterm-mode))
+      (let ((map (make-sparse-keymap)))
+        (set-keymap-parent map +popup-buffer-mode-map)
+        (define-key map (kbd "<escape>") #'vterm-send-escape)
+        (setq-local minor-mode-overriding-map-alist
+                    (assq-delete-all '+popup-buffer-mode minor-mode-overriding-map-alist))
+        (push (cons '+popup-buffer-mode map) minor-mode-overriding-map-alist))))
+  (add-hook 'vterm-mode-hook #'my/vterm-popup-send-escape)
   )
 
 (map! :leader :desc "Project vterm" "o t" #'jc/vterm-project-toggle)
@@ -1311,9 +1408,25 @@ With prefix argument ARG (C-u), exclude *special* buffers."
 ;;; Misc UX tweaks
 
 (use-package! dirvish
-  :config               
-  (setopt dired-kill-when-opening-new-dired-buffer t)
-  )
+  :config
+  (setopt dired-kill-when-opening-new-dired-buffer t))
+
+(after! dired
+  ;; Enabling `dired-omit-mode' during initial Dired setup can make an empty
+  ;; directory look like a failed listing (after `.' and `..' are omitted),
+  ;; which breaks nested directory entry from Dired/Dirvish. Defer it until the
+  ;; buffer has opened successfully.
+  (remove-hook 'dired-mode-hook #'dired-omit-mode)
+  (add-hook 'dired-mode-hook #'jc/dired-enable-omit-delayed-h)
+  (defun jc/dired-enable-omit-delayed-h ()
+    (run-at-time
+     0 nil
+     (lambda (buf)
+       (when (buffer-live-p buf)
+         (with-current-buffer buf
+           (when (derived-mode-p 'dired-mode)
+             (dired-omit-mode 1)))))
+     (current-buffer))))
 
 (setopt diff-refine 'navigation)
 
@@ -1713,12 +1826,28 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
               (when (bound-and-true-p diff-hl-dired-mode)
                 (diff-hl-dired-mode -1)))))
 
+;; a temp fix for the warning tm status file killed
+(after! diff-hl-dired
+  (defun jc/diff-hl-dired-disable-process-query-a
+      (orig-fn destination okstatus command file-or-list &rest flags)
+    "Keep diff-hl's temp VC process from blocking Dired refreshes."
+    (let ((result (apply orig-fn destination okstatus command file-or-list flags)))
+      (when (and (eq okstatus 'async)
+                 (processp result)
+                 (buffer-live-p (process-buffer result))
+                 (string-prefix-p " *diff-hl-dired* tmp status"
+                                  (buffer-name (process-buffer result))))
+        (set-process-query-on-exit-flag result nil))
+      result))
+  (advice-add #'vc-do-command :around
+              #'jc/diff-hl-dired-disable-process-query-a))
+
 (after! agent-shell
   (setq agent-shell-preferred-agent-config
         (agent-shell-opencode-make-agent-config))
   (setq agent-shell-opencode-default-model-id "openai/gpt-5.4")
   (setq agent-shell-opencode-default-session-mode-id "build"))
-
+ 
 ;; store agent shell under ./emacs.d instead of per project
 (defun my/agent-shell-dot-subdir (subdir)
   (let* ((cwd (string-remove-suffix "/" (agent-shell-cwd)))
@@ -1757,19 +1886,6 @@ and return only the localname on the remote host."
       (vterm-send-return)))
   )
 
-;; (map! :map vterm-mode-map
-;;       :leader
-;;       :desc "quickrun"
-;;       "m j" #'jc/vterm-cd-to-buffer-above)
-
-;; (use-package! arrow
-;;   :load-path "/Users/jiawei/Projects/Playground/arrow.el"
-;;   :after evil
-;;   :config
-;;   (setq arrow-enable-evil-integration t
-;;         arrow-evil-enable-extra-mappings t
-;;         arrow-visual-marker t
-;;         arrow-visual-marker-position 'left))
 (use-package! arrow
   :after evil
   :load-path "/Users/jiawei/Projects/Playground/arrow.el"
