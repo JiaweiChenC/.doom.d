@@ -2,60 +2,9 @@
 (defun org-export-latex-body-only ()
   "Export current Org file to a LaTeX file with body only, open and compile it."
   (interactive)
-  (org-latex-export-to-latex nil nil nil t nil)) ;; Run the compile command
-;; map to space l b
+  (org-latex-export-to-latex nil nil nil t nil))
+
 (map! :leader :desc "export latex body only" "l b" #'org-export-latex-body-only)
-
-(defun compile-main-tex-with-latexmk-no-popup ()
-  "Compile the main.tex file using latexmk without popping up the shell window."
-  (interactive)
-(let ((process (start-process "latexmk" "*latexmk-output*" "latexmk"
-                              "-pdf"
-                              "-pdflatex=pdflatex -interaction=nonstopmode -synctex=1"
-                              "-use-make"
-                              "main.tex")))
-    (set-process-sentinel process
-                          (lambda (proc event)
-                            (when (string= event "finished\n")
-                              (message "Compilation with latexmk finished!"))))))
-
-(defun org-compile-latex ()
-  "Export current Org file to a LaTeX file with body only,
-compile it, then switch back to the Org file and kill the LaTeX buffer."
-  (interactive)
-  (let ((original-buffer (current-buffer)) ; Store the current buffer (Org file)
-        (output-file (org-latex-export-to-latex nil nil nil t nil))) ; Export and get the output file name
-    (find-file output-file) ; Open the LaTeX file
-    (call-interactively '+latex/compile) ; Run the compile command
-    (switch-to-buffer original-buffer) ; Switch back to the Org file
-    ))
-
-(defun org-compile-latex-and-close (&optional open-pdf)
-  "Export current Org buffer to LaTeX, then compile the master TeX file
-using `org-latex-compile`. Kills the intermediate Org-exported .tex buffer.
-If OPEN-PDF is non-nil, open the resulting PDF."
-  (interactive "P")
-  (let* ((org-buf (current-buffer))
-         (texfile (org-latex-export-to-latex nil nil nil t nil)))
-    (when texfile
-      ;; Determine the master TeX file
-      (let* ((master (or (and (boundp 'TeX-master)
-                              (stringp TeX-master)
-                              (not (string= TeX-master ""))
-                              TeX-master)
-                         ;; fallback: plain "main.tex" in current dir
-                         "main.tex"))
-             (pdffile (org-latex-compile master nil open-pdf)))
-        ;; Kill the exported .tex buffer
-        (when-let ((tex-buf (get-file-buffer texfile)))
-          (kill-buffer tex-buf))
-        ;; Return to the Org buffer
-        (when (buffer-live-p org-buf)
-          (pop-to-buffer org-buf))
-        pdffile))))
-
-;; map compile latex to space l c
-(map! :leader :desc "compile latex" "l c" #'org-compile-latex-and-close)
 
 ;;;;;;;;;;;;;;;;;;;;;;; hack to make org table work perfectly ;;;;;;;;;;;;;;;;;;;;;;
 (defun org-export-cmidrule-filter-latex (row backend info)
@@ -87,7 +36,6 @@ If OPEN-PDF is non-nil, open the resulting PDF."
         (cl-decf columns))))
   row)
 
-
 (defun org-export-multicolumn-filter-latex (row backend info)
   (while (string-match
           "\\(<\\([0-9]+\\)col\\([lrc]\\)?>[[:blank:]]*\\(.*?\\)\\)\\(?:&\\|\\\\\\\\\\)" row)
@@ -118,8 +66,7 @@ If OPEN-PDF is non-nil, open the resulting PDF."
           (algn (or (match-string 3 row) "l")))
       (setq row (replace-match
                  (format "\\\\multirow{%d}{%s}{%s}" columns algn contents)
-                 nil nil row 1))
-      ))
+                 nil nil row 1))))
   row)
 
 (with-eval-after-load 'ox-latex
@@ -133,31 +80,23 @@ If OPEN-PDF is non-nil, open the resulting PDF."
                'org-export-multicolumnv-filter-latex))
 
 (defun convert-zotero-links-in-buffer ()
-"Convert Zotero links to Org-mode links in the current buffer."
-(interactive)
-(evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/\([[\\2][\\1]]\)/g")
-(evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
-(evil-ex "%s/^\(“.+”\)\(.*\)/***\2\n\1/g/")
-)
+  "Convert Zotero links to Org-mode links in the current buffer."
+  (interactive)
+  (evil-ex "%s/(\\[\\([^)]+\\)\\](\\([^)]+))\\)/\([[\\2][\\1]]\)/g")
+  (evil-ex "%s/^\\(«.+»\\)\\(.*\\)/***\\2\\n\\1/g/")
+  (evil-ex "%s/^\(".+"\)\(.*\)/***\2\n\1/g/"))
 
 (defun modify-and-paste-clipboard-content-at-end ()
   "Modify the clipboard's content to convert Zotero
 links to Org-mode links and paste it at the end of the buffer."
   (interactive)
   (let ((content (gui-get-selection 'CLIPBOARD)))
-    ;; Perform replacements to convert Zotero links to Org-mode format without changing the order
     (setq content (replace-regexp-in-string
                    "\\[\\([^]]+\\)\\](\\([^)]+\\))"
                    "[[\\2][\\1]]"
                    content))
-    ;; Go to the end of the buffer and insert the modified content
-    (with-current-buffer (current-buffer)  ; Ensure we're in the current buffer
-      (insert content)
-      )
-  )
-)
+    (insert content)))
 
-;; Map the function to the key sequence `SPC y z`
 (map! :leader
       :desc "Modify clipboard and paste at end"
       "y z" #'modify-and-paste-clipboard-content-at-end)
@@ -171,7 +110,6 @@ links to Org-mode links and paste it at the end of the buffer."
   (cond ((eq backend 'html)
          (format "<span style=\"color:%s;\">%s</span>" path desc))
         ((eq backend 'latex)
-         ;; Apply citation replacement only for LaTeX exports
          (let ((processed-desc (replace-citations desc)))
            (format "\\textcolor{%s}{%s}" path processed-desc)))
         (t desc)))
@@ -191,17 +129,17 @@ links to Org-mode links and paste it at the end of the buffer."
 
 (defun my/org-delete-link-export (path desc backend)
   "Export the delete link with PATH, DESC, and depending on BACKEND."
-  (let ((color (if (string-empty-p path) "red" path))) ; Default to red if no color specified
+  (let ((color (if (string-empty-p path) "red" path)))
     (cond ((eq backend 'html)
            (format "<span style=\"color:%s; text-decoration: line-through;\">%s</span>" color desc))
           ((eq backend 'latex)
            (let ((processed-desc (replace-citations desc)))
-           (format "\\textcolor{%s}{\\sout{%s}}" color desc)))
+             (format "\\textcolor{%s}{\\sout{%s}}" color processed-desc)))
           (t desc))))
 
 (defun my/org-delete-link-face (path)
   "Return a face for the delete link with specified PATH as color."
-  (let ((color (if (string-empty-p path) "red" path))) ; Default to red if no color specified
+  (let ((color (if (string-empty-p path) "red" path)))
     (list :foreground color :strike-through t)))
 
 (org-link-set-parameters "delete"
@@ -243,21 +181,17 @@ If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
              (pdffile (concat (file-name-sans-extension master) ".pdf"))
              (comp-buf-name (format "*latexmk: %s*"
                                     (file-name-nondirectory master)))
-             ;; IMPORTANT: run latexmk in the directory where master lives
              (default-directory (file-name-directory master)))
 
-        ;; Kill the exported .tex buffer (same as your original)
         (when-let ((tex-buf (get-file-buffer texfile)))
           (bury-buffer tex-buf))
 
-        ;; Create/clear compilation buffer, but don't display it
         (setq org-latexmk--last-comp-buf (get-buffer-create comp-buf-name))
         (with-current-buffer org-latexmk--last-comp-buf
           (let ((inhibit-read-only t))
             (erase-buffer))
           (compilation-mode))
 
-        ;; Start latexmk async
         (let* ((cmd (format "latexmk -pdf -synctex=1 -interaction=nonstopmode %s"
                             (shell-quote-argument (file-name-nondirectory master))))
                (proc (start-process-shell-command "latexmk"
@@ -276,7 +210,6 @@ If OPEN-PDF is non-nil (C-u), open the resulting PDF when compilation succeeds."
                  (message "latexmk failed (see buffer %s)"
                           (buffer-name org-latexmk--last-comp-buf)))))))
 
-        ;; Return to Org buffer (no compilation popup)
         (when (buffer-live-p org-buf)
           (pop-to-buffer org-buf))
 
