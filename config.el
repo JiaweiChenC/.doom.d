@@ -38,7 +38,26 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
 
-(setq auto-save-default t)
+;; Fix hl-line ghost highlights when switching workspaces
+(after! hl-line
+  (add-hook 'persp-before-switch-functions
+            (lambda (&rest _)
+              (dolist (buf (buffer-list))
+                (with-current-buffer buf
+                  (remove-overlays (point-min) (point-max) 'face 'hl-line)
+                  (when (bound-and-true-p hl-line-overlay)
+                    (delete-overlay hl-line-overlay)
+                    (setq hl-line-overlay nil))
+                  (when (bound-and-true-p global-hl-line-overlay)
+                    (delete-overlay global-hl-line-overlay)
+                    (setq global-hl-line-overlay nil))))))
+
+  (add-hook 'persp-activated-functions
+            (lambda (&rest _)
+              (run-at-time 0.05 nil
+                           (lambda ()
+                             (when (bound-and-true-p hl-line-mode)
+                               (hl-line-highlight)))))))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -124,21 +143,20 @@
 (setq mathpix-screenshot-method "screencapture -i %s")
 
 (use-package! super-save
+  :defer t
   :config
-  (super-save-mode +1))
-
+  (super-save-mode +1)
+  (add-to-list 'super-save-triggers 'ace-window)
+  (add-to-list 'super-save-triggers '+vterm/toggle)
+    (setq super-save-remote-files nil)
 (setq auto-save-default nil)
-(setq super-save-remote-files nil)
-
-(add-to-list 'super-save-triggers 'ace-window)
-(add-to-list 'super-save-triggers '+vterm/toggle)
-
-(use-package vertico
-  :init
-  (vertico-mode)
-  (setq vertico-resize 'grow-only)
   )
 
+
+
+;; vertico is already configured by Doom's vertico module;
+;; just set the resize option here.
+(setq vertico-resize 'grow-only)
 
 ;;; Org, citation, and roam
 
@@ -165,8 +183,9 @@
         "C-M-y" #'zz/org-download-paste-clipboard)
   )
 
-
-(setopt org-noter-notes-search-path '("/Users/jiawei/Documents/roam/booknotes"))
+(use-package! ef-themes
+  :load-path "/Users/jiawei/Projects/Playground/ef-themes"
+  )
 
 ;; citar configuration
 (setopt org-cite-csl-styles-dir "~/Zotero/styles")
@@ -187,7 +206,6 @@
 ;;; AI tools and assistants
 
 (use-package! copilot
-  :init
   :hook (prog-mode . copilot-mode)
   :bind (("<backtab>" . 'copilot-accept-completion-by-word)
          :map copilot-completion-map
@@ -215,10 +233,6 @@
 ;; bind quickrun kill process to space r k
 (map! :leader :desc "quickrun kill process" "r k" #'quickrun--kill-running-process)
 
-(use-package! dired
-  :config
-  (set-popup-rule! "^\\*image-dired" :ignore t))
-
 (setq org-journal-file-type 'monthly)
 
 ;; initial frame size
@@ -227,6 +241,14 @@
 ;; Set the default frame width and height
 (add-to-list 'default-frame-alist '(width . 170))  ; width set to 100 columns
 (add-to-list 'default-frame-alist '(height . 60))  ; height set to 50 lines
+
+(defun jc/frame-snap-right ()
+  "Set the current frame to a saved position and size (right half of screen)."
+  (interactive)
+  (set-frame-position (selected-frame) 1299 128)
+  (set-frame-size (selected-frame) 1526 1275 t))
+
+(global-set-key (kbd "C-M-l") #'jc/frame-snap-right)
 
 
 ;; after python mode, start evil vimish fold mode
@@ -348,7 +370,9 @@
             (set-face-background 'fringe (face-attribute 'default :background))))
 
 
-(load! (expand-file-name "my-quickrun.el" "~/.doom.d/lisp/"))
+;; Defer my-quickrun.el until quickrun is actually loaded
+(after! quickrun
+  (load! (expand-file-name "my-quickrun.el" "~/.doom.d/lisp/")))
 ;; load mytex.el after org
 (after! org
   (add-to-list 'org-file-apps '("\\.svg\\'" . default))
@@ -390,15 +414,6 @@
 ;; space t e to mini-echo-mode
 (map! :leader :desc "toggle mini echo mode" "t e" #'mini-echo-mode)
 
-;; (setq-default bidi-display-reordering nil)
-
-;; (setq bidi-inhibit-bpa t
-;;       long-line-threshold 1000
-;;       large-hscroll-threshold 1000
-;;       syntax-wholeline-max 1000)
-
-;; (setopt org-preview-html-viewer 'xwidget)
-
 (setq TeX-view-program-selection '((output-pdf "PDF Viewer")))
 (setq TeX-view-program-list
       '(("PDF Viewer" "/Applications/Skim.app/Contents/SharedSupport/displayline -b %n %o %b")))
@@ -409,9 +424,6 @@
 (add-hook 'prog-mode-hook
           (lambda ()
             (face-remap-add-relative 'font-lock-comment-face :slant 'italic)))
-
-;; (use-package! rainbow-csv
-;;   :hook (csv-mode . rainbow-csv-mode))
 
 ;; disable visual line mode in csv mode
 (add-hook 'csv-mode-hook
@@ -460,8 +472,8 @@
 (custom-set-variables
  '(zoom-size '(0.8 . 0.8)))
 
-;; (use-package! phscroll
-;;   :hook (org-mode . org-phscroll-mode))
+(use-package! phscroll
+  :hook (org-mode . org-phscroll-mode))
 
 (setopt visual-fill-column-width 100)
 
@@ -514,12 +526,6 @@
 
 (use-package! org-modern-indent
   :hook (org-mode . org-modern-indent-mode))
-(after! org
-  ;; Don't auto-enable org-indent-mode when opening Org buffers
-  (setq org-startup-indented 't))
-
-;;   ;; Hard-disable it even if something else toggles it on
-;;   (add-hook 'org-mode-hook (lambda () (org-indent-mode -1))))
 
 (use-package! org-modern
   :defer t
@@ -693,21 +699,27 @@ Falls back to ORIG-FN for local paths."
 
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
-(add-to-list 'load-path "/Users/jiawei/Projects/Playground/flash-emacs")
-(require 'flash-emacs)
-(require 'flash-emacs-remote)
-(require 'flash-emacs-ts)
-(require 'flash-emacs-search)
-(setopt flash-emacs-ts-rainbow-enabled 't)
+(use-package! flash-emacs                                                                                                                 
+:load-path "/Users/jiawei/Projects/Playground/flash-emacs"                                                                              
+:defer t                                                                                                                                
+:commands (flash-emacs-jump flash-emacs-ts-jump)                                                                                        
+:init                                                                                                                                   
+(after! evil                                                                                                                            
+    (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)                                                                       
+    (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)                                                                     
+    (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump))                                                                   
+:config                                                                                                                                 
+(require 'flash-emacs-remote)                                                                                                           
+(require 'flash-emacs-ts)                                                                                                               
+(require 'flash-emacs-search)                                                                                                           
+(setopt flash-emacs-ts-rainbow-enabled t))     
 
 ;;; Evil navigation and jump behavior
 
 (after! evil
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
-  (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)
-  (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)
-  (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump)
+  ;; flash-emacs keybindings are set in use-package! flash-emacs above
   )
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
@@ -784,6 +796,7 @@ Falls back to ORIG-FN for local paths."
   :defer t
   :config                        
   (setq gptel-display-buffer-action nil)  ; if user changes this, popup manager will bow out
+  (setq gptel-model "gpt-5.4-pro")
   (set-popup-rule! "^\\*ChatGPT\\*$"
     :side 'right :size 0.3 :select t :quit t :ttl nil))
 
@@ -970,7 +983,6 @@ Falls back to ORIG-FN for local paths."
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
 
-
 ;;; Peek breadcrumb until next keypress
 (defvar-local my--breadcrumb-peek-armed nil)
 
@@ -997,9 +1009,6 @@ Falls back to ORIG-FN for local paths."
 ;; https://github.com/vedang/pdf-tools/issues/283
 (defvar org-format-latex-header nil)
 
-(use-package! ef-themes
-  :load-path "/Users/jiawei/Projects/Playground/ef-themes"
-  )
 
 (add-hook! '+popup-buffer-mode
            ;; only adjust when we really are in a popup window
@@ -1034,9 +1043,21 @@ Falls back to ORIG-FN for local paths."
 (map! :leader :desc "dirvish side and follow" "o p" #'+dired/dirvish-side-and-follow)
 
 ;; Put this in your config.el
-;; (add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
+(add-hook 'quickrun--mode-hook #'hack-dir-local-variables-non-file-buffer)
 
-;; dirvish bug
+;; dirvish bugs
+
+;; Fix subtree-toggle on files: dirvish-subtree--readin returns "" for
+;; non-directories, so the file-error path in dirvish-subtree-toggle is
+;; never reached and files are silently treated as empty dirs.
+(after! dirvish-subtree
+  (defun jc/dirvish-subtree-toggle-a (orig-fn)
+    "Check file-directory-p before attempting subtree insert."
+    (if (file-directory-p (dired-get-filename nil t))
+        (funcall orig-fn)
+      (dirvish-subtree--view-file)))
+  (advice-add 'dirvish-subtree-toggle :around #'jc/dirvish-subtree-toggle-a))
+
 ;; Fix Dirvish yank under Emacs 31 where built-in `all` clashes
 (with-eval-after-load 'dirvish
   (defun my/dirvish--all-like-and (&rest xs)
@@ -1208,6 +1229,13 @@ Skip remote (TRAMP) buffers silently."
 
 (use-package! projectile
   :config              
+  (defun my/projectile-switch-project-find-file ()
+    "Find a file from the project chosen by `projectile-switch-project'."
+    ;; Use Doom's helper so the selected project root is bound explicitly.
+    (doom-project-find-file default-directory))
+
+  (setq projectile-switch-project-action #'my/projectile-switch-project-find-file)
+
   (defun projectile-find-file-hook-function ()
     "Called by `find-file-hook' when `projectile-mode' is on.
 This version also runs fully on remote files."
@@ -1250,33 +1278,6 @@ This version also runs fully on remote files."
               'consult-dir--source-bookmark
               'consult-dir--source-tramp-ssh
               'consult-dir--source-tramp-local)))
-
-(defun my/projectile-switch-to-buffer (arg)
-  "Switch to a project buffer.
-Default: include *special* buffers.
-With prefix argument ARG (C-u), exclude *special* buffers."
-  (interactive "P")
-  (require 'consult)
-  (let* ((buffers (projectile-project-buffers))
-         (filtered (if arg
-                       (cl-remove-if (lambda (b)
-                                       (string-prefix-p "*" (buffer-name b)))
-                                     buffers)
-                     buffers)))
-    (switch-to-buffer
-     (consult--read
-      (consult--buffer-query :sort 'visibility
-                             :predicate (lambda (buf) (memq buf filtered))
-                             :as #'buffer-name)
-      :prompt "Switch to buffer: "
-      :history 'buffer-name-history
-      :sort nil
-      :category 'buffer
-      :state (consult--buffer-state)))))
-
-(map! :leader
-      :desc "projectile switch to buffer"
-      "TAB" #'my/projectile-switch-to-buffer)
 
 (after! consult
   (defun my/consult-tmux-session ()
@@ -1445,6 +1446,17 @@ With prefix argument ARG (C-u), exclude *special* buffers."
              (dired-omit-mode 1)))))
      (current-buffer))))
 
+(after! dired-aux
+  (defun jc/dired-vc-rename-tracked-file-p (file)
+    "Use VC rename only for tracked, non-directory files."
+    (and (not (file-directory-p file))
+         (vc-backend file)))
+
+  (define-advice dired-rename-file (:around (orig-fn file newname ok-if-already-exists) jc/tracked-files-only)
+    (let ((dired-vc-rename-file (and dired-vc-rename-file
+                                     (jc/dired-vc-rename-tracked-file-p file))))
+      (funcall orig-fn file newname ok-if-already-exists))))
+
 (setopt diff-refine 'navigation)
 
 ;; map j and k to use next line and previous line of native emacs
@@ -1453,10 +1465,13 @@ With prefix argument ARG (C-u), exclude *special* buffers."
   (define-key evil-normal-state-map (kbd "k") #'previous-line))
 
 (use-package! mini-echo
-  :config
-  (mini-echo-mode 1))   
-
-(add-hook 'emacs-startup-hook #'global-hide-mode-line-mode)
+  :defer t
+  :init
+  ;; Activate mini-echo and hide modeline together after startup
+  (add-hook 'emacs-startup-hook
+            (lambda ()
+              (mini-echo-mode 1)
+              (global-hide-mode-line-mode 1))))
 
 (defvar per-project-compile-history nil)
 
@@ -1469,10 +1484,6 @@ With prefix argument ARG (C-u), exclude *special* buffers."
     (unwind-protect
         (apply args)
       (setf (alist-get root per-project-compile-test nil nil #'equal) compile-history))))
-
-(add-hook 'pdf-view-mode-hook #'pdf-view-roll-minor-mode)
-
-(setopt mouse-highlight nil)
 
 (defun jc/evil-ex-search-next ()
   "Like Vim C-g in /: jump to next match while staying in minibuffer."
@@ -1831,17 +1842,97 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
   :defer t
   )
 
+;; `tramp-rpc` currently requires `tramp-rpc-magit` while `tramp-rpc` itself is
+;; still loading, which can recurse in this Doom/Emacs 31 setup.  Provide a
+;; tiny local compatibility shim instead of loading the package's Magit layer.
+;; This keeps core `tramp-rpc' working and avoids a fragile global `require'
+;; advice. The tradeoff is that tramp-rpc-specific Magit/Projectile
+;; optimizations are disabled.
+;; Defer tramp-rpc-magit shim until tramp is loaded (avoids ~70 defuns at startup)
+(after! tramp
+  (unless (featurep 'tramp-rpc-magit)
+  (defvar tramp-rpc--file-exists-cache (make-hash-table :test 'equal))
+  (defvar tramp-rpc--file-truename-cache (make-hash-table :test 'equal))
+  (defvar tramp-rpc--suppress-fs-notifications nil)
+  (defvar tramp-rpc--watched-directories (make-hash-table :test 'equal))
+  (defvar tramp-rpc-magit--debug nil)
+  (defvar tramp-rpc-magit--process-caches nil)
+
+  (defun tramp-rpc--cache-get (cache key)
+    (gethash key cache))
+
+  (defun tramp-rpc--cache-put (cache key value)
+    (puthash key value cache))
+
+  (defun tramp-rpc--invalidate-cache-for-path (filename)
+    (let ((expanded (expand-file-name filename)))
+      (remhash expanded tramp-rpc--file-exists-cache)
+      (remhash expanded tramp-rpc--file-truename-cache)))
+
+  (defun tramp-rpc--directory-watched-p (_localname _vec)
+    nil)
+
+  (defun tramp-rpc--handle-notification (_process _method _params)
+    nil)
+
+  (defun tramp-rpc-clear-file-exists-cache ()
+    (clrhash tramp-rpc--file-exists-cache))
+
+  (defun tramp-rpc-clear-file-truename-cache ()
+    (clrhash tramp-rpc--file-truename-cache))
+
+  (defun tramp-rpc--cleanup-watches-for-connection (_vec)
+    nil)
+
+  (defun tramp-rpc--clear-file-caches-for-connection (_vec)
+    (tramp-rpc-clear-file-exists-cache)
+    (tramp-rpc-clear-file-truename-cache))
+
+  (defun tramp-rpc-magit--process-cache-lookup (_program _args)
+    nil)
+
+  (defun tramp-rpc-magit--file-exists-p (filename)
+    (file-exists-p filename))
+
+  (defun tramp-rpc-magit--clear-cache ()
+    (setq tramp-rpc-magit--process-caches nil))
+
+  (defun tramp-rpc-magit-enable ()
+    (interactive))
+
+  (defun tramp-rpc-magit-disable ()
+    (interactive))
+
+  (defun tramp-rpc-magit-enable-debug ()
+    (interactive)
+    (setq tramp-rpc-magit--debug t))
+
+  (defun tramp-rpc-magit-disable-debug ()
+    (interactive)
+    (setq tramp-rpc-magit--debug nil))
+
+  (defun tramp-rpc-projectile-enable ()
+    (interactive))
+
+  (defun tramp-rpc-projectile-disable ()
+    (interactive))
+
+  (provide 'tramp-rpc-magit)))
+
 (use-package! tramp-rpc
   :defer t
   :after tramp
   :init
   )
 
-(add-hook 'dired-mode-hook
-          (defun jc/dired-remote-lightweight-mode ()
-            (when (file-remote-p default-directory)
-              (when (bound-and-true-p diff-hl-dired-mode)
-                (diff-hl-dired-mode -1)))))
+(defun jc/dired-remote-lightweight-mode ()
+  (when (file-remote-p default-directory)
+    (when (bound-and-true-p diff-hl-dired-mode)
+      (diff-hl-dired-mode -1))))
+
+;; Append so this runs after Doom's `+vc-gutter-enable-maybe-h` hook and can
+;; turn `diff-hl-dired-mode` back off on remote Dired buffers.
+(add-hook 'dired-mode-hook #'jc/dired-remote-lightweight-mode t)
 
 ;; a temp fix for the warning tm status file killed
 (after! diff-hl-dired
@@ -1904,10 +1995,19 @@ and return only the localname on the remote host."
   )
 
 (use-package! arrow
-  :after evil
+  :defer t
   :load-path "/Users/jiawei/Projects/Playground/arrow.el"
   :config
   (require 'arrow-evil)
   (setq arrow-enable-evil-integration t
         arrow-evil-enable-extra-mappings t)
   (arrow-evil-mode 1))
+
+(after! tramp
+  (require 'jupyter-tramp nil t))
+
+(use-package! anvil
+  :defer t
+  :config
+  (anvil-enable)
+  (add-hook 'emacs-startup-hook #'anvil-start-server))
