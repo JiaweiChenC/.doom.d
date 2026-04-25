@@ -59,6 +59,71 @@
                              (when (bound-and-true-p hl-line-mode)
                                (hl-line-highlight)))))))
 
+;; Fix: killing a shared buffer in one workspace should not kill it globally.
+;; Doom's doom--switch-to-fallback-buffer-maybe-a calls
+;; run-hook-with-args-until-failure on kill-buffer-query-functions as a
+;; pre-check.  persp-kill-buffer-query-function removes the buffer from the
+;; current perspective and returns nil (preventing kill).  But Doom then falls
+;; through and the real kill-buffer calls the hook AGAIN — the buffer is now
+;; "foreign" and persp-kill-foreign-buffer-behaviour = kill lets it die.
+;; This advice runs first: if the buffer lives in ANY other perspective we
+;; remove it from the current one (if present) and switch away, preventing the
+;; global kill entirely.
+(defun my/workspace-aware-kill-current-buffer-a (&rest _)
+  "Remove buffer from current workspace instead of killing when shared."
+  (when (and (bound-and-true-p persp-mode)
+             (not (minibufferp)))
+    (let* ((buf (current-buffer))
+           (persps (persp--buffer-in-persps buf))
+           (current-persp (get-current-persp))
+           (other-persps (remq current-persp persps)))
+      (when other-persps
+        ;; Buffer lives in other workspaces — never kill it globally.
+        (when (memq current-persp persps)
+          (persp-remove-buffer buf current-persp))
+        ;; Switch to another buffer that belongs to this workspace.
+        (let ((replacement
+               (or (car (cl-remove-if
+                         (lambda (b)
+                           (or (eq b buf)
+                               (not (buffer-live-p b))
+                               (minibufferp b)))
+                         (persp-buffers current-persp)))
+                   (doom-fallback-buffer))))
+          (switch-to-buffer replacement t))
+        t))))
+
+(advice-add 'kill-current-buffer :before-until
+            #'my/workspace-aware-kill-current-buffer-a
+            '((depth . -90)))
+
+;; Also guard `kill-buffer' itself — other code paths (e.g. layout-buffer
+;; advice, or direct M-x kill-buffer) can bypass kill-current-buffer.
+(defun my/workspace-aware-kill-buffer-a (orig-fn &optional buffer-or-name)
+  "Prevent `kill-buffer' from killing buffers that belong to other workspaces."
+  (if (not (bound-and-true-p persp-mode))
+      (funcall orig-fn buffer-or-name)
+    (let* ((buf (or (and buffer-or-name
+                         (get-buffer buffer-or-name))
+                    (current-buffer)))
+           (persps (and (buffer-live-p buf) (persp--buffer-in-persps buf)))
+           (current-persp (get-current-persp))
+           (other-persps (remq current-persp persps)))
+      (if (not other-persps)
+          ;; Buffer only in current workspace (or none) — kill normally.
+          (funcall orig-fn buffer-or-name)
+        ;; Buffer is in other workspaces — just remove from current.
+        (when (memq current-persp persps)
+          (persp-remove-buffer buf current-persp))
+        ;; If this buffer is displayed, switch its windows away.
+        (dolist (win (get-buffer-window-list buf nil nil))
+          (with-selected-window win
+            (switch-to-prev-buffer win t)))
+        t))))
+
+(advice-add 'kill-buffer :around #'my/workspace-aware-kill-buffer-a
+            '((depth . -90)))
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -165,6 +230,7 @@
   (setopt org-pretty-entities nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
+  (setopt org-startup-folded 'content)
   (setq org-download-annotate-function (lambda (link) ""))
   (setq org-download-heading-lvl nil)
   ;; (setopt org-download-method 'directory)
@@ -182,6 +248,16 @@
   (map! :map org-mode-map
         "C-M-y" #'zz/org-download-paste-clipboard)
   )
+
+(defadvice! +org/insert-item-below-with-newline (fn direction)
+  "Insert an extra blank line before a new heading inserted below."
+  :around #'+org--insert-item
+  (funcall fn direction)
+  (when (and (eq direction 'below) (org-at-heading-p))
+    (save-excursion
+      (beginning-of-line)
+      (insert "\n"))))
+
 
 (use-package! ef-themes
   :load-path "/Users/jiawei/Projects/Playground/ef-themes"
@@ -245,10 +321,18 @@
 (defun jc/frame-snap-right ()
   "Set the current frame to a saved position and size (right half of screen)."
   (interactive)
-  (set-frame-position (selected-frame) 1299 128)
-  (set-frame-size (selected-frame) 1526 1275 t))
+  (set-frame-position (selected-frame) 1306 80)
+  (set-frame-size (selected-frame) 1526 1300 t))
 
 (global-set-key (kbd "C-M-l") #'jc/frame-snap-right)
+
+(defun jc/frame-snap-center ()
+  "Set the current frame to a saved position and size."
+  (interactive)
+  (set-frame-position (selected-frame) 809 93)
+  (set-frame-size (selected-frame) 1518 1294 t))
+
+(global-set-key (kbd "C-M-;") #'jc/frame-snap-center)
 
 
 ;; after python mode, start evil vimish fold mode
@@ -328,10 +412,6 @@
   ;; (map! :i "<tab>" #'completion-at-point)
   )
 
-;; (after! dabbrev
-;;   ;; This line adds a regex to ignore buffers ending in .csv for dabbrev
-;;   (add-to-list 'dabbrev-ignored-buffer-modes 'csv-mode))
-
 (use-package! tab-bar
   :config
   (map! :leader :desc "tab bar mode" "t t" #'toggle-frame-tab-bar)
@@ -381,6 +461,7 @@
   (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "org-sliced-image-fix.el" "~/.doom.d/lisp/"))
+  (load! (expand-file-name "gterm_config" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
@@ -580,12 +661,78 @@
 
 (setopt envrc-remote t)
 
+;; Fix org-persist--add-to-index bug: :hash and :key lookups are
+;; indexed by `inode' instead of their actual values, so persist
+;; cache lookups by key (used by org-latex-preview) always miss.
+;; Upstream bug in org-persist.el lines 587-588.
+(after! org-persist
+  (defun org-persist--add-to-index (collection &optional hash-only)
+    "Add or update COLLECTION in `org-persist--index'.
+When optional HASH-ONLY is non-nil, only modify the hash table."
+    (org-persist-collection-let collection
+      (let ((existing (org-persist--find-index collection)))
+        (if existing
+            (progn
+              (plist-put existing :container container)
+              (plist-put (plist-get existing :associated) :file path)
+              (plist-put (plist-get existing :associated) :inode inode)
+              (plist-put (plist-get existing :associated) :hash hash)
+              (plist-put (plist-get existing :associated) :key key)
+              existing)
+          (unless hash-only (push collection org-persist--index))
+          (unless org-persist--index-hash
+            (setq org-persist--index-hash (make-hash-table :test 'equal)))
+          (dolist (cont
+                   (if (listp (car container))
+                       (cons container container)
+                     (list container)))
+            (puthash (cons cont associated) collection org-persist--index-hash)
+            (when path (puthash (cons cont (list :file path)) collection org-persist--index-hash))
+            (when inode (puthash (cons cont (list :inode inode)) collection org-persist--index-hash))
+            (when hash (puthash (cons cont (list :hash hash)) collection org-persist--index-hash))
+            (when key (puthash (cons cont (list :key key)) collection org-persist--index-hash)))
+          collection))))
+
+  ;; Rebuild the hash table so entries written by the buggy upstream
+  ;; code get correct :key/:hash shortcut lookups.
+  (when org-persist--index
+    (let ((ht (make-hash-table :test 'equal)))
+      (dolist (collection org-persist--index)
+        (org-persist-collection-let collection
+          (dolist (cont
+                   (if (and container (listp (car container)))
+                       (cons container container)
+                     (list container)))
+            (puthash (cons cont associated) collection ht)
+            (when path (puthash (cons cont (list :file path)) collection ht))
+            (when inode (puthash (cons cont (list :inode inode)) collection ht))
+            (when hash (puthash (cons cont (list :hash hash)) collection ht))
+            (when key (puthash (cons cont (list :key key)) collection ht)))))
+      (setq org-persist--index-hash ht))))
+
 (use-package! org-latex-preview
   :hook (org-mode . org-latex-preview-mode)
   :config
   ;; Increase preview width
   (plist-put org-latex-preview-appearance-options :page-width 0.8)
   (plist-put org-latex-preview-appearance-options :zoom 1.1)
+
+  ;; Fix org-block bg bleeding around LaTeX preview SVGs:
+  ;; a separate high-priority overlay covers the region with default bg.
+  (add-hook 'org-latex-preview-overlay-update-functions
+            (lambda (ov)
+              (when (overlay-get ov 'display)
+                (let* ((s (overlay-start ov))
+                       (e (overlay-end ov))
+                       (end (if (eq (char-after e) ?\n) (1+ e) e))
+                       (bg (face-attribute 'default :background)))
+                  (unless (seq-find (lambda (o) (overlay-get o 'latex-preview-bg))
+                                   (overlays-at s))
+                    (let ((cover (make-overlay s end nil nil t)))
+                      (overlay-put cover 'face (list :background bg :extend t))
+                      (overlay-put cover 'priority 1)
+                      (overlay-put cover 'latex-preview-bg t)
+                      (overlay-put cover 'evaporate t)))))))
 
   ;; ;; Block C-n, C-p etc from opening up previews when using auto-mode
   (setq org-latex-preview-mode-ignored-commands
@@ -599,12 +746,29 @@
   ;; More immediate live-previews -- the default delay is 1 second
   (setq org-latex-preview-mode-update-delay 0.25)
 
+  ;; Fix: dvisvgm's \special{dvisvgm:currentcolor on} does NOT persist
+  ;; across DVI pages.  Only the first fragment in a batch receives the
+  ;; \color + \special commands (via :continue-color optimisation), so
+  ;; subsequent SVGs are rendered with hardcoded black instead of
+  ;; currentColor.  Disable :continue-color for dvisvgm so every
+  ;; fragment gets the special and its SVG uses currentColor.
+  (define-advice org-latex-preview--tex-styled
+      (:around (orig-fn processing-type value appearance-options)
+               fix-dvisvgm-currentcolor)
+    (when (and (eq processing-type 'dvisvgm)
+               (plist-get appearance-options :continue-color))
+      (setq appearance-options (copy-sequence appearance-options))
+      (plist-put appearance-options :continue-color nil))
+    (funcall orig-fn processing-type value appearance-options))
+
+
   (defun org--latex-preview-region (beg end)
     "Compatibility shim for old Org LaTeX preview function.
         Calls `org-latex-preview--preview-region' with a default
         processing type."
     (let ((processing-type org-latex-preview-process-default))
       (org-latex-preview--preview-region processing-type beg end)))
+
   )
 (defvar my/remote-open-extra-env
   '(("100.105.242.51" . (("DISPLAY" . ":0")
@@ -777,8 +941,6 @@ Falls back to ORIG-FN for local paths."
 
 (after! python                   
   (set-eglot-client! '(python-mode python-ts-mode)
-                     ;; `("ty" "server")
-                     ;; '("rass" "python")
                      '("pyright-langserver" "--stdio")
                      '("basedpyright-langserver" "--stdio")
                      '("pyright" "--stdio")
@@ -858,7 +1020,6 @@ Falls back to ORIG-FN for local paths."
 (setopt good-scroll-persist-vscroll-window-scroll 'nil)
 
 ;;; Org export and file association tuning
-
 (setopt org-journal-time-format ""
        org-journal-time-prefix "** TODO ")
 
@@ -1667,43 +1828,43 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
       (org-roam-db-sync)
       (message "Org-roam projects synced.")))
 
-;;; Org cache and persist performance
+;; ;;; Org cache and persist performance
 
-;; org-element in-memory cache — keeps org-map-entries and friends fast.
-;; Disk persistence is off: the element cache (one entry per .org file) is
-;; the main contributor to org-persist bloat, and loading a large index
-;; synchronously on the first org-file open causes multi-second stalls.
-;; The in-memory cache rebuilds per-buffer and is nearly instant.
-(setopt org-element-use-cache t
-       org-element-cache-persistent nil)
+;; ;; org-element in-memory cache — keeps org-map-entries and friends fast.
+;; ;; Disk persistence is off: the element cache (one entry per .org file) is
+;; ;; the main contributor to org-persist bloat, and loading a large index
+;; ;; synchronously on the first org-file open causes multi-second stalls.
+;; ;; The in-memory cache rebuilds per-buffer and is nearly instant.
+;; (setopt org-element-use-cache t
+;;        org-element-cache-persistent nil)
 
-;; When element-cache persistence is off, org-element-cache-reset still
-;; calls org-persist-unregister on every org-mode buffer init.  That
-;; triggers org-persist--merge-index-with-disk → O(n²) cl-set-difference
-;; on the full persist index.  Skip the persistence codepath entirely
-;; when there's nothing to register or unregister.
-(defadvice! +org-element-cache-reset-no-persist-a (fn &optional all no-persistence)
-  :around #'org-element-cache-reset
-  (funcall fn all (or no-persistence (not org-element-cache-persistent))))
+;; ;; When element-cache persistence is off, org-element-cache-reset still
+;; ;; calls org-persist-unregister on every org-mode buffer init.  That
+;; ;; triggers org-persist--merge-index-with-disk → O(n²) cl-set-difference
+;; ;; on the full persist index.  Skip the persistence codepath entirely
+;; ;; when there's nothing to register or unregister.
+;; (defadvice! +org-element-cache-reset-no-persist-a (fn &optional all no-persistence)
+;;   :around #'org-element-cache-reset
+;;   (funcall fn all (or no-persistence (not org-element-cache-persistent))))
 
-;; Shorten org-persist expiry so remaining data (LaTeX previews, export
-;; caches, etc.) doesn't accumulate indefinitely.  Default is 30 days.
-(setopt org-persist-default-expiry 7)
+;; ;; Shorten org-persist expiry so remaining data (LaTeX previews, export
+;; ;; caches, etc.) doesn't accumulate indefinitely.  Default is 30 days.
+;; (setopt org-persist-default-expiry 7)
 
-;; org-persist--merge-index-with-disk is called on EVERY persist read/write.
-;; It re-reads the index file from disk and runs cl-set-difference (O(n²))
-;; to merge with the in-memory index.  With thousands of LaTeX preview
-;; entries this takes seconds and causes visible freezes on buffer revert.
-;; The merge is only needed when multiple Emacs instances share the persist
-;; directory.  For single-Emacs use, skip it entirely after initial load.
-(defvar +org-persist--index-loaded nil
-  "Non-nil after the persist index has been loaded once.")
-(defadvice! +org-persist-skip-merge-a (fn)
-  :around #'org-persist--merge-index-with-disk
-  (if +org-persist--index-loaded
-      nil  ; already loaded, skip the expensive merge
-    (setq +org-persist--index-loaded t)
-    (funcall fn)))
+;; ;; org-persist--merge-index-with-disk is called on EVERY persist read/write.
+;; ;; It re-reads the index file from disk and runs cl-set-difference (O(n²))
+;; ;; to merge with the in-memory index.  With thousands of LaTeX preview
+;; ;; entries this takes seconds and causes visible freezes on buffer revert.
+;; ;; The merge is only needed when multiple Emacs instances share the persist
+;; ;; directory.  For single-Emacs use, skip it entirely after initial load.
+;; (defvar +org-persist--index-loaded nil
+;;   "Non-nil after the persist index has been loaded once.")
+;; (defadvice! +org-persist-skip-merge-a (fn)
+;;   :around #'org-persist--merge-index-with-disk
+;;   (if +org-persist--index-loaded
+;;       nil  ; already loaded, skip the expensive merge
+;;     (setq +org-persist--index-loaded t)
+;;     (funcall fn)))
 
 (after! org-roam
   (cl-defmethod org-roam-node-jc-type ((node org-roam-node))
@@ -1760,77 +1921,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 (advice-add 'quickrun :before #'jc/quickrun-refresh-locals)
 
-;; (add-hook 'vterm-mode-hook
-;;         (lambda () (setq-local line-spacing 0)))
-
 (setq inhibit-compacting-font-caches t)                                             
-
-(setq face-font-rescale-alist '(("Apple Color Emoji" . 0.85)))
-
-;;; Claude Code and terminal integration
-
-;; (require 'acp)
-;; (require 'agent-shell)
-
-(use-package! claude-code-ide
-  :commands (claude-code-ide claude-code-ide-menu)
-  :init
-  (map! :leader
-        :desc "Claude Code" "o c" #'claude-code-ide-menu)
-  :config
-
-  ;; (setopt claude-code-ide-show-claude-window-in-ediff nil)
-
-  (claude-code-ide-emacs-tools-setup)
-
-  ;; Fix double cursor and pass keybindings to Claude Code terminal
-  (defun my/claude-code-setup-terminal ()
-    "Configure terminal buffer for Claude Code.
-Fixes double cursor by removing evil-refresh-cursor from window hook."
-    (when (string-match-p "\\*claude-code\\[.*\\]\\*" (buffer-name))
-      ;; Disable ALL Evil cursors for this buffer
-      (setq-local evil-normal-state-cursor nil)
-      (setq-local evil-insert-state-cursor nil)
-      (setq-local evil-visual-state-cursor nil)
-      (setq-local evil-motion-state-cursor nil)
-      ;; Hide Emacs cursor (let terminal handle it)
-      (setq-local cursor-type nil)
-      ;; KEY FIX: Remove evil-refresh-cursor from window-configuration-change-hook
-      ;; The 't' argument makes this buffer-local
-      (remove-hook 'window-configuration-change-hook #'evil-refresh-cursor t)
-      ;; Use insert-state for key passthrough
-      (evil-insert-state)
-      ;; Rebind ESC to send to terminal
-      (evil-local-set-key 'insert (kbd "<escape>") #'vterm-send-escape)
-      ;; Fix Unicode spinner/icon chars (braille, box-drawing) causing variable line height
-      ;; by mapping them to the primary monospace font instead of a fallback font
-      (let ((font-family (face-attribute 'default :family)))
-        (dolist (range '((#x2800 . #x28FF)   ; Braille patterns (spinner chars)
-                         (#x2500 . #x257F)   ; Box drawing
-                         (#x2580 . #x259F))) ; Block elements
-          (set-fontset-font t range font-family nil 'prepend)))))
-
-  (add-hook 'vterm-mode-hook #'my/claude-code-setup-terminal)
-  (add-hook 'eat-mode-hook #'my/claude-code-setup-terminal))
-
-;;; vterm font fallback and startup behavior
-
-(defun diego--vterm-font-setup ()
-"Configure font settings specifically for vterm buffers, workaround claude-code."
-
-;; Apply ASCII replacements for vterm specifically
-(let ((tbl (or buffer-display-table (setq buffer-display-table (make-display-table)))))
-    (dolist (pair
-             '((#x23FA . ?*) ; ⏺ RECORD CIRCLE
-               (#x273B . ?*) ; ✻
-               (#x273D . ?*) ; ✽
-               (#x2722 . ?+) ; ✢
-               (#x2736 . ?+) ; ✶
-               (#x2733 . ?*) ; ✳
-               ))
-(aset tbl (car pair) (vector (cdr pair))))))
-
-(add-hook 'vterm-mode-hook #'diego--vterm-font-setup)
 
 (setopt org-startup-with-link-previews 't)
 (setopt org-startup-with-latex-preview 't)
@@ -1950,20 +2041,6 @@ Fixes double cursor by removing evil-refresh-cursor from window hook."
   (advice-add #'vc-do-command :around
               #'jc/diff-hl-dired-disable-process-query-a))
 
-(after! agent-shell
-  (setq agent-shell-preferred-agent-config
-        (agent-shell-opencode-make-agent-config))
-  (setq agent-shell-opencode-default-model-id "openai/gpt-5.4")
-  (setq agent-shell-opencode-default-session-mode-id "build"))
- 
-;; store agent shell under ./emacs.d instead of per project
-(defun my/agent-shell-dot-subdir (subdir)
-  (let* ((cwd (string-remove-suffix "/" (agent-shell-cwd)))
-         (sanitized (replace-regexp-in-string "/" "-" (string-remove-prefix "/" cwd))))
-    (expand-file-name subdir (locate-user-emacs-file (concat "agent-shell/" sanitized)))))
-
-(setopt agent-shell-dot-subdir-function #'my/agent-shell-dot-subdir)
-
 (after! vterm
   (defun jc/vterm--shell-dir-from-default-directory (dir)
     "Convert DIR into a path suitable for sending to a shell in vterm.
@@ -2007,7 +2084,11 @@ and return only the localname on the remote host."
   (require 'jupyter-tramp nil t))
 
 (use-package! anvil
-  :defer t
+  :defer 10
   :config
   (anvil-enable)
-  (add-hook 'emacs-startup-hook #'anvil-start-server))
+  (anvil-server-start))
+
+(use-package! vertico
+  :config
+  (setopt vertico-resize 'grow-only))
