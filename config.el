@@ -334,7 +334,6 @@
 
 (global-set-key (kbd "C-M-;") #'jc/frame-snap-center)
 
-
 ;; after python mode, start evil vimish fold mode
 (add-hook 'python-mode-hook #'evil-vimish-fold-mode)
 
@@ -708,7 +707,33 @@ When optional HASH-ONLY is non-nil, only modify the hash table."
             (when inode (puthash (cons cont (list :inode inode)) collection ht))
             (when hash (puthash (cons cont (list :hash hash)) collection ht))
             (when key (puthash (cons cont (list :key key)) collection ht)))))
-      (setq org-persist--index-hash ht))))
+      (setq org-persist--index-hash ht)))
+
+  ;; Stop the LaTeX-preview cache from being poisoned by sidecars with
+  ;; no geometry.  `org-latex-preview--display-info' only copies keys
+  ;; that exist on `fragment-info'; when the LaTeX-log filter never
+  ;; matches a "Preview: Snippet N ended.(H+D x W)" line (hyperref in
+  ;; preamble, snippet error, etc.) the resulting plist is just
+  ;; (:image-type svg :errors nil).  That plist is then persisted by
+  ;; `org-latex-preview--cache-image' / `org-persist-register'.  Future
+  ;; cache hits on the same fragment hash place the overlay with
+  ;; :height nil :ascent center, so Emacs renders the SVG at its raw
+  ;; pt size and the fragment looks shrunken vs. freshly rendered ones.
+  ;;
+  ;; Refuse to persist incomplete sidecars.  The image still displays
+  ;; this session (caller falls back to (path . info)); the next render
+  ;; re-runs dvisvgm and re-attempts the log parse, and only writes
+  ;; once geometry actually arrived.
+  (define-advice org-latex-preview--cache-image
+      (:around (orig-fn key path info &optional cache-location)
+               skip-incomplete-geometry)
+    (if (and info
+             (eq (plist-get info :image-type) 'svg)
+             (null (plist-get info :height))
+             (null (plist-get info :width))
+             (null (plist-get info :depth)))
+        (cons path info)
+      (funcall orig-fn key path info cache-location))))
 
 (use-package! org-latex-preview
   :hook (org-mode . org-latex-preview-mode)
@@ -745,6 +770,17 @@ When optional HASH-ONLY is non-nil, only modify the hash table."
 
   ;; More immediate live-previews -- the default delay is 1 second
   (setq org-latex-preview-mode-update-delay 0.25)
+
+  ;; Fix: live-preview's :box t border around the editing fragment grows
+  ;; the line height by 1-2 px when the cursor enters.  Render the box
+  ;; with negative line-width so it draws inside the existing pixel area
+  ;; instead of extending the line.
+  (advice-add 'org-latex-preview-live--update-props :filter-args
+              (lambda (args)
+                (if (cadr args)
+                    (list (car args) '(:box (:line-width (1 . -1))))
+                  args))
+              '((name . my/inset-live-box)))
 
   ;; Fix: dvisvgm's \special{dvisvgm:currentcolor on} does NOT persist
   ;; across DVI pages.  Only the first fragment in a batch receives the
@@ -883,7 +919,6 @@ Falls back to ORIG-FN for local paths."
 (after! evil
   ;; disable evil surround global mode
   (global-evil-surround-mode -1)
-  ;; flash-emacs keybindings are set in use-package! flash-emacs above
   )
 
 (defun flash-emacs--set-jump-before-jump (&rest _args)
@@ -1585,7 +1620,6 @@ This version also runs fully on remote files."
   (advice-add 'evil-ex-search :after #'jc/evil-search--after-search))
 
 ;;; Misc UX tweaks
-
 (use-package! dirvish
   :config
   (setopt dired-kill-when-opening-new-dired-buffer t))
@@ -1605,7 +1639,25 @@ This version also runs fully on remote files."
          (with-current-buffer buf
            (when (derived-mode-p 'dired-mode)
              (dired-omit-mode 1)))))
-     (current-buffer))))
+     (current-buffer)))
+
+  ;; Emacs 31 dired-x.el adds `dired-omit-expunge' to the *global*
+  ;; `dired-after-readin-hook'.  On empty directories (only . and ..)
+  ;; this strips every entry, leaving a bare header that crashes
+  ;; Dirvish/dired with "Wrong type argument: stringp, nil".
+  ;; Guard: skip the omit when no real files would survive.
+  (define-advice dired-omit-expunge (:around (orig-fn &rest args) skip-empty-dirs)
+    "Don't omit in directories containing only `.' and `..'."
+    (if (save-excursion
+          (goto-char (point-min))
+          (catch 'has-real-file
+            (while (not (eobp))
+              (when-let ((fn (ignore-errors (dired-get-filename 'no-dir t))))
+                (unless (member fn '("." ".."))
+                  (throw 'has-real-file t)))
+              (forward-line 1))
+            nil))
+        (apply orig-fn args))))
 
 (after! dired-aux
   (defun jc/dired-vc-rename-tracked-file-p (file)
