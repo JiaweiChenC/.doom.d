@@ -189,7 +189,7 @@
                "j" #'org-journal-open-current-journal-file
                "d" #'org-journal-new-entry
                "D" #'org-journal-new-date-entry
-               "i" #'org-roam-node-insert
+               "i" #'my/org-roam-node-insert-dwim
                "r" #'org-roam-node-find
                "R" #'org-roam-capture
                "m" #'my/org-roam-move-node))
@@ -613,7 +613,7 @@
   :defer t
   :init
   (setopt org-modern-tag nil)
-  )
+  (setopt org-modern-block-name nil))
 
 ;; ;;; Org Babel and Jupyter
 
@@ -1178,6 +1178,17 @@ Falls back to ORIG-FN for local paths."
         (org-roam-db-location (expand-file-name "~/Documents/roam/note/org-roam.db")))
     ;; Ensure the DB is loaded with correct path
     (org-roam-node-find)))
+
+(defun my/org-roam-node-insert-dwim (&optional arg)
+  "Insert an org-roam node link.
+With a prefix ARG (e.g. \\`SPC u'), insert from the GLOBAL org-roam
+directory; otherwise use the buffer-local (project) one."
+  (interactive "P")
+  (if arg
+      (let ((org-roam-directory (expand-file-name "~/Documents/roam/note/"))
+            (org-roam-db-location (expand-file-name "~/Documents/roam/note/org-roam.db")))
+        (call-interactively #'org-roam-node-insert))
+    (call-interactively #'org-roam-node-insert)))
 
 ;; map to space n R
 (map! :leader :desc "org-roam find global node" "n R" #'my/org-roam-find-global-node)
