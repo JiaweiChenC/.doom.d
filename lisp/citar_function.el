@@ -1,7 +1,4 @@
-(require 'json)
-  (require 'url)
-
-  (defcustom zot-max-retries 3
+(defcustom zot-max-retries 3
     "Maximum number of retries for connecting to Zotero."
     :type 'integer
     :group 'zotero)
@@ -13,6 +10,7 @@
 
   (defun zot--is-zotero-running ()
     "Check if Zotero is running by attempting to connect to its API."
+    (require 'url)
     (condition-case nil
         (with-current-buffer
             (url-retrieve-synchronously "http://localhost:23119/better-bibtex" t t 1)
@@ -25,6 +23,8 @@
 
   (defun zot-open-pdf (citekey)
     "Open PDF for given CITEKEY using Zotero Better BibTeX."
+    (require 'json)
+    (require 'url)
     (unless citekey
       (error "Citation key cannot be empty"))
 

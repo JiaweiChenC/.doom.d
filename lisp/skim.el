@@ -1,6 +1,5 @@
 ;;; lisp/skim.el -*- lexical-binding: t; -*-
 ;; open in another frame
-(require 's)
 (autoload 'pdf-sync-backward-search-mouse "pdf-sync" nil t)
 
 (defun replace-fig-ref (input-string)
@@ -127,6 +126,7 @@ formatted as [cite:@target1;@target2;@target3]."
 
 (defun hermanhelf-latex-jump-to-org ()
   (interactive)
+  (require 's)
   ;; Get the start and end position of the current line at point
   (let* ((line (thing-at-point 'line t))
          (tex-filename (buffer-file-name))
@@ -188,9 +188,7 @@ formatted as [cite:@target1;@target2;@target3]."
       (search-in-file line tex-filename)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTEST
-(require 's)
 (autoload 'org-attach-dir "org-attach" nil nil)
-(require 'cl-lib)
 
 (defun hermanhelf--candidate-tex-files (org-file)
   "Return a list of .tex files to search for ORG-FILE.
@@ -220,6 +218,7 @@ else <basename>.tex in the attach dir (if none found)."
 (defun hermanhelf--search-in-candidates (needle files)
   "Search for NEEDLE in the first matching FILES.
 Calls `search-in-file' on each existing file until one succeeds."
+  (require 'cl-lib)
   (let ((found nil))
     (dolist (f files)
       (when (and (not found) (file-exists-p f))
@@ -236,6 +235,7 @@ Calls `search-in-file' on each existing file until one succeeds."
 
 (defun hermanhelf-org-jump-to-latex ()
   (interactive)
+  (require 's)
   (let* ((line (string-trim (thing-at-point 'line t)))
          (org-filename (buffer-file-name))
          (tex-files (hermanhelf--candidate-tex-files org-filename)))

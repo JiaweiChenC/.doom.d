@@ -101,9 +101,6 @@
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
 (package! grip-mode)
-(package! ivy)
-(package! nano-theme)
-;; (disable-packages! evil-nerd-commenter)
 (unpin! evil-nerd-commenter)
 (package! evil-nerd-commenter
   :recipe (:host github :repo "JiaweiChenC/evil-nerd-commenter"))
@@ -124,8 +121,6 @@
 (package! flash-emacs
   :recipe (:host github
            :repo "JiaweiChenC/flash-emacs"))
-(package! web-server)
-(package! msgpack)
 (package! tramp-rpc
 :recipe (:host github :repo "ArthurHeymans/emacs-tramp-rpc"))
 (package! anvil
