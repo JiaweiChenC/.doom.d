@@ -200,6 +200,7 @@
   (load "~/.emacs.d/.secret.el"))
 
 (use-package! mathpix.el
+  :defer t
   :custom ((mathpix-app-id mathpix-app-id)
            (mathpix-app-key mathpix-app-key))
   :bind
@@ -398,6 +399,7 @@
 ;;; Completion and tab UI
 
 (use-package! corfu
+  :defer t
   ;; :init
   ;; (corfu-global-mode)
   :config
@@ -765,7 +767,7 @@ When optional HASH-ONLY is non-nil, only modify the hash table."
 
   ;; ;; Enable consistent equation numbering
   (setq org-latex-preview-numbered t)
-  
+
   (setq org-latex-preview-mode-display-live t)
 
   ;; More immediate live-previews -- the default delay is 1 second
@@ -900,19 +902,19 @@ Falls back to ORIG-FN for local paths."
 (add-hook 'gptel-post-stream-hook 'gptel-auto-scroll)
 
 (use-package! flash-emacs                                                                                                                 
-:load-path "/Users/jiawei/Projects/Playground/flash-emacs"                                                                              
-:defer t                                                                                                                                
-:commands (flash-emacs-jump flash-emacs-ts-jump)                                                                                        
-:init                                                                                                                                   
-(after! evil                                                                                                                            
-    (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)                                                                       
-    (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)                                                                     
-    (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump))                                                                   
-:config                                                                                                                                 
-(require 'flash-emacs-remote)                                                                                                           
-(require 'flash-emacs-ts)                                                                                                               
-(require 'flash-emacs-search)                                                                                                           
-(setopt flash-emacs-ts-rainbow-enabled t))     
+    :load-path "/Users/jiawei/Projects/Playground/flash-emacs"                                                                              
+    :defer t                                                                                                                                
+    :commands (flash-emacs-jump flash-emacs-ts-jump)                                                                                        
+    :init                                                                                                                                   
+    (after! evil                                                                                                                            
+        (define-key evil-normal-state-map (kbd "s") #'flash-emacs-jump)                                                                       
+        (define-key evil-insert-state-map (kbd "C-s") #'flash-emacs-jump)                                                                     
+        (define-key evil-normal-state-map (kbd "S") #'flash-emacs-ts-jump))                                                                   
+    :config                                                                                                                                 
+    (require 'flash-emacs-remote)                                                                                                           
+    (require 'flash-emacs-ts)                                                                                                               
+    (require 'flash-emacs-search)                                                                                                           
+    (setopt flash-emacs-ts-rainbow-enabled t))     
 
 ;;; Evil navigation and jump behavior
 
@@ -967,6 +969,7 @@ Falls back to ORIG-FN for local paths."
 (setq eglot-send-changes-idle-time 0.1)
 
 (use-package! eglot
+  :defer t
   :config
   (setq eglot-events-buffer-config '(:size 0)
         eglot-report-progress nil
@@ -1097,7 +1100,7 @@ Falls back to ORIG-FN for local paths."
   (defun my/org-roam-slugify (s)
     (org-roam-node-slug (org-roam-node-create :title s)))
 
-  ;; Compute relative path from the node's title
+;;   ;; Compute relative path from the node's title
   ;; Example: "abc@paper" -> "paper/abc.org"
   ;;          "abc"       -> "abc.org"
   (defun my/org-roam-file-from-title (node)
