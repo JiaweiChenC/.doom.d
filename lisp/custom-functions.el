@@ -52,24 +52,11 @@
     (buffer-file-name))
    (t nil)))
 
-(defun my/macos-image-class (file)
-  "Return the AppleScript image class for FILE."
-  (pcase (downcase (or (file-name-extension file) ""))
-    ((or "jpg" "jpeg") "JPEG picture")
-    ("png" "PNG picture")
-    ((or "tif" "tiff") "TIFF picture")
-    ("gif" "GIF picture")
-    ("bmp" "BMP picture")
-    (_ nil)))
-
 (defun my/copy-image-file-to-clipboard (file)
   "Copy FILE to the macOS clipboard.
 If FILE is remote, fetch a local temporary copy first."
-  (let* ((image-class (my/macos-image-class file))
-         (remote-p (file-remote-p file))
+  (let* ((remote-p (file-remote-p file))
          (local-file (or (file-local-copy file) file)))
-    (unless image-class
-      (user-error "Unsupported image type: %s" file))
     (unless (file-exists-p local-file)
       (user-error "Image file does not exist: %s" file))
     (unwind-protect
@@ -77,10 +64,24 @@ If FILE is remote, fetch a local temporary copy first."
           (let ((status
                  (call-process
                   "osascript" nil t nil
+                  "-l" "JavaScript"
                   "-e"
-                  (format
-                   "set the clipboard to (read (POSIX file %S) as %s)"
-                   local-file image-class))))
+                  (concat
+                   "function run(argv) {"
+                   "ObjC.import(\"AppKit\");"
+                   "var path = argv[0];"
+                   "var image = $.NSImage.alloc.initWithContentsOfFile(path);"
+                   "if (!image || (image.isNil && image.isNil())) {"
+                   "throw new Error(\"Unsupported or unreadable image: \" + path);"
+                   "}"
+                   "var pb = $.NSPasteboard.generalPasteboard;"
+                   "pb.clearContents;"
+                   "if (!pb.setDataForType(image.TIFFRepresentation, $.NSPasteboardTypeTIFF)) {"
+                   "throw new Error(\"Clipboard write failed: \" + path);"
+                   "}"
+                   "}")
+                  "--"
+                  local-file)))
             (if (zerop status)
                 (message "Copied image to clipboard: %s" file)
               (user-error "Failed to copy image: %s"
@@ -683,28 +684,31 @@ inside a Jupyter src-block, return nil."
   (require 'org-attach)
   (require 'cl-lib)
 
-  (defun my/ob--maybe-rewrite-file-into-attach (info)
-    "If INFO has a relative :file, rewrite it into the heading's attach dir."
+  (defun my/ob--attach-file-overrides (info)
+    "Return Babel param overrides to place relative :file output in attach dir."
     (let* ((params (nth 2 info))
-           (file   (cdr (assq :file params))))
-      (when file
-        (let* ((attach-dir (ignore-errors (org-with-wide-buffer (org-attach-dir t)))))
-          (when (and attach-dir
-                     (stringp file)
-                     (not (file-name-absolute-p file)))
-            (let* ((abs (expand-file-name file attach-dir))
-                   (new-params (org-babel-merge-params
-                                params
-                                (list (cons :file abs) '(:mkdirp . "yes"))))
-                   (new-info (cl-copy-list info)))
-              (setf (nth 2 new-info) new-params)
-              (setq info new-info)))))
-      info))
+           (file (cdr (assq :file params))))
+      (when (and (stringp file)
+                 (not (file-name-absolute-p file)))
+        (let ((attach-dir
+               (ignore-errors
+                 (org-with-wide-buffer (org-attach-dir 'create)))))
+          (when attach-dir
+            (list (cons :file (expand-file-name file attach-dir))
+                  '(:mkdirp . "yes")))))))
 
-  (defun my/ob-attach-default-file (orig-fn &optional arg info)
+  (defun my/ob-attach-default-file (orig-fn &rest args)
     "Around advice for `org-babel-execute-src-block' to target attach dir."
-    (let ((info* (my/ob--maybe-rewrite-file-into-attach (or info (org-babel-get-src-block-info t)))))
-      (funcall orig-fn arg info*)))
+    (let* ((arg (car args))
+           (info (or (cadr args) (org-babel-get-src-block-info t)))
+           (params (nth 2 args))
+           (executor-type (nth 3 args))
+           (overrides (my/ob--attach-file-overrides info)))
+      (funcall orig-fn arg info
+               (if params
+                   (org-babel-merge-params params overrides)
+                 overrides)
+               executor-type)))
 
   (advice-add 'org-babel-execute-src-block :around #'my/ob-attach-default-file))
 

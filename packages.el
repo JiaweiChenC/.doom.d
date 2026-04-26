@@ -97,7 +97,7 @@
 (package! zoom)
 (package! pet)
 (package! gruvbox-theme)
-(package! exec-path-from-shell)
+(package! exec-path-from-shell :recipe (:branch "main"))
 (package! phscroll
   :recipe (:host github :repo "misohena/phscroll"))
 (package! grip-mode)
@@ -114,7 +114,6 @@
 (package! sideline-flycheck)
 (package! sideline-eglot
   :recipe (:host github :repo "emacs-sideline/sideline-eglot"))
-(package! catppuccin-theme)
 (package! ox-pandoc)
 (package! evil-easymotion
   :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
@@ -125,18 +124,11 @@
 (package! flash-emacs
   :recipe (:host github
            :repo "JiaweiChenC/flash-emacs"))
-(package! mcp-server
-  :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
-           :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
-(package! claude-code-ide
-  :recipe (:host github 
-           :repo "manzaltu/claude-code-ide.el"))
-(package! shell-maker)
-(package! acp)
-(package! agent-shell)
 (package! web-server)
 (package! msgpack)
 (package! tramp-rpc
 :recipe (:host github :repo "ArthurHeymans/emacs-tramp-rpc"))
-;; (package! arrow
-;;   :recipe (:host github :repo "vmargb/arrow.el"))
+(package! anvil
+  :recipe (:host github
+           :repo "zawatton/anvil.el")
+  :pin "6b56decaa34c3da78ccfb5a70a2bce28699898bc")

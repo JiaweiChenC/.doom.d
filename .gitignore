@@ -4,3 +4,4 @@
 .dir-locals.el
 *.json
 /node_modules
+/.agent-shell/

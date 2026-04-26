@@ -1,7 +1,7 @@
 ;;; lisp/skim.el -*- lexical-binding: t; -*-
 ;; open in another frame
 (require 's)
-(require 'pdf-sync)
+(autoload 'pdf-sync-backward-search-mouse "pdf-sync" nil t)
 
 (defun replace-fig-ref (input-string)
   "Replace all occurrences of [[fig:LABEL]] in INPUT-STRING with \\ref{fig:LABEL}."
@@ -189,7 +189,7 @@ formatted as [cite:@target1;@target2;@target3]."
 
 ;;;;;;;;;;;;;;;;;;;;;;;; TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTEST
 (require 's)
-(require 'org-attach)
+(autoload 'org-attach-dir "org-attach" nil nil)
 (require 'cl-lib)
 
 (defun hermanhelf--candidate-tex-files (org-file)

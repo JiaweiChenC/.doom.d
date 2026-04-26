@@ -76,7 +76,20 @@
   ;; The rpc backend has its own login-shell PATH probe. Disable it too so
   ;; remote vterm buffers do not trigger benign but repeated path warnings.
   (setq tramp-rpc-remote-path
-        (delete 'tramp-rpc-own-remote-path (copy-sequence tramp-rpc-remote-path))))
+        (delete 'tramp-rpc-own-remote-path (copy-sequence tramp-rpc-remote-path)))
+
+  (defun jc/tramp-rpc-disable-undo-a (_vec _process buffer)
+    "Disable undo in TRAMP RPC connection buffers."
+    (when (buffer-live-p buffer)
+      (with-current-buffer buffer
+        (buffer-disable-undo))))
+
+  (advice-add #'tramp-rpc--set-connection :after #'jc/tramp-rpc-disable-undo-a))
+
+(after! diff-hl
+  ;; Keep file-level vc-gutter enabled on remote buffers; we disable only the
+  ;; Dired integration separately because that is the reproducible leak path.
+  (setq diff-hl-disable-on-remote nil))
 
 ;; ;; enable delete via dired on remote files
 (defun my/dired-remote-trash-only ()
