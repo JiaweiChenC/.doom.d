@@ -2109,14 +2109,12 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
   :init
   )
 
-(defun jc/dired-remote-lightweight-mode ()
-  (when (file-remote-p default-directory)
-    (when (bound-and-true-p diff-hl-dired-mode)
-      (diff-hl-dired-mode -1))))
-
-;; Append so this runs after Doom's `+vc-gutter-enable-maybe-h` hook and can
-;; turn `diff-hl-dired-mode` back off on remote Dired buffers.
-;; (add-hook 'dired-mode-hook #'jc/dired-remote-lightweight-mode t)
+;; Avoid double VC indicators in dired: `diff-hl-dired-mode` paints the
+;; left margin (?, !, i) and dirvish's own `vc-state` attribute paints
+;; the left fringe (colored bar). They disagree on subtree-expanded
+;; rows, where diff-hl-dired aggregates onto the parent dir and only
+;; dirvish-vc tags the inner files. Keep dirvish-vc, drop diff-hl-dired.
+(remove-hook 'dired-mode-hook #'+vc-gutter-enable-maybe-h)
 
 ;; a temp fix for the warning tm status file killed
 (after! diff-hl-dired
@@ -2186,5 +2184,9 @@ and return only the localname on the remote host."
   :config
   (setopt vertico-resize 'grow-only))
 
-(after! dirvish
-  (setq dirvish-window-fringe 8)) 
+;; Distinguish untracked (green) from deleted (red) in dirvish's
+;; left-fringe vc-state bar. By default both inherit reddish faces.
+(after! dirvish-vc
+  (set-face-attribute 'dirvish-vc-unregistered-face nil
+                      :inherit nil
+                      :foreground (face-attribute 'success :foreground nil 'default)))

@@ -169,6 +169,35 @@ Supports local files and TRAMP files from Org, Dired, and image buffers."
 (defvar last-warp-dir nil
   "Directory where the last Warp Terminal was opened.")
 
+(defvar warp-project-tabs (make-hash-table :test 'equal)
+  "Map of project root -> t when a Warp tab has already been opened for it.")
+
+(defun open-warp--project-key ()
+  "Identify the current context for Warp tab tracking.
+On remote buffers, key on TRAMP host + remote project root (or remote
+directory) so the same SSH-backed tab is reused."
+  (let ((remote (file-remote-p default-directory)))
+    (cond
+     (remote
+      (concat remote
+              (or (ignore-errors
+                    (and (fboundp 'projectile-project-p)
+                         (projectile-project-p)
+                         (projectile-project-root)))
+                  (file-remote-p default-directory 'localname))))
+     ((ignore-errors
+        (and (fboundp 'projectile-project-p)
+             (projectile-project-p)
+             (projectile-project-root))))
+     ((when-let ((proj (ignore-errors (project-current))))
+        (project-root proj)))
+     (t default-directory))))
+
+(defun open-warp--activate ()
+  "Bring Warp to the foreground without opening a new tab or window."
+  (call-process "osascript" nil 0 nil
+                "-e" "tell application \"Warp\" to activate"))
+
 (defun open-warp--split-host-port (host)
   "Return (HOST . PORT) parsed from TRAMP HOST value.
 TRAMP encodes explicit ports as HOST#PORT."
@@ -222,10 +251,10 @@ TRAMP encodes explicit ports as HOST#PORT."
                 "-e" "delay 0.05"
                 "-e" "end repeat"
                 "-e" "if (count of windows) = 0 then return"
-                "-e" "delay 0.15"
+                "-e" "delay 0.35"
                 "-e" "keystroke cmd"
-                "-e" "delay 0.05"
-                "-e" "key code 36"
+                "-e" "delay 1.35"
+                "-e" "keystroke return"
                 "-e" "end tell"
                 "-e" "end tell"
                 "-e" "end run"
@@ -260,16 +289,29 @@ When FORCE-NEW-WINDOW is non-nil, create a new Warp window first."
   (open-warp--send-command command))
 
 (defun open-warp-terminal-in-dir ()
-  "Open Warp Terminal in `default-directory', including TRAMP paths."
+  "Open Warp Terminal for the current project's directory.
+If a Warp tab was already opened for this project (and Warp still has
+windows), just activate Warp instead of spawning another tab."
   (interactive)
-  (let ((dir default-directory)
-        (window-open (open-warp--window-open-p)))
+  (let* ((dir default-directory)
+         (project (open-warp--project-key))
+         (window-open (open-warp--window-open-p))
+         (already-opened (and window-open
+                              (gethash project warp-project-tabs))))
     (setq last-warp-dir dir)
-    (if (file-remote-p dir)
-        (open-warp--run-remote-command (open-warp--remote-shell-command dir)
-                                       (not window-open))
+    (unless window-open
+      (clrhash warp-project-tabs))
+    (cond
+     (already-opened
+      (open-warp--activate))
+     ((file-remote-p dir)
+      (open-warp--run-remote-command (open-warp--remote-shell-command dir)
+                                     (not window-open))
+      (puthash project t warp-project-tabs))
+     (t
       (open-warp--open-uri-session (if window-open "new_tab" "new_window")
-                                   (expand-file-name dir)))))
+                                   (expand-file-name dir))
+      (puthash project t warp-project-tabs)))))
 
 (map! :leader :desc "open warp terminal in current directory" "o w" #'open-warp-terminal-in-dir)
 

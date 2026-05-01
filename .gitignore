@@ -1,5 +1,6 @@
 .DS_Store
 .secret.el
+/.claude/
 
 .dir-locals.el
 *.json
