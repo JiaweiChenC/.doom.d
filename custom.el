@@ -46,7 +46,7 @@
      "69a25b1d88aad37bb3a7c311a4a648772fa794a8ab4c1fa69b9455112e536449"
      "a8347c492511ecc002df26d2b268f1342d84af50c43901e0d88dd678134729d8"
      "cfc1e49eec0d57e2f70ef3a6db3b543bbb2edcf16a9f164231afcc4d1263f9fb" default))
- '(org-agenda-files '("/Users/jiawei/org/journal/20260401"))
+ '(org-agenda-files '("/Users/jiawei/org/journal/20260501"))
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen web-server with-editor))
  '(safe-local-variable-directories

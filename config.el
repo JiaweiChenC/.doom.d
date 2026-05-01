@@ -396,6 +396,16 @@
 ;; map citar open files to space o C
 (map! :leader :desc "citar open files" "o z" #'my/citar-open-pdf)
 
+(defun my/citar-open-pdf-in-zotero ()
+  "Select reference(s) via citar and open the PDF in Zotero."
+  (interactive)
+  (let* ((refs (citar-select-refs))
+         (keys (if (listp refs) refs (list refs))))
+    (dolist (key keys)
+      (zot-open-pdf key))))
+
+(map! :leader :desc "citar open in zotero" "o Z" #'my/citar-open-pdf-in-zotero)
+
 ;;; Completion and tab UI
 
 (use-package! corfu
@@ -462,7 +472,6 @@
   (load! ".secret.el")
   (load! (expand-file-name "babel.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "org-sliced-image-fix.el" "~/.doom.d/lisp/"))
-  (load! (expand-file-name "gterm_config" "~/.doom.d/lisp/"))
   (load! (expand-file-name "citar_function.el" "~/.doom.d/lisp/"))
   (load! (expand-file-name "custom-functions" "~/.doom.d/lisp/"))
   )
@@ -977,7 +986,12 @@ Falls back to ORIG-FN for local paths."
         eglot-ignored-server-capabilities '(:inlayHintProvider)))
 
 
-(after! python                   
+;; Disable extra (prettify-symbols) ligatures everywhere except org-mode,
+;; because the substituted glyphs (¬, λ, ∧, …) come from a fallback font
+;; with different metrics and bump the line height.
+(setq +ligatures-extras-in-modes '(org-mode))
+
+(after! python
   (set-eglot-client! '(python-mode python-ts-mode)
                      '("pyright-langserver" "--stdio")
                      '("basedpyright-langserver" "--stdio")
@@ -1280,6 +1294,19 @@ Return non-nil iff XS is non-empty AND every element is non-nil."
               (lambda (orig-fn &rest args)
                 (cl-letf (((symbol-function 'all) #'my/dirvish--all-like-and))
                   (apply orig-fn args)))))
+
+;; Fix dirvish-revert erroring on orphaned buffers whose session has
+;; already been removed from `dirvish--sessions'. In that case
+;; `(dirvish-curr)' is nil and `(dv-type nil)' raises "Wrong type
+;; argument: dirvish, nil". Fall back to plain `dired-revert' so refresh
+;; still works on the lingering dired buffer.
+(with-eval-after-load 'dirvish
+  (defun jc/dirvish-revert-orphan-guard-a (orig-fn &rest args)
+    (if (dirvish-curr)
+        (apply orig-fn args)
+      (setq-local revert-buffer-function #'dired-revert)
+      (apply #'dired-revert args)))
+  (advice-add 'dirvish-revert :around #'jc/dirvish-revert-orphan-guard-a))
 
 
 ;; map space l a to my/org-export-pdf-to-attach-dir
@@ -2089,7 +2116,7 @@ If FILE-PATH is already under `org-roam-directory', return it unchanged."
 
 ;; Append so this runs after Doom's `+vc-gutter-enable-maybe-h` hook and can
 ;; turn `diff-hl-dired-mode` back off on remote Dired buffers.
-(add-hook 'dired-mode-hook #'jc/dired-remote-lightweight-mode t)
+;; (add-hook 'dired-mode-hook #'jc/dired-remote-lightweight-mode t)
 
 ;; a temp fix for the warning tm status file killed
 (after! diff-hl-dired
@@ -2158,3 +2185,6 @@ and return only the localname on the remote host."
 (use-package! vertico
   :config
   (setopt vertico-resize 'grow-only))
+
+(after! dirvish
+  (setq dirvish-window-fringe 8)) 
