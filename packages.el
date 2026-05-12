@@ -72,8 +72,7 @@
               "(provide 'org-version)\n"))))
   :pin nil)
 (unpin! org)
-(unpin! auctex evil-easymotion quickrun eglot citar)
-(unpin! diff-hl)
+(unpin! auctex evil-easymotion quickrun citar markdown-mode)
 (package! htmlize)
 (package! impatient-showdown)
 (package! impatient-mode)
@@ -82,8 +81,6 @@
 (package! matlab-mode)
 (package! mathpix.el
   :recipe (:host github :repo "jethrokuan/mathpix.el"))
-(package! copilot
-  :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el" "dist")))
 (package! flycheck-popup-tip :disable t)
 (package! code-cells)
 (package! org-download)
@@ -109,15 +106,10 @@
 (package! eat)
 (package! sideline)
 (package! sideline-flycheck)
-(package! sideline-eglot
-  :recipe (:host github :repo "emacs-sideline/sideline-eglot"))
+(package! sideline-eglot :disable t)
 (package! ox-pandoc)
 (package! evil-easymotion
   :recipe (:host github :repo "LemonBreezes/evil-easymotion"))
-(package! diff-hl
-  :recipe (:host github
-           :repo "JiaweiChenC/diff-hl"
-           :branch "feature/show-hunk-refine"))
 (package! flash-emacs
   :recipe (:host github
            :repo "JiaweiChenC/flash-emacs"))
@@ -127,3 +119,12 @@
   :recipe (:host github
            :repo "zawatton/anvil.el")
   :pin "6b56decaa34c3da78ccfb5a70a2bce28699898bc")
+(package! mcp-server
+  :recipe (:type git :host github :repo "rhblind/emacs-mcp-server"
+           :files ("*.el" "tools/*.el" "mcp-wrapper.py" "mcp-wrapper.sh")))
+
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)
+(package! agent-shell-tramp
+  :recipe (:host github :repo "junyi-hou/agent-shell-tramp"))

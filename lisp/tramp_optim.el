@@ -70,13 +70,15 @@
   ;; unnecessary for this setup because the common executable directories are
   ;; already listed explicitly.
   (setq tramp-remote-path
-        (delete 'tramp-own-remote-path (copy-sequence tramp-remote-path))))
+        (delete 'tramp-own-remote-path (copy-sequence tramp-remote-path)))
+  (dolist (dir '("~/.local/bin" "~/.npm-global/bin" "~/.npm-global/node_modules/.bin" "~/bin"))
+    (add-to-list 'tramp-remote-path dir t)))
 
 (after! tramp-rpc
-  ;; The rpc backend has its own login-shell PATH probe. Disable it too so
-  ;; remote vterm buffers do not trigger benign but repeated path warnings.
-  (setq tramp-rpc-remote-path
-        (delete 'tramp-rpc-own-remote-path (copy-sequence tramp-rpc-remote-path)))
+  ;; Defer to the customized `tramp-remote-path' above. A non-nil value here
+  ;; overrides it (per the variable's docstring) and previously dropped the
+  ;; system bin dirs, breaking remote vterm with `stty: not found'.
+  (setq tramp-rpc-remote-path nil)
 
   (defun jc/tramp-rpc-disable-undo-a (_vec _process buffer)
     "Disable undo in TRAMP RPC connection buffers."

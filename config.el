@@ -228,6 +228,7 @@
 
 (setq org-image-max-width 1000)
 (after! org
+  (setopt org-agenda-files "~/org/agenda-files.txt")
   (setopt org-pretty-entities nil)
   ;; start hl-todo-mode
   ;; disable org indent mode
@@ -280,25 +281,7 @@
          :unnarrowed t
          :empty-lines 1)))
 
-;;; AI tools and assistants
-
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (("<backtab>" . 'copilot-accept-completion-by-word)
-         :map copilot-completion-map
-         ("<tab>" . 'copilot-accept-completion)
-         ("TAB" . 'copilot-accept-completion))
-  :config
-  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
-  (add-to-list 'copilot-indentation-alist '(org-mode 2))
-  (add-to-list 'copilot-indentation-alist '(text-mode 2))
-  (add-to-list 'copilot-indentation-alist '(closure-mode 2))
-  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2))
-  (setq copilot-idle-delay 0.5)
-  )
-
 ;;; Window/frame and shell helpers
-
 (load! (expand-file-name "layout-buffer-consult" "~/.doom.d/lisp/"))
 
 ;; set the default frame
@@ -341,16 +324,25 @@
 (setopt quickrun-timeout-seconds 1000000)
 
 ;; paste image
+;; On TRAMP buffers, divert org-download to a buffer-relative `./image/'
+;; directory instead of using `org-attach' (and skip the unwanted :ID:
+;; stamp that `org-download-clipboard' otherwise adds).
 (defun zz/org-download-paste-clipboard (&optional use-default-filename)
   (interactive "P")
   (require 'org-download)
-  (let ((file
-         (if (not use-default-filename)
-             (read-string (format "Filename [%s]: "
-                                  org-download-screenshot-basename)
-                          nil nil org-download-screenshot-basename)
-           nil)))
-    (org-download-clipboard file)))
+  (let* ((remote (file-remote-p default-directory))
+         (org-download-method      (if remote 'directory org-download-method))
+         (org-download-image-dir   (if remote "./image"  org-download-image-dir))
+         (org-download-heading-lvl (if remote nil        org-download-heading-lvl))
+         (file (if (not use-default-filename)
+                   (read-string (format "Filename [%s]: "
+                                        org-download-screenshot-basename)
+                                nil nil org-download-screenshot-basename)
+                 nil)))
+    (if remote
+        (cl-letf (((symbol-function 'org-id-get-create) (lambda (&rest _) nil)))
+          (org-download-clipboard file))
+      (org-download-clipboard file))))
 
 ;;; macOS integration
 
@@ -974,32 +966,82 @@ Falls back to ORIG-FN for local paths."
       :fringe-bitmap 'flycheck-fringe-bitmap-double-left-arrow
       :fringe-face (intern (format "flycheck-fringe-%s" level)))))
 
-;; eglot setttings               
-(setq eglot-send-changes-idle-time 0.1)
+(setq lsp-auto-register-remote-clients nil)
 
-(use-package! eglot
-  :defer t
-  :config
-  (setq eglot-events-buffer-config '(:size 0)
-        eglot-report-progress nil
-        eglot-extend-to-xref t
-        eglot-ignored-server-capabilities '(:inlayHintProvider)))
+(after! lsp-mode
+  (setq lsp-auto-guess-root t
+        lsp-guess-root-without-session t
+        lsp-enable-file-watchers nil
+        lsp-disabled-clients '(ty-ls)))
 
+;; quickrun creates the *quickrun* buffer once with a stale default-directory,
+;; so project.el / .dir-locals.el can't tell which project the output belongs
+;; to.  Pin the buffer's default-directory to the source's on every run and
+;; reapply dir-local variables.
+(with-eval-after-load 'quickrun
+  (advice-add 'quickrun--exec-cmd :before
+              (lambda (&rest _)
+                (when-let* ((buf (get-buffer quickrun--buffer-name))
+                            (dir (quickrun--default-directory)))
+                  (with-current-buffer buf
+                    (setq default-directory dir)
+                    (hack-dir-local-variables-non-file-buffer))))
+              '((name . +my/quickrun-inherit-project))))
+
+;; tramp-rpc cascades buffer kills (LSP stderr relays, process buffers, etc.),
+;; so a snapshotted list passed to `doom-kill-buffer-and-windows' may contain
+;; buffers that died mid-loop.  Guard against the resulting
+;; `window-normalize-buffer: No such live buffer' error.
+(advice-add 'doom-kill-buffer-and-windows :around
+            (lambda (orig buffer)
+              (when (buffer-live-p buffer)
+                (funcall orig buffer))))
+
+(after! lsp-pyright
+  (setq lsp-pyright-venv-directory ".venv")
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     '("/home/jiawei/.npm-global/node_modules/.bin/pyright-langserver" "--stdio")
+                     (lambda () t))
+    :major-modes '(python-mode python-ts-mode)
+    :server-id 'pyright-rpc-remote
+    :multi-root nil
+    :library-folders-fn (lambda (_workspace) nil)
+    :remote? t
+    :priority 3
+    :initialized-fn (lambda (workspace)
+                      (with-lsp-workspace workspace
+                        (lsp--set-configuration
+                         (make-hash-table :test 'equal)))))))
+
+(defun +my/lsp-active-workspace-for-buffer-p ()
+  "Return non-nil when current buffer belongs to an active LSP workspace."
+  (when (and buffer-file-name
+             (fboundp 'lsp-session)
+             (fboundp 'lsp--session-workspaces))
+    (seq-some
+     (lambda (workspace)
+       (let ((root (lsp--workspace-root workspace)))
+         (and root
+              (string-prefix-p (file-name-as-directory root) buffer-file-name))))
+     (lsp--session-workspaces (lsp-session)))))
+
+(defun lsp! ()
+  "Start LSP automatically for local buffers.
+
+For remote buffers, do not start a new server automatically; only attach to an
+already-running workspace after `M-x lsp' has been invoked once in that project."
+  (unless (bound-and-true-p lsp-mode)
+    (if (file-remote-p default-directory)
+        (when (+my/lsp-active-workspace-for-buffer-p)
+          (lsp-deferred))
+      (lsp-deferred))))
 
 ;; Disable extra (prettify-symbols) ligatures everywhere except org-mode,
 ;; because the substituted glyphs (¬, λ, ∧, …) come from a fallback font
 ;; with different metrics and bump the line height.
 (setq +ligatures-extras-in-modes '(org-mode))
-
-(after! python
-  (set-eglot-client! '(python-mode python-ts-mode)
-                     '("pyright-langserver" "--stdio")
-                     '("basedpyright-langserver" "--stdio")
-                     '("pyright" "--stdio")
-                     '("pyrefly" "lsp")
-                     '("ruff" "server") "ruff-lsp"
-                     "jedi-language-server"
-                     "pylsp" "pyls"))
 
 (after! org
   (set-popup-rule! "\\*Org Babel Results\\*"
@@ -1053,21 +1095,21 @@ Falls back to ORIG-FN for local paths."
 (after! embark-org               
   (define-key embark-org-src-block-map (kbd "r") #'org-babel-open-src-block-result))
 
-(use-package! sideline-flycheck
-  :hook (flycheck-mode . sideline-flycheck-setup))
+;; (use-package! sideline-flycheck
+;;   :hook (flycheck-mode . sideline-flycheck-setup))
 
-(use-package! sideline           
-  :init
-  (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
-        sideline-backends-right-skip-current-line t
-        sideline-priority 100                        ; overlays' priority
-        sideline-display-backend-name t
-        sideline-backends-right '(sideline-flycheck)
-        flycheck-display-errors-function nil
-        )
-  :hook (                        
-         (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
-         ))            ; display the backend name
+;; (use-package! sideline           
+;;   :init
+;;   (setq sideline-backends-left-skip-current-line t   ; don't display on current line (left)
+;;         sideline-backends-right-skip-current-line t
+;;         sideline-priority 100                        ; overlays' priority
+;;         sideline-display-backend-name t
+;;         sideline-backends-right '(sideline-flycheck)
+;;         flycheck-display-errors-function nil
+;;         )
+;;   :hook (                        
+;;          (flycheck-mode . sideline-mode)   ; for `sideline-flycheck`
+;;          ))            ; display the backend name
 
 (setopt good-scroll-persist-vscroll-window-scroll 'nil)
 
@@ -1453,15 +1495,6 @@ and convert it to Org using the pandoc utility."
 
 
 ;;; Core command overrides
-
-(defun lsp! ()
-  "Dispatch to call the currently used lsp client entrypoint.
-Skip remote (TRAMP) buffers silently."
-  (unless (file-remote-p default-directory)
-    (when (require 'eglot nil t)
-      (if (eglot--lookup-mode major-mode)
-          (eglot-ensure)
-        (eglot--message "No client defined for %s" major-mode)))))
 
 
 (use-package! projectile
@@ -2190,3 +2223,27 @@ and return only the localname on the remote host."
   (set-face-attribute 'dirvish-vc-unregistered-face nil
                       :inherit nil
                       :foreground (face-attribute 'success :foreground nil 'default)))
+(setq tramp-rpc-deploy-git-build-policy 'release)
+
+(setq markdown-fontify-code-blocks-natively nil)
+
+(let ((nvm-bin "/Users/jiawei/.nvm/versions/node/v25.5.0/bin"))
+  (when (file-directory-p nvm-bin)
+    (setenv "PATH" (concat nvm-bin path-separator (getenv "PATH")))
+    (add-to-list 'exec-path nvm-bin)))
+
+(use-package! agent-shell
+  :commands (agent-shell-anthropic-start-claude-code
+             agent-shell-google-start-gemini)
+  :config
+  (require 'acp)
+  ;; Subscription login (default). For API key instead:
+  ;;   (agent-shell-anthropic-make-authentication :api-key (lambda () (auth-source-pick-first-password :host "api.anthropic.com")))
+  (setq agent-shell-anthropic-authentication
+        (agent-shell-anthropic-make-authentication :login t))
+  (setq agent-shell-anthropic-claude-acp-command '("claude-agent-acp")))
+
+(use-package agent-shell-tramp
+  ;; or :ensure if using elpaca with use-package integration
+  :config
+  (agent-shell-tramp-mode 1))

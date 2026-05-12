@@ -50,7 +50,10 @@
  '(package-selected-packages
    '(cond-let llama magit-section tomlparse uuidgen web-server with-editor))
  '(safe-local-variable-directories
-   '("/rpc:100.105.242.51:/data/projects/JOSH/"
+   '("/Users/jiawei/Projects/virtual_maze_pd_penn/"
+     "/ssh:100.105.242.51:/data/projects/multi-hmr/"
+     "/rpc:100.105.242.51:/data/projects/multi-hmr/"
+     "/rpc:100.105.242.51:/data/projects/JOSH/"
      "/rpc:100.105.242.51:/home/jiawei/projects/gait_init/"
      "/rpc:100.105.242.51:/home/jiawei/projects/HSMR/"
      "/rpc:100.105.242.51:/home/jiawei/projects/sam-3d-body/"
